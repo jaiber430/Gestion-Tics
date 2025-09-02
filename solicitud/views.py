@@ -77,9 +77,9 @@ def crear_solicitud(request):
     return render(request, 'pages/creacion.html', context)
 
 
-def solicitud_regular(request):
+def _crear_solicitud_base(request, tipo_solicitud_id, template_name, mensaje_exito):
     """
-    Crear la solicitud regular
+    Función base para crear solicitudes (regular o campesina)
     """
     user_id = request.session.get('user_id')
     if not user_id:
@@ -115,7 +115,10 @@ def solicitud_regular(request):
             with transaction.atomic():
                 # Datos principales
                 tiene_empresa = request.POST.get('tieneEmpresa')
+<<<<<<< HEAD
                 # tipo_modalidad = request.POST.get('tipoModalidad')
+=======
+>>>>>>> 345b8826601c1f85ee2a2cd7871d0a19650dc0af
                 nombre_programa_codigo = request.POST.get('nombrePrograma_codigo')
                 version_programa = request.POST.get('versionPrograma')
                 subsector_economico = request.POST.get('subsectorEconomico')
@@ -165,16 +168,17 @@ def solicitud_regular(request):
                         )
 
                 programa_formacion = Programaformacion.objects.get(codigoprograma=nombre_programa_codigo)
+<<<<<<< HEAD
                 modalidad = Modalidad.objects.get(idmodalidad=1)
+=======
+                modalidad = Modalidad.objects.get(idmodalidad=1)  # Modalidad siempre 1 (presencial)
+>>>>>>> 345b8826601c1f85ee2a2cd7871d0a19650dc0af
                 municipio = Municipios.objects.get(codigomunicipio=municipio_formacion)
                 programa_especial_obj = Programaespecial.objects.get(idespecial=programa_especial)
                 ambiente_obj = Ambiente.objects.filter(idambiente=nombre_ambiente).first() if nombre_ambiente else None
-                tipo_solicitud = Tiposolicitud.objects.get(idtiposolicitud=1)
+                tipo_solicitud = Tiposolicitud.objects.get(idtiposolicitud=tipo_solicitud_id)
 
-                # Generar código de solicitud
-                ultimo_codigo = Solicitud.objects.aggregate(max_codigo=models.Max('codigosolicitud'))['max_codigo']
-                nuevo_codigo = (ultimo_codigo or 0) + 1
-
+                # No se genera código, debe ser nulo según requerimiento
                 Solicitud.objects.create(
                     idtiposolicitud=tipo_solicitud,
                     codigoprograma=programa_formacion,
@@ -190,12 +194,42 @@ def solicitud_regular(request):
                     convenio=convenio or None,
                     ambiente=ambiente_obj,
                     fechasolicitud=timezone.now().date()
+                    # codigosolicitud se deja nulo por defecto
                 )
 
+<<<<<<< HEAD
                 messages.success(request, 'Solicitud de ficha regular creada exitosamente.')
                 return redirect('crearregular')
+=======
+                messages.success(request, mensaje_exito)
+                return redirect('Crearsolicitud')  # Regresar a la página de creación
+>>>>>>> 345b8826601c1f85ee2a2cd7871d0a19650dc0af
 
         except Exception as e:
             messages.error(request, f'Error al crear la solicitud: {str(e)}')
 
-    return render(request, 'forms/crearsolicitudregular.html', context)
+    return render(request, template_name, context)
+
+
+def solicitud_regular(request):
+    """
+    Crear la solicitud regular
+    """
+    return _crear_solicitud_base(
+        request, 
+        tipo_solicitud_id=1, 
+        template_name='forms/crearsolicitudregular.html',
+        mensaje_exito='Solicitud de ficha regular creada exitosamente.'
+    )
+
+
+def solicitud_campesina(request):
+    """
+    Crear la solicitud campesina (tipo 2, modalidad 1 - presencial)
+    """
+    return _crear_solicitud_base(
+        request, 
+        tipo_solicitud_id=2, 
+        template_name='forms/crearsolicitudcampesina.html',
+        mensaje_exito='Solicitud de ficha campesina creada exitosamente.'
+    )
