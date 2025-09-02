@@ -1,0 +1,224 @@
+/* 
+   VARIABLES GLOBALES DE COLORES Y CONFIGURACIÓN
+ */
+
+:root {
+    /* Paleta de colores principales - Verde y Blanco */
+    --color-primario: #2E7D32;          
+    --color-primario-claro: #4CAF50;     
+    --color-primario-hover: #1B5E20;     
+    --color-secundario: #FFFFFF;        
+    --color-fondo: #F5F5F5;             
+    --color-texto-principal: #212121;
+    --color-texto-secundario: #757575;
+    --color-borde: #E0E0E0;          
+    --color-error: #D32F2F;        
+    --color-exito: #388E3C;          
+    --color-advertencia: #F57C00;   
+    
+    /* Estados específicos */
+    --color-disponible: #4CAF50;
+    --color-iniciado: #2196F3;
+    --color-registrado: #FF9800;
+    --color-espera: #9C27B0;
+    --color-rechazado: #F44336;
+    --color-aprobado: #4CAF50;
+    --color-revision: #FF9800;
+    --color-pendiente: #FFC107;
+    --color-aceptada: #4CAF50;
+    --color-Matriculada: #104712;
+    
+    /* Configuración de tipografía */
+    --fuente-principal: 'Poppins', Arial, sans-serif;
+    --tamanio-base: 1rem;                /* 10px base */
+    --peso-normal: 400;
+    --peso-medio: 500;
+    --peso-semi-negrita: 600;
+    --peso-negrita: 700;
+    
+    /* Espaciado */
+    --espaciado-xs: 0.4rem;              /* 4px */
+    --espaciado-sm: 0.8rem;              /* 8px */
+    --espaciado-md: 1.6rem;              /* 16px */
+    --espaciado-lg: 2.4rem;              /* 24px */
+    --espaciado-xl: 3.2rem;              /* 32px */
+    
+    /* Bordes y sombras */
+    --radio-borde: 0.8rem;               /* 8px */
+    --sombra-ligera: 0 0.2rem 0.4rem rgba(0, 0, 0, 0.1);
+    --sombra-media: 0 0.4rem 0.8rem rgba(0, 0, 0, 0.15);
+}
+
+/* 
+   RESET Y CONFIGURACIÓN BASE
+ */
+
+/* Reset básico */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Configuración base del documento */
+html {
+    font-size: 10px; /* Base de 10px para facilitar cálculos rem */
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: var(--fuente-principal);
+    font-size: var(--tamanio-base);
+    font-weight: var(--peso-normal);
+    line-height: 1.6;
+    color: var(--color-texto-principal);
+    background-color: var(--color-fondo);
+    min-height: 100vh;
+}
+
+/* 
+   CONTENEDOR PRINCIPAL
+ */
+
+.contenedor-principal {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    max-width: 1200px;
+    margin: 0 auto;
+    background-color: var(--color-secundario);
+    box-shadow: var(--sombra-ligera);
+}
+
+/*ENCABEZADO Y NAVEGACIÓN */
+
+.encabezado {
+    background-color: var(--color-primario);
+    color: var(--color-secundario);
+    padding: var(--espaciado-lg);
+    box-shadow: var(--sombra-media);
+}
+
+.titulo-encabezado {
+    text-align: center;
+    margin-bottom: var(--espaciado-md);
+}
+
+.titulo-principal {
+    font-size: 2.4rem;
+    font-weight: var(--peso-negrita);
+    margin: 0;
+}
+
+/* Logo para página de inicio */
+.logo-contenedor {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--espaciado-md);
+    flex-wrap: wrap;
+}
+
+.logo {
+    height: 6rem;
+    width: auto;
+}
+
+/* Navegación */
+.barra-navegacion {
+    margin-top: var(--espaciado-md);
+}
+
+.menu-navegacion {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--espaciado-md);
+}
+
+.elemento-menu {
+    margin: 0;
+}
+
+.enlace-menu {
+    color: var(--color-secundario);
+    text-decoration: none;
+    padding: var(--espaciado-sm) var(--espaciado-md);
+    border-radius: var(--radio-borde);
+    font-weight: var(--peso-medio);
+    display: block;
+}
+
+.enlace-menu:hover {
+    background-color: var(--color-primario-hover);
+}
+
+.enlace-menu.activo {
+    background-color: var(--color-primario-claro);
+    font-weight: var(--peso-semi-negrita);
+}
+
+.boton-cerrar-sesion {
+    color: var(--color-secundario);
+    text-decoration: none;
+    padding: var(--espaciado-sm) var(--espaciado-md);
+    border-radius: var(--radio-borde);
+    font-weight: var(--peso-medio);
+    background-color: var(--color-error);
+    display: block;
+}
+
+.boton-cerrar-sesion:hover {
+    background-color: #B71C1C;
+}
+
+/* 
+   CONTENIDO PRINCIPAL
+ */
+
+ /* flex 1 sirve para que el contenedor principal ocupe el espacio restante */
+.contenido-principal {
+    flex: 1;
+    padding: var(--espaciado-xl);
+}
+
+.titulo-seccion {
+    text-align: center;
+    margin-bottom: var(--espaciado-xl);
+}
+
+.titulo-pagina {
+    font-size: 2.8rem;
+    font-weight: var(--peso-negrita);
+    color: var(--color-primario);
+    margin-bottom: var(--espaciado-sm);
+}
+
+.subtitulo-pagina {
+    font-size: 1.4rem;
+    color: var(--color-texto-secundario);
+    font-weight: var(--peso-normal);
+}
+
+/* Iframe styling */
+iframe {
+    margin: var(--espaciado-lg);
+}
+
+/* 
+   PIE DE PÁGINA
+ */
+
+.pie-pagina {
+    background-color: var(--color-primario);
+    color: var(--color-secundario);
+    text-align: center;
+    padding: var(--espaciado-lg);
+    margin-top: auto;
+}
+
+.texto-pie {
+    font-size: 1.3rem;
+    margin: 0;
+}

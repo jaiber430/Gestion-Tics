@@ -1,0 +1,60 @@
+{% extends layout %}
+
+{% block content %}
+  <main class="contenido-principal">
+    <!-- Título de la sección -->
+    <div class="titulo-seccion">
+      <h2 class="titulo-pagina">REGISTRO DE SOLICITUD</h2>
+      <div class="descripcion-registro">
+        <p>
+          <strong>Fecha de corte:</strong> El día 15 de cada mes es el plazo máximo para el envío de solicitudes de creación de fichas para el mismo mes.
+        </p>
+        <br />
+        <p>
+          <strong>ATENCIÓN:</strong> Para poder diligenciar la solicitud, debe tener una cuenta de correo de xxx@gmail.com la cual previamente debe haber sido aprobada por el administrador de la aplicación.
+        </p>
+      </div>
+    </div>
+    {% if fechas == 'Creaciones_abiertas' %}
+    {% comment %} Habilita la creación de un curso si aun se encuentra en las fechas {% endcomment %}
+      <!-- Contenedor de opciones -->
+      <div class="contenedor-opciones-ficha">
+        <!-- Opción Ficha Regular -->
+        <div class="opcion-ficha">
+          <div class="icono-opcion">📋</div>
+          <h3 class="titulo-opcion">REGULAR</h3>
+          <p class="descripcion-opcion">Seleccione esta opción si desea solicitar la CREACIÓN de una ficha complementaria</p>
+          <a href="{% url "crearregular" %}" class="boton-opcion">Crear Ficha Regular</a>
+        </div>
+
+        <!-- Opción Ficha Campesina -->
+        <div class="opcion-ficha">
+          <div class="icono-opcion">🌾</div>
+          <h3 class="titulo-opcion">CAMPESINA</h3>
+          <p class="descripcion-opcion">Seleccione esta opción si desea solicitar la CREACIÓN de una ficha complementaria</p>
+          <a href="#" class="boton-opcion">Crear Ficha Campesina</a>
+        </div>
+      </div>
+    {% else %}
+    {% comment %} Esto deshabilitara la opción de crear curso cuando no se encuentra en el rango establecido {% endcomment %}
+      <!-- Contenedor de opciones -->
+      <div class="contenedor-opciones-ficha">
+        <!-- Opción Ficha Regular -->
+        <div class="opcion-ficha">
+          <div class="icono-opcion">📋</div>
+          <h3 class="titulo-opcion">REGULAR</h3>
+          <p class="descripcion-opcion">Seleccione esta opción si desea solicitar la CREACIÓN de una ficha complementaria</p>
+          <a href="#" class="boton-opcion">Crear Ficha Regular</a>
+        </div>
+
+        <!-- Opción Ficha Campesina -->
+        <div class="opcion-ficha">
+          <div class="icono-opcion">🌾</div>
+          <h3 class="titulo-opcion">CAMPESINA</h3>
+          <p class="descripcion-opcion">Seleccione esta opción si desea solicitar la CREACIÓN de una ficha complementaria</p>
+          <a href="#" class="boton-opcion">Crear Ficha Campesina</a>
+        </div>
+      </div>
+    {% endif %}
+  </main>
+{% endblock %}

@@ -1,0 +1,360 @@
+/* 
+   VARIABLES GLOBALES DE COLORES Y CONFIGURACIÓN
+ */
+
+:root {
+    /* Paleta de colores principales */
+    --color-primario: #2E7D32;          
+    --color-primario-claro: #4CAF50;     
+    --color-primario-hover: #1B5E20;     
+    --color-secundario: #FFFFFF;        
+    --color-fondo: #F5F5F5;             
+    --color-texto-principal: #212121;
+    --color-texto-secundario: #757575;
+    --color-borde: #E0E0E0;          
+    --color-error: #D32F2F;        
+    
+    /* Configuración de tipografía */
+    --fuente-principal: 'Poppins', Arial, sans-serif;
+    --tamanio-base: 1rem;
+    --peso-normal: 400;
+    --peso-medio: 500;
+    --peso-semi-negrita: 600;
+    --peso-negrita: 700;
+    
+    /* Espaciado */
+    --espaciado-xs: 0.4rem;
+    --espaciado-sm: 0.8rem;
+    --espaciado-md: 1.6rem;
+    --espaciado-lg: 2.4rem;
+    --espaciado-xl: 3.2rem;
+    
+    /* Bordes y sombras */
+    --radio-borde: 0.8rem;
+    --sombra-ligera: 0 0.2rem 0.4rem rgba(0, 0, 0, 0.1);
+    --sombra-media: 0 0.4rem 0.8rem rgba(0, 0, 0, 0.15);
+}
+
+/* Reset básico */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Configuración base del documento */
+html {
+    font-size: 10px;
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: var(--fuente-principal);
+    font-size: var(--tamanio-base);
+    font-weight: var(--peso-normal);
+    line-height: 1.6;
+    color: var(--color-texto-principal);
+    background-color: var(--color-fondo);
+    min-height: 100vh;
+}
+
+/* 
+   CONTENEDOR PRINCIPAL
+ */
+
+.contenedor-principal {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    max-width: 1200px;
+    margin: 0 auto;
+    background-color: var(--color-secundario);
+    box-shadow: var(--sombra-ligera);
+}
+
+/* 
+   ENCABEZADO Y NAVEGACIÓN
+ */
+
+.encabezado {
+    background-color: var(--color-primario);
+    color: var(--color-secundario);
+    padding: var(--espaciado-lg);
+    box-shadow: var(--sombra-media);
+}
+
+.titulo-encabezado {
+    text-align: center;
+    margin-bottom: var(--espaciado-md);
+}
+
+.titulo-principal {
+    font-size: 2.4rem;
+    font-weight: var(--peso-negrita);
+    margin: 0;
+}
+
+.barra-navegacion {
+    margin-top: var(--espaciado-md);
+}
+
+.menu-navegacion {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--espaciado-md);
+}
+
+.elemento-menu {
+    margin: 0;
+}
+
+.enlace-menu {
+    color: var(--color-secundario);
+    text-decoration: none;
+    padding: var(--espaciado-sm) var(--espaciado-md);
+    border-radius: var(--radio-borde);
+    font-weight: var(--peso-medio);
+    display: block;
+}
+
+.enlace-menu:hover {
+    background-color: var(--color-primario-hover);
+}
+
+.enlace-menu.activo {
+    background-color: var(--color-primario-claro);
+    font-weight: var(--peso-semi-negrita);
+}
+
+.boton-cerrar-sesion {
+    color: var(--color-secundario);
+    text-decoration: none;
+    padding: var(--espaciado-sm) var(--espaciado-md);
+    border-radius: var(--radio-borde);
+    font-weight: var(--peso-medio);
+    background-color: var(--color-error);
+    display: block;
+}
+
+.boton-cerrar-sesion:hover {
+    background-color: #B71C1C;
+}
+
+/* 
+   CONTENIDO PRINCIPAL
+ */
+
+.contenido-principal {
+    flex: 1;
+    padding: var(--espaciado-xl);
+}
+
+.titulo-seccion {
+    text-align: center;
+    margin-bottom: var(--espaciado-xl);
+}
+
+.titulo-pagina {
+    font-size: 2.8rem;
+    font-weight: var(--peso-negrita);
+    color: var(--color-primario);
+    margin-bottom: var(--espaciado-sm);
+}
+
+.subtitulo-pagina {
+    font-size: 1.4rem;
+    color: var(--color-texto-secundario);
+    font-weight: var(--peso-normal);
+}
+
+/* 
+   FORMULARIO FICHA REGULAR
+ */
+
+.formulario-ficha {
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: var(--color-secundario);
+    padding: var(--espaciado-xl);
+    border-radius: var(--radio-borde);
+    box-shadow: var(--sombra-media);
+}
+
+.seccion-formulario {
+    margin-bottom: var(--espaciado-xl);
+    padding-bottom: var(--espaciado-xl);
+    border-bottom: 0.1rem solid var(--color-borde);
+}
+
+.seccion-formulario:last-of-type {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.titulo-seccion-form {
+    font-size: 2rem;
+    font-weight: var(--peso-semi-negrita);
+    color: var(--color-primario);
+    margin-bottom: var(--espaciado-lg);
+    padding-bottom: var(--espaciado-sm);
+    border-bottom: 0.2rem solid var(--color-primario-claro);
+}
+
+.campo-entrada {
+    margin-bottom: var(--espaciado-lg);
+}
+
+.etiqueta-campo {
+    display: block;
+    font-weight: var(--peso-medio);
+    color: var(--color-texto-principal);
+    margin-bottom: var(--espaciado-sm);
+    font-size: 1.4rem;
+}
+
+.entrada-texto,
+.entrada-select,
+.entrada-textarea {
+    width: 100%;
+    padding: var(--espaciado-md);
+    border: 0.2rem solid var(--color-borde);
+    border-radius: var(--radio-borde);
+    font-family: var(--fuente-principal);
+    font-size: 1.4rem;
+    background-color: var(--color-secundario);
+    color: var(--color-texto-principal);
+}
+
+/* NUEVO: Estilos para campo de archivo */
+.entrada-archivo {
+    width: 100%;
+    padding: var(--espaciado-sm);
+    border: 0.2rem solid var(--color-borde);
+    border-radius: var(--radio-borde);
+    font-family: var(--fuente-principal);
+    font-size: 1.4rem;
+    background-color: var(--color-secundario);
+    color: var(--color-texto-principal);
+    cursor: pointer;
+}
+
+.entrada-archivo::file-selector-button {
+    background-color: var(--color-primario);
+    color: var(--color-secundario);
+    border: none;
+    padding: var(--espaciado-sm) var(--espaciado-md);
+    border-radius: var(--radio-borde);
+    font-family: var(--fuente-principal);
+    font-size: 1.3rem;
+    cursor: pointer;
+    margin-right: var(--espaciado-md);
+}
+
+.entrada-archivo::file-selector-button:hover {
+    background-color: var(--color-primario-hover);
+}
+
+.entrada-texto:focus,
+.entrada-select:focus,
+.entrada-textarea:focus {
+    outline: none;
+    border-color: var(--color-primario);
+    box-shadow: 0 0 0 0.3rem rgba(76, 175, 80, 0.2);
+}
+
+/* NUEVO: Focus para campo de archivo */
+.entrada-archivo:focus {
+    outline: none;
+    border-color: var(--color-primario);
+    box-shadow: 0 0 0 0.3rem rgba(76, 175, 80, 0.2);
+}
+
+.contenedor-checkboxes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: var(--espaciado-md);
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: var(--espaciado-sm);
+    font-size: 1.3rem;
+    cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 1.6rem;
+    height: 1.6rem;
+    accent-color: var(--color-primario);
+}
+
+/* NUEVO: Texto de ayuda para archivos */
+.texto-ayuda {
+    font-size: 1.2rem;
+    color: var(--color-texto-secundario);
+    margin-top: var(--espaciado-xs);
+    font-style: italic;
+}
+
+.contenedor-botones-formulario {
+    display: flex;
+    gap: var(--espaciado-md);
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: var(--espaciado-xl);
+    padding-top: var(--espaciado-lg);
+    border-top: 0.1rem solid var(--color-borde);
+}
+
+.boton-enviar,
+.boton-cancelar {
+    padding: var(--espaciado-md) var(--espaciado-xl);
+    border: none;
+    border-radius: var(--radio-borde);
+    font-family: var(--fuente-principal);
+    font-size: 1.4rem;
+    font-weight: var(--peso-medio);
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+    cursor: pointer;
+}
+
+.boton-enviar {
+    background-color: var(--color-primario);
+    color: var(--color-secundario);
+}
+
+.boton-enviar:hover {
+    background-color: var(--color-primario-hover);
+}
+
+.boton-cancelar {
+    background-color: var(--color-borde);
+    color: var(--color-texto-principal);
+}
+
+.boton-cancelar:hover {
+    background-color: #BDBDBD;
+}
+
+/* 
+   PIE DE PÁGINA
+ */
+
+.pie-pagina {
+    background-color: var(--color-primario);
+    color: var(--color-secundario);
+    text-align: center;
+    padding: var(--espaciado-lg);
+    margin-top: auto;
+}
+
+.texto-pie {
+    font-size: 1.3rem;
+    margin: 0;
+}

@@ -1,0 +1,305 @@
+
+
+:root {
+    /* Paleta de colores principales */
+    --color-primario: #2E7D32;          
+    --color-primario-claro: #4CAF50;     
+    --color-primario-hover: #1B5E20;     
+    --color-secundario: #FFFFFF;        
+    --color-fondo: #F5F5F5;             
+    --color-texto-principal: #212121;
+    --color-texto-secundario: #757575;
+    --color-borde: #E0E0E0;          
+    --color-error: #D32F2F;        
+    
+    /* Configuración de tipografía */
+    --fuente-principal: 'Poppins', Arial, sans-serif;
+    --tamanio-base: 1rem;
+    --peso-normal: 400;
+    --peso-medio: 500;
+    --peso-semi-negrita: 600;
+    --peso-negrita: 700;
+    
+    /* Espaciado */
+    --espaciado-xs: 0.4rem;
+    --espaciado-sm: 0.8rem;
+    --espaciado-md: 1.6rem;
+    --espaciado-lg: 2.4rem;
+    --espaciado-xl: 3.2rem;
+    
+    /* Bordes y sombras */
+    --radio-borde: 0.8rem;
+    --sombra-ligera: 0 0.2rem 0.4rem rgba(0, 0, 0, 0.1);
+    --sombra-media: 0 0.4rem 0.8rem rgba(0, 0, 0, 0.15);
+}
+
+/* Reset básico */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Configuración base del documento */
+html {
+    font-size: 10px;
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: var(--fuente-principal);
+    font-size: var(--tamanio-base);
+    font-weight: var(--peso-normal);
+    line-height: 1.6;
+    color: var(--color-texto-principal);
+    background-color: var(--color-fondo);
+    min-height: 100vh;
+}
+
+/* 
+   CONTENEDOR PRINCIPAL
+ */
+
+.contenedor-principal {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    max-width: 1200px;
+    margin: 0 auto;
+    background-color: var(--color-secundario);
+    box-shadow: var(--sombra-ligera);
+}
+
+/* 
+   ENCABEZADO PARA PÁGINA DE INICIO
+ */
+
+.encabezado {
+    background-color: var(--color-primario);
+    color: var(--color-secundario);
+    padding: var(--espaciado-lg);
+    box-shadow: var(--sombra-media);
+}
+
+/* Logo para página de inicio */
+.logo-contenedor {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--espaciado-md);
+    flex-wrap: wrap;
+}
+
+.logo {
+    height: 6rem;
+    width: auto;
+}
+
+.titulo-principal {
+    font-size: 2.4rem;
+    font-weight: var(--peso-negrita);
+    margin: 0;
+}
+
+/* 
+   CONTENIDO PRINCIPAL
+ */
+
+.contenido-principal {
+    flex: 1;
+    padding: var(--espaciado-xl);
+}
+
+/* 
+   FORMULARIO DE LOGIN
+ */
+
+.formulario-contenedor {
+    max-width: 600px;
+    margin: 0 auto;
+    background-color: var(--color-secundario);
+    padding: var(--espaciado-xl);
+    border-radius: var(--radio-borde);
+    box-shadow: var(--sombra-media);
+}
+
+.titulo-formulario {
+    font-size: 2.4rem;
+    font-weight: var(--peso-negrita);
+    color: var(--color-primario);
+    text-align: center;
+    margin-bottom: var(--espaciado-xl);
+}
+
+.campo-entrada {
+    margin-bottom: var(--espaciado-lg);
+}
+
+.etiqueta-campo {
+    display: block;
+    font-weight: var(--peso-medio);
+    color: var(--color-texto-principal);
+    margin-bottom: var(--espaciado-sm);
+    font-size: 1.4rem;
+}
+
+.entrada-texto,
+.selector-usuario {
+    width: 100%;
+    padding: var(--espaciado-md);
+    border: 0.2rem solid var(--color-borde);
+    border-radius: var(--radio-borde);
+    font-family: var(--fuente-principal);
+    font-size: 1.4rem;
+    background-color: var(--color-secundario);
+    color: var(--color-texto-principal);
+}
+
+.entrada-texto:focus,
+.selector-usuario:focus {
+    outline: none;
+    border-color: var(--color-primario);
+    box-shadow: 0 0 0 0.3rem rgba(76, 175, 80, 0.2);
+}
+
+.selector-usuario {
+    cursor: pointer;
+}
+
+/* 
+   BOTÓN DE INGRESAR
+ */
+
+.boton-ingresar {
+    background-color: var(--color-primario);
+    color: var(--color-secundario);
+    padding: var(--espaciado-md) var(--espaciado-xl);
+    border: none;
+    border-radius: var(--radio-borde);
+    font-family: var(--fuente-principal);
+    font-size: 1.4rem;
+    font-weight: var(--peso-medio);
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+    cursor: pointer;
+    width: 100%;
+    margin-top: var(--espaciado-md);
+}
+
+.boton-ingresar:hover {
+    background-color: var(--color-primario-hover);
+}
+
+/* 
+   ENLACES ADICIONALES
+ */
+
+.enlaces-adicionales {
+    text-align: center;
+    margin-top: var(--espaciado-lg);
+}
+
+.enlace-recuperar,
+.enlace-registro {
+    color: var(--color-primario);
+    text-decoration: none;
+    font-size: 1.4rem;
+    display: block;
+    margin: var(--espaciado-sm) 0;
+    transition: color 0.3s ease;
+    font-weight: var(--peso-medio);
+}
+
+.enlace-recuperar:hover,
+.enlace-registro:hover {
+    color: var(--color-primario-hover);
+    text-decoration: underline;
+}
+
+/* 
+   MODAL DE RECUPERACIÓN DE CONTRASEÑA
+ */
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(2px);
+}
+
+.modal-contenido {
+    background-color: var(--color-secundario);
+    margin: 5% auto;
+    padding: var(--espaciado-xl);
+    border: none;
+    border-radius: var(--radio-borde);
+    width: 90%;
+    max-width: 500px;
+    box-shadow: var(--sombra-media);
+    animation: modalFadeIn 0.3s ease-out;
+    position: relative;
+}
+
+@keyframes modalFadeIn {
+    from { 
+        opacity: 0; 
+        transform: translateY(-50px) scale(0.95); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0) scale(1); 
+    }
+}
+
+.cerrar-modal {
+    color: var(--color-texto-secundario);
+    float: right;
+    font-size: 2.8rem;
+    font-weight: var(--peso-negrita);
+    cursor: pointer;
+    line-height: 1;
+    transition: color 0.3s ease;
+    position: absolute;
+    top: var(--espaciado-md);
+    right: var(--espaciado-lg);
+}
+
+.cerrar-modal:hover,
+.cerrar-modal:focus {
+    color: var(--color-error);
+    text-decoration: none;
+}
+
+.modal-contenido h2 {
+    color: var(--color-primario);
+    margin-bottom: var(--espaciado-xl);
+    text-align: center;
+    font-family: var(--fuente-principal);
+    font-size: 2.2rem;
+    font-weight: var(--peso-negrita);
+    margin-top: var(--espaciado-lg);
+}
+
+/* 
+   PIE DE PÁGINA
+ */
+
+.pie-pagina {
+    background-color: var(--color-primario);
+    color: var(--color-secundario);
+    text-align: center;
+    padding: var(--espaciado-lg);
+    margin-top: auto;
+}
+
+.texto-pie {
+    font-size: 1.3rem;
+    margin: 0;
+}

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <!-- Configuración básica del documento -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      {% block title %}
+        {{ title }}
+      {% endblock %}
+    </title>
+    <link rel="stylesheet" href="../../static/css/index-styles.css" />
+  </head>
+  <body>
+    <!-- Contenedor principal de la aplicación -->
+    <div class="contenedor-principal">
+      <!-- Encabezado de la página -->
+      <header class="encabezado">
+        <!-- Logo del SENA -->
+        <div class="logo-contenedor">
+          <img src="Assets/img/sena_logo.png" alt="Logo SENA" class="logo" />
+          <h1 class="titulo-principal">Sistema de Gestión SENA</h1>
+        </div>
+      </header>
+
+      <!-- Sección principal - Formulario de inicio de sesión -->
+      <main class="contenido-principal">
+        <!-- Contenedor del formulario de login -->
+        <div class="formulario-contenedor">
+          <!-- Título del formulario -->
+          <h2 class="titulo-formulario">Inicio sesión</h2>
+
+          <!-- Formulario de autenticación -->
+            
+          <form class="formulario-login" method="POST" action="{% url 'login' %}">
+            {% csrf_token %}
+            <!-- Campo para número de cédula -->
+            <div class="campo-entrada">
+              <label for="numeroCedula" class="etiqueta-campo">Número de Cédula:</label>
+              <input type="number" id="numeroCedula" name="numeroCedula" class="entrada-texto" placeholder="Ingrese su número de cédula" required />
+            </div>
+
+            <!-- Campo para contraseña -->
+            <div class="campo-entrada">
+              <label for="clave" class="etiqueta-campo">Contraseña:</label>
+              <input type="password" id="clave" name="clave" class="entrada-texto" placeholder="Ingrese su contraseña" required />
+            </div>
+
+            <!-- Selector de tipo de usuario -->
+            <div class="campo-entrada">
+              <label for="rol" class="etiqueta-campo">Tipo de Usuario:</label>
+              <select id="rol" name="rol" class="selector-usuario" required>
+                <option value="">Seleccione su rol</option>
+                <option value="1">Instructor</option>
+                <option value="2">Coordinador</option>
+                <option value="3">Funcionario</option>
+                <option value="4">Administrador</option>
+              </select>
+            </div>
+
+            <!-- Botón de inicio de sesión -->
+            <input type="submit" class="boton-ingresar" value="ingresar"/>
+          </form>
+          {% if messages %}
+            {% for message in messages %}
+              <div class="alert alert-success">
+                {{message}}
+              </div>
+            {% endfor %}
+          {% endif %} 
+          {{error}}
+      </main>
+    </div>
+  </body>
+</html>
