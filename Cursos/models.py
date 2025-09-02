@@ -96,14 +96,6 @@ class Horario(models.Model):
         db_table = 'horario'
 
 
-class Jornada(models.Model):
-    idjornada = models.AutoField(primary_key=True)
-    jornada = models.CharField(max_length=100)
-
-    class Meta:
-        db_table = 'jornada'
-
-
 class Modalidad(models.Model):
     idmodalidad = models.AutoField(primary_key=True)
     modalidad = models.CharField(max_length=50)

@@ -1,8 +1,12 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
+# Se usa para obtener la fecha y horas del país
 from django.utils import timezone
+# Juntar datos que deben completarse para la Db (transaction) y trabajar con los campos de los modelos (models)
 from django.db import transaction, models
+# Importar fehas 
 from datetime import datetime
+# Importar datos de los modulos requeridos
 from Cursos.models import (
     Ambiente, Area, Departamentos, Empresa, Horario, Modalidad, Municipios,
     Programaespecial, Programaformacion, Solicitud, Tipoempresa, Tiposolicitud, Usuario
@@ -28,13 +32,17 @@ def crear_solicitud(request):
     """
     Página para decidir qué ficha crear: regular o campesina
     """
+    # Llamar el id del usuario 
     user_id = request.session.get('user_id')
+    # Se asegura de que el ID del usuario esxista
     if not user_id:
         messages.error(request, "Debes iniciar sesión para acceder.")
         return redirect('login')
 
     try:
+        # Ontener el rol por medio del id del usuario que ingreso
         usuario = Usuario.objects.select_related('rol').get(idusuario=user_id)
+        # Crear una variable para almacenar el rol
         id_rol = usuario.rol.idrol
 
         # Definir layout según rol
@@ -53,7 +61,12 @@ def crear_solicitud(request):
 
         # Verificar fecha para crear cursos
         hoy = datetime.now().day
-        dato = 'Creaciones_abiertas' if hoy in range(1, 15) else 'Creaciones_cerradas'
+        # Verificar fecha para crear cursos
+        hoy = datetime.now().day
+        if (hoy in range (1,16)):
+            dato = 'Creaciones_abiertas'
+        else:
+            dato= 'Creaciones_cerradas'
 
     except Usuario.DoesNotExist:
         messages.error(request, "Usuario no encontrado.")
@@ -102,7 +115,7 @@ def solicitud_regular(request):
             with transaction.atomic():
                 # Datos principales
                 tiene_empresa = request.POST.get('tieneEmpresa')
-                tipo_modalidad = request.POST.get('tipoModalidad')
+                # tipo_modalidad = request.POST.get('tipoModalidad')
                 nombre_programa_codigo = request.POST.get('nombrePrograma_codigo')
                 version_programa = request.POST.get('versionPrograma')
                 subsector_economico = request.POST.get('subsectorEconomico')
@@ -152,7 +165,7 @@ def solicitud_regular(request):
                         )
 
                 programa_formacion = Programaformacion.objects.get(codigoprograma=nombre_programa_codigo)
-                modalidad = Modalidad.objects.get(idmodalidad=tipo_modalidad)
+                modalidad = Modalidad.objects.get(idmodalidad=1)
                 municipio = Municipios.objects.get(codigomunicipio=municipio_formacion)
                 programa_especial_obj = Programaespecial.objects.get(idespecial=programa_especial)
                 ambiente_obj = Ambiente.objects.filter(idambiente=nombre_ambiente).first() if nombre_ambiente else None
@@ -180,7 +193,7 @@ def solicitud_regular(request):
                 )
 
                 messages.success(request, 'Solicitud de ficha regular creada exitosamente.')
-                return redirect('consultarsolicitudinstru')
+                return redirect('crearregular')
 
         except Exception as e:
             messages.error(request, f'Error al crear la solicitud: {str(e)}')
