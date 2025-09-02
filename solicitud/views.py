@@ -115,10 +115,7 @@ def _crear_solicitud_base(request, tipo_solicitud_id, template_name, mensaje_exi
             with transaction.atomic():
                 # Datos principales
                 tiene_empresa = request.POST.get('tieneEmpresa')
-<<<<<<< HEAD
                 # tipo_modalidad = request.POST.get('tipoModalidad')
-=======
->>>>>>> 345b8826601c1f85ee2a2cd7871d0a19650dc0af
                 nombre_programa_codigo = request.POST.get('nombrePrograma_codigo')
                 version_programa = request.POST.get('versionPrograma')
                 subsector_economico = request.POST.get('subsectorEconomico')
@@ -168,11 +165,8 @@ def _crear_solicitud_base(request, tipo_solicitud_id, template_name, mensaje_exi
                         )
 
                 programa_formacion = Programaformacion.objects.get(codigoprograma=nombre_programa_codigo)
-<<<<<<< HEAD
                 modalidad = Modalidad.objects.get(idmodalidad=1)
-=======
                 modalidad = Modalidad.objects.get(idmodalidad=1)  # Modalidad siempre 1 (presencial)
->>>>>>> 345b8826601c1f85ee2a2cd7871d0a19650dc0af
                 municipio = Municipios.objects.get(codigomunicipio=municipio_formacion)
                 programa_especial_obj = Programaespecial.objects.get(idespecial=programa_especial)
                 ambiente_obj = Ambiente.objects.filter(idambiente=nombre_ambiente).first() if nombre_ambiente else None
@@ -196,14 +190,11 @@ def _crear_solicitud_base(request, tipo_solicitud_id, template_name, mensaje_exi
                     fechasolicitud=timezone.now().date()
                     # codigosolicitud se deja nulo por defecto
                 )
-
-<<<<<<< HEAD
                 messages.success(request, 'Solicitud de ficha regular creada exitosamente.')
                 return redirect('crearregular')
-=======
+                
                 messages.success(request, mensaje_exito)
                 return redirect('Crearsolicitud')  # Regresar a la página de creación
->>>>>>> 345b8826601c1f85ee2a2cd7871d0a19650dc0af
 
         except Exception as e:
             messages.error(request, f'Error al crear la solicitud: {str(e)}')
