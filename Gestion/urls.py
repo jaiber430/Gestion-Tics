@@ -26,5 +26,6 @@ urlpatterns = [
     path('pagina_principal/', views.login_view, name="login"),
     # Paginas de creación (Admin - Instru)
     path('crearficha/', views_solicitud.crear_solicitud, name="Crearsolicitud"),
-    path('formulario_solicitud_regular/', views_solicitud.solicitud_regular, name="crearregular")
+    path('formulario_solicitud_regular/', views_solicitud.solicitud_regular, name="crearregular"),
+    path('formulario_solicitud_campesina/', views_solicitud.solicitud_campesina, name="crearcampesina")
 ]
