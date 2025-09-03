@@ -3,9 +3,10 @@ from django.contrib import messages
 # Se usa para obtener la fecha y horas del país
 from django.utils import timezone
 # Juntar datos que deben completarse para la Db (transaction) y trabajar con los campos de los modelos (models)
-from django.db import transaction, models
+from django.db import transaction
 # Importar fehas 
 from datetime import datetime
+import json
 # Importar datos de los modulos requeridos
 from Cursos.models import (
     Ambiente, Area, Departamentos, Empresa, Horario, Modalidad, Municipios,
@@ -117,19 +118,23 @@ def _crear_solicitud_base(request, tipo_solicitud_id, template_name, mensaje_exi
             with transaction.atomic():
                 # Datos principales
                 tiene_empresa = request.POST.get('tieneEmpresa')
-                # tipo_modalidad = request.POST.get('tipoModalidad')
                 nombre_programa_codigo = request.POST.get('nombrePrograma_codigo')
-                version_programa = request.POST.get('versionPrograma')
+                version_programa = request.POST.get('versionPrograma') 
                 subsector_economico = request.POST.get('subsectorEconomico')
                 fecha_inicio = request.POST.get('fechaInicio')
                 fecha_finalizacion = request.POST.get('fechaFinalizacion')
                 cupo_aprendices = request.POST.get('cupoAprendices')
                 municipio_formacion = request.POST.get('municipioFormacion')
                 direccion_formacion = request.POST.get('direccionFormacion')
-                dias_semana = request.POST.getlist('diasSemana[]')
-                horario_curso = request.POST.get('horarioCurso')
-                fechas_ejecucion_mes1 = request.POST.get('fechasEjecucionMes1')
-                fechas_ejecucion_mes2 = request.POST.get('fechasEjecucionMes2', '')
+                dias_semana = request.POST.getlist('diasSemana[]')  # valores de 0-6
+                #campos de horario y fechas específicas
+                hora_inicio = request.POST.get('horario_inicio') or request.POST.get('horarioInicio')
+                hora_fin = request.POST.get('horario_fin') or request.POST.get('horarioFin')
+                fechas_calendario_raw = request.POST.get('fechas_calendario')  #lista de fechas seleccionadas
+                try:
+                    fechas_calendario = json.loads(fechas_calendario_raw) if fechas_calendario_raw else []
+                except json.JSONDecodeError:
+                    fechas_calendario = []
 
                 # Campos de empresa
                 empresa_solicitante = request.POST.get('empresaSolicitante', '')
@@ -143,12 +148,17 @@ def _crear_solicitud_base(request, tipo_solicitud_id, template_name, mensaje_exi
                 convenio = request.POST.get('convenio', '')
                 nombre_ambiente = request.POST.get('nombreAmbiente')
 
-                # Crear horario
+                # Crear horario (mes1 almacena el resumen del nuevo calendario y horario) POR AHORA
+                resumen_calendario = ""
+                if fechas_calendario:
+                    resumen_calendario = f"Fechas: {', '.join(fechas_calendario)} | "
+                resumen_calendario += f"Días semana: {', '.join(dias_semana)} | Horario: {hora_inicio}-{hora_fin}"
+
                 horario = Horario.objects.create(
                     fechainicio=datetime.strptime(fecha_inicio, '%Y-%m-%d').date(),
                     fechafin=datetime.strptime(fecha_finalizacion, '%Y-%m-%d').date(),
-                    mes1=f"{fechas_ejecucion_mes1} - Días: {', '.join(dias_semana)} - Horario: {horario_curso}",
-                    mes2=fechas_ejecucion_mes2 or None
+                    mes1=resumen_calendario,
+                    mes2=None
                 )
 
                 # Empresa opcional
@@ -167,7 +177,6 @@ def _crear_solicitud_base(request, tipo_solicitud_id, template_name, mensaje_exi
                         )
 
                 programa_formacion = Programaformacion.objects.get(codigoprograma=nombre_programa_codigo)
-                modalidad = Modalidad.objects.get(idmodalidad=1)
                 modalidad = Modalidad.objects.get(idmodalidad=1)  # Modalidad siempre 1 (presencial)
                 municipio = Municipios.objects.get(codigomunicipio=municipio_formacion)
                 programa_especial_obj = Programaespecial.objects.get(idespecial=programa_especial)
@@ -192,8 +201,6 @@ def _crear_solicitud_base(request, tipo_solicitud_id, template_name, mensaje_exi
                     fechasolicitud=timezone.now().date()
                     # codigosolicitud se deja nulo por defecto
                 )
-                messages.success(request, 'Solicitud de ficha regular creada exitosamente.')
-                return redirect('crearregular')
                 
                 messages.success(request, mensaje_exito)
                 return redirect('Crearsolicitud')  # Regresar a la página de creación
