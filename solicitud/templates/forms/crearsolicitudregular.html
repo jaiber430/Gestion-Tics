@@ -1,6 +1,9 @@
 {% extends layout %}
 
+{% load static %}
+
 {% block content %}
+  <link rel="stylesheet" href="{% static 'css/calendario-ficha.css' %}">
   <main class="contenido-principal">
     <!-- Título -->
     <div class="titulo-seccion">
@@ -11,15 +14,9 @@
     <!-- Mensajes de Django -->
     {% if messages %}
       {% for message in messages %}
-        <div class="alert"
-          style="padding: 12px; margin: 15px 0; border-radius: 6px; font-size: 14px; border: 1px solid;
-                    {% if message.tags == 'success' %}
-                      background-color: #d4edda; color: #155724; border-color: #c3e6cb;
-          {% elif message.tags == 'error' %}
-                      background-color: #f8d7da; color: #721c24; border-color: #f5c6cb;
-          {% else %}
-                      background-color: #d1ecf1; color: #0c5460; border-color: #bee5eb;
-          {% endif %}">{{ message }}</div>
+        <div class="alert {% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% else %}info{% endif %}">
+          {{ message }}
+        </div>
       {% endfor %}
     {% endif %}
 
@@ -61,7 +58,14 @@
           <input type="hidden" id="nombrePrograma_codigo" name="nombrePrograma_codigo" />
           <!-- Datos ocultos de programas -->
           {% for programa in programas_formacion %}
-            <span class="programa-data" data-codigo="{{ programa.codigoprograma }}" data-area="{{ programa.idarea.idarea }}" data-area-nombre="{{ programa.idarea.area }}" data-horas="{{ programa.horas }}" data-version="{{ programa.verision|default:'' }}" data-nombre="{{ programa.nombreprograma }}" style="display:none;"></span>
+            <span class="programa-data"
+                  data-codigo="{{ programa.codigoprograma }}"
+                  data-area="{{ programa.idarea.idarea }}"
+                  data-area-nombre="{{ programa.idarea.area }}"
+                  data-horas="{{ programa.horas }}"
+                  data-version="{{ programa.verision|default:'' }}"
+                  data-nombre="{{ programa.nombreprograma }}"
+                  style="display:none;"></span>
           {% endfor %}
         </div>
 
@@ -82,7 +86,7 @@
       </div>
 
       <!-- Sección Empresa (solo si es cerrada) -->
-      <div class="seccion-formulario" id="seccionEmpresa">
+      <div class="seccion-formulario" id="seccionEmpresa" style="display: none;">
         <h3 class="titulo-seccion-form">Empresa y Responsable</h3>
         <div class="campo-entrada">
           <label for="empresaSolicitante" class="etiqueta-campo">Empresa Solicitante*:</label>
@@ -118,15 +122,7 @@
 
       <!-- Sección 2: Fechas -->
       <div class="seccion-formulario">
-        <h3 class="titulo-seccion-form">Fechas</h3>
-        <div class="campo-entrada">
-          <label for="fechaInicio" class="etiqueta-campo">Fecha de Inicio*:</label>
-          <input type="date" id="fechaInicio" name="fechaInicio" class="entrada-texto" required />
-        </div>
-        <div class="campo-entrada">
-          <label for="fechaFinalizacion" class="etiqueta-campo">Fecha de Finalización*:</label>
-          <input type="date" id="fechaFinalizacion" name="fechaFinalizacion" class="entrada-texto" required />
-        </div>
+        <h3 class="titulo-seccion-form">Cupos</h3>
         <div class="campo-entrada">
           <label for="cupoAprendices" class="etiqueta-campo">Cupo de Aprendices*:</label>
           <select id="cupoAprendices" name="cupoAprendices" class="entrada-select" required>
@@ -135,11 +131,6 @@
             <option value="30">30</option>
           </select>
         </div>
-
-        {% comment %} <div id="link_preinscripcion" style="display: none;">
-          <label for="campoOculto" class="etiqueta-campo">Link de preinscripción aspirantes</label>
-          <strong>Copie y comparta el siguiente link para que se pueden preinscribir aspirantes interesados al programa: </strong> <a href="{% url "formularioaspirantes" %}">{{ codigo }}</a>
-        </div> {% endcomment %}
       </div>
 
       <!-- Sección 3: Ubicación -->
@@ -159,7 +150,10 @@
           <select id="municipioFormacion" name="municipioFormacion" class="entrada-select" required>
             <option value="">Primero seleccione departamento</option>
             {% for m in municipios %}
-              <option value="{{ m.codigomunicipio }}" data-dep="{{ m.codigodepartamento.codigodepartamentos|default:'' }}">{{ m.municipio }}</option>
+              <option value="{{ m.codigomunicipio }}"
+                      data-dep="{{ m.codigodepartamento.codigodepartamentos|default:'' }}">
+                {{ m.municipio }}
+              </option>
             {% endfor %}
           </select>
         </div>
@@ -203,30 +197,55 @@
 
       <!-- Sección 6: Programación del Curso -->
       <div class="seccion-formulario">
-        <h3 class="titulo-seccion-form">Programación del Curso</h3>
+        <h3 class="titulo-seccion-form">Programación del Curso y Horario</h3>
+        <div class="campo-entrada">
+          <label for="fechaInicio" class="etiqueta-campo">Fecha de Inicio*:</label>
+          <input type="date" id="fechaInicio" name="fechaInicio" class="entrada-texto" required />
+        </div>
+        <div class="campo-entrada">
+          <label for="fechaFinalizacion" class="etiqueta-campo">Fecha de Finalización*:</label>
+          <input type="date" id="fechaFinalizacion" name="fechaFinalizacion" class="entrada-texto" required />
+        </div>
+        <div class="campo-entrada">
+          <label for="horarioInicio" class="etiqueta-campo">Hora de Inicio*:</label>
+          <input type="time" id="horarioInicio" name="horarioInicio" class="entrada-texto" required />
+        </div>
+        <div class="campo-entrada">
+          <label for="horarioFin" class="etiqueta-campo">Hora de Fin*:</label>
+          <input type="time" id="horarioFin" name="horarioFin" class="entrada-texto" required />
+        </div>
         <div class="campo-entrada">
           <label class="etiqueta-campo">Días de la Semana*:</label>
           <div class="contenedor-checkboxes">
-            <label><input type="checkbox" name="diasSemana[]" value="lunes" />Lunes</label>
-            <label><input type="checkbox" name="diasSemana[]" value="martes" />Martes</label>
-            <label><input type="checkbox" name="diasSemana[]" value="miercoles" />Miércoles</label>
-            <label><input type="checkbox" name="diasSemana[]" value="jueves" />Jueves</label>
-            <label><input type="checkbox" name="diasSemana[]" value="viernes" />Viernes</label>
-            <label><input type="checkbox" name="diasSemana[]" value="sabado" />Sábado</label>
-            <label><input type="checkbox" name="diasSemana[]" value="domingo" />Domingo</label>
+            <label><input type="checkbox" name="diasSemana[]" value="1" onchange="generarCalendario()"> Lunes</label>
+            <label><input type="checkbox" name="diasSemana[]" value="2" onchange="generarCalendario()"> Martes</label>
+            <label><input type="checkbox" name="diasSemana[]" value="3" onchange="generarCalendario()"> Miércoles</label>
+            <label><input type="checkbox" name="diasSemana[]" value="4" onchange="generarCalendario()"> Jueves</label>
+            <label><input type="checkbox" name="diasSemana[]" value="5" onchange="generarCalendario()"> Viernes</label>
+            <label><input type="checkbox" name="diasSemana[]" value="6" onchange="generarCalendario()"> Sábado</label>
+            <label><input type="checkbox" name="diasSemana[]" value="0" onchange="generarCalendario()"> Domingo</label>
           </div>
         </div>
-        <div class="campo-entrada">
-          <label for="horarioCurso" class="etiqueta-campo">Horario del Curso*:</label>
-          <input type="text" id="horarioCurso" name="horarioCurso" class="entrada-texto" placeholder="08:00 AM - 12:00 PM" required />
-        </div>
-        <div class="campo-entrada">
-          <label for="fechasEjecucionMes1" class="etiqueta-campo">Fechas (Mes 1)*:</label>
-          <input type="text" id="fechasEjecucionMes1" name="fechasEjecucionMes1" class="entrada-texto" placeholder="01/08/2025 - 31/08/2025" required />
-        </div>
-        <div class="campo-entrada">
-          <label for="fechasEjecucionMes2" class="etiqueta-campo">Fechas (Mes 2):</label>
-          <input type="text" id="fechasEjecucionMes2" name="fechasEjecucionMes2" class="entrada-texto" placeholder="01/09/2025 - 30/09/2025" />
+
+        <!-- Calendario de días específicos -->
+        <div id="calendarioContainer" class="calendario-container" style="display: none;">
+          <h4 class="calendario-titulo">Selecciona los días específicos del curso:</h4>
+          
+          <!-- Información de horas -->
+          <div id="infoHoras" class="info-horas">
+            <div class="resumen-horas">
+              <p><strong>Horas del programa:</strong> <span id="horasTotales">-</span></p>
+              <p><strong>Horas por día:</strong> <span id="horasPorDia">-</span></p>
+              <p><strong>Días necesarios:</strong> <span id="diasNecesarios">-</span></p>
+              <p><strong>Días seleccionados:</strong> <span id="diasMaximos">-</span></p>
+            </div>
+          </div>
+
+          <div id="calendarioMeses" class="calendario-meses"></div>
+          <div class="calendario-controles">
+            <button type="button" onclick="seleccionarTodos(true)" class="boton-secundario">Seleccionar Todos</button>
+            <button type="button" onclick="seleccionarTodos(false)" class="boton-secundario">Deseleccionar Todos</button>
+          </div>
         </div>
       </div>
 
@@ -257,7 +276,7 @@
         </select>
 
         <label for="modalPrograma">Programas Disponibles:</label>
-        <select id="modalPrograma" size="8" style="width: 100%; height: auto; margin: 8px 0;"></select>
+        <select id="modalPrograma" size="8" class="entrada-select"></select>
 
         <button type="button" class="boton-seleccionar" onclick="seleccionarPrograma()">Seleccionar Programa</button>
       </div>
@@ -268,10 +287,11 @@
   <script>
     // Almacenamiento de datos
     let municipiosOriginales = [];
-    let programasData = [];
+    const programasData = [];
 
     // Inicialización al cargar la página
     document.addEventListener('DOMContentLoaded', function () {
+      console.log("Formulario cargado correctamente");
 
       // Guardar opciones de municipios
       const selectMunicipio = document.getElementById('municipioFormacion');
@@ -294,13 +314,37 @@
 
       // Eventos
       document.getElementById('departamentoFormacion').addEventListener('change', filtrarMunicipios);
-      //document.getElementById('tieneEmpresa').addEventListener('change', toggleEmpresa);
+      document.getElementById('tieneEmpresa').addEventListener('change', toggleEmpresa);
       document.getElementById('modalArea').addEventListener('change', filtrarProgramasModal);
       document.getElementById('modalHoras').addEventListener('change', filtrarProgramasModal);
+      document.getElementById('fechaInicio').addEventListener('change', generarCalendario);
+      document.getElementById('fechaFinalizacion').addEventListener('change', generarCalendario);
+      
+      // Eventos para horarios (regenerar calendario cuando cambien)
+      document.getElementById('horarioInicio').addEventListener('change', function() {
+        const horaFin = document.getElementById('horarioFin').value;
+        if (horaFin && calcularHorasPorDia() <= 0) {
+          this.value = '';
+          return;
+        }
+        actualizarInfoHoras();
+        generarCalendario();
+      });
+      
+      document.getElementById('horarioFin').addEventListener('change', function() {
+        const horaInicio = document.getElementById('horarioInicio').value;
+        if (horaInicio && calcularHorasPorDia() <= 0) {
+          this.value = '';
+          return;
+        }
+        actualizarInfoHoras();
+        generarCalendario();
+      });
 
       // Inicializar
       llenarHorasModal();
-      //toggleEmpresa();
+      toggleEmpresa();
+  actualizarInfoHoras();
     });
 
     // Filtrar municipios por departamento
@@ -318,6 +362,26 @@
         if (opt.dataset.dep === dptoId) {
           const clone = opt.cloneNode(true);
           selectMunicipio.appendChild(clone);
+        }
+      });
+    }
+
+    // Mostrar u ocultar sección de empresa
+    function toggleEmpresa() {
+      const valor = document.getElementById('tieneEmpresa').value;
+      const seccion = document.getElementById('seccionEmpresa');
+      seccion.style.display = (valor === 'si') ? 'block' : 'none';
+
+      // Ajustar required
+      const campos = ['empresaSolicitante', 'tipoEmpresa', 'nombreResponsable', 'correoResponsable', 'nitEmpresa', 'cartaSolicitud'];
+      campos.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          if (valor === 'si') {
+            el.setAttribute('required', 'required');
+          } else {
+            el.removeAttribute('required');
+          }
         }
       });
     }
@@ -392,6 +456,12 @@
       document.getElementById('versionPrograma').value = selected.dataset.version;
 
       cerrarModal();
+  // Actualizar info de horas si ya hay horario definido
+  actualizarInfoHoras();
+  // Limpiar fechas seleccionadas anteriores para forzar recalculo coherente
+  const checkFechas = document.querySelectorAll('input[name="fechasEspecificas[]"]:checked');
+  checkFechas.forEach(c=>c.checked=false);
+  generarCalendario();
     }
 
     // Validación antes de enviar
@@ -410,6 +480,295 @@
         return;
       }
 
+      // Validar horarios
+      const horasPorDia = calcularHorasPorDia();
+      if (horasPorDia <= 0) {
+        e.preventDefault();
+        alert('Debe seleccionar horarios de inicio y fin válidos.');
+        return;
+      }
+
+      // Validar que se hayan seleccionado fechas específicas
+      const fechasEspecificas = document.querySelectorAll('input[name="fechasEspecificas[]"]:checked');
+      if (fechasEspecificas.length === 0 && document.getElementById('calendarioContainer').style.display !== 'none') {
+        e.preventDefault();
+        alert('Debe seleccionar al menos una fecha específica del calendario.');
+        return;
+      }
+
+      // Validar que no se excedan las horas necesarias
+      const diasNecesarios = calcularDiasNecesarios();
+      const diasSeleccionados = fechasEspecificas.length;
+      if (diasNecesarios > 0 && diasSeleccionados !== diasNecesarios) {
+        e.preventDefault();
+        const horasTotales = obtenerHorasTotales();
+        const diferencia = diasNecesarios - diasSeleccionados;
+        const mensaje = diferencia > 0
+          ? `Faltan ${diferencia} día(s) por seleccionar.`
+          : `Hay ${Math.abs(diferencia)} día(s) de más seleccionados.`;
+        alert(`No puede continuar.\n\nHoras del programa: ${horasTotales} horas\nHoras por día: ${horasPorDia} horas\nDías necesarios: ${diasNecesarios} días\nDías seleccionados: ${diasSeleccionados} días\n\n${mensaje}`);
+        return;
+      }
+
+      // Si es oferta cerrada, validar campos de empresa
+      if (document.getElementById('tieneEmpresa').value === 'si') {
+        const campos = {
+          'Empresa Solicitante': document.getElementById('empresaSolicitante').value.trim(),
+          'Tipo de Empresa': document.getElementById('tipoEmpresa').value,
+          'Nombre del Responsable': document.getElementById('nombreResponsable').value.trim(),
+          'Correo Electrónico': document.getElementById('correoResponsable').value.trim(),
+          'NIT de la Empresa': document.getElementById('nitEmpresa').value.trim(),
+          'Carta de Solicitud': document.getElementById('cartaSolicitud').value
+        };
+
+        const faltantes = Object.keys(campos).filter(campo => !campos[campo]);
+        if (faltantes.length > 0) {
+          e.preventDefault();
+          alert('Faltan datos obligatorios:\n- ' + faltantes.join('\n- '));
+          return;
+        }
+      }
+
+      // Agregar información de fechas seleccionadas al formulario
+      const fechasSeleccionadas = obtenerFechasSeleccionadas();
+      if (fechasSeleccionadas.length > 0) {
+        const hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'fechas_calendario';
+        hiddenInput.value = JSON.stringify(fechasSeleccionadas);
+        this.appendChild(hiddenInput);
+      }
+
+      // Agregar información de horarios
+      const hiddenHorarioInicio = document.createElement('input');
+      hiddenHorarioInicio.type = 'hidden';
+      hiddenHorarioInicio.name = 'horario_inicio';
+      hiddenHorarioInicio.value = document.getElementById('horarioInicio').value;
+      this.appendChild(hiddenHorarioInicio);
+
+      const hiddenHorarioFin = document.createElement('input');
+      hiddenHorarioFin.type = 'hidden';
+      hiddenHorarioFin.name = 'horario_fin';
+      hiddenHorarioFin.value = document.getElementById('horarioFin').value;
+      this.appendChild(hiddenHorarioFin);
     });
+
+    // Función para generar el calendario de días específicos
+    function generarCalendario() {
+      const fechaInicio = document.getElementById('fechaInicio').value;
+      const fechaFin = document.getElementById('fechaFinalizacion').value;
+      const diasSeleccionados = Array.from(document.querySelectorAll('input[name="diasSemana[]"]:checked'))
+                                     .map(cb => parseInt(cb.value));
+
+      const container = document.getElementById('calendarioContainer');
+      const calendarioMeses = document.getElementById('calendarioMeses');
+
+      if (!fechaInicio || !fechaFin || diasSeleccionados.length === 0) {
+        container.style.display = 'none';
+        return;
+      }
+
+      const inicio = new Date(fechaInicio);
+      const fin = new Date(fechaFin);
+
+      if (inicio >= fin) {
+        container.style.display = 'none';
+        alert('La fecha de fin debe ser posterior a la fecha de inicio');
+        return;
+      }
+
+      // Verificar si hay horarios seleccionados
+      const horasPorDia = calcularHorasPorDia();
+      if (horasPorDia === 0) {
+        container.style.display = 'none';
+        return;
+      }
+
+      // Limpiar calendario anterior
+      calendarioMeses.innerHTML = '';
+
+      // Generar calendarios por mes
+      const fechaActual = new Date(inicio);
+      fechaActual.setDate(1);
+
+      while (fechaActual <= fin) {
+        calendarioMeses.appendChild(generarMes(fechaActual, inicio, fin, diasSeleccionados));
+        fechaActual.setMonth(fechaActual.getMonth() + 1);
+      }
+
+      container.style.display = 'block';
+      
+      // Actualizar información de horas
+      actualizarInfoHoras();
+    }
+
+    // Función para generar calendario de un mes
+    function generarMes(fecha, fechaInicio, fechaFin, diasSeleccionados) {
+      const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+      const mesDiv = document.createElement('div');
+      mesDiv.className = 'calendar-mes';
+      mesDiv.innerHTML = `<h5>${meses[fecha.getMonth()]} ${fecha.getFullYear()}</h5>`;
+
+      const cabecera = document.createElement('div');
+      cabecera.className = 'calendar-header';
+      ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'].forEach(diaTxt=>{
+        const d=document.createElement('div');
+        d.textContent=diaTxt;
+        cabecera.appendChild(d);
+      });
+      mesDiv.appendChild(cabecera);
+
+      const grid = document.createElement('div');
+      grid.className = 'calendar-grid';
+
+      const primerDia = new Date(fecha.getFullYear(), fecha.getMonth(), 1);
+      const ultimoDia = new Date(fecha.getFullYear(), fecha.getMonth()+1, 0);
+      
+      // Espacios vacíos al inicio
+      for (let i=0; i<primerDia.getDay(); i++){
+        grid.appendChild(document.createElement('div'));
+      }
+
+      // Generar días del mes
+      for (let dia=1; dia<=ultimoDia.getDate(); dia++) {
+        const fechaDia = new Date(fecha.getFullYear(), fecha.getMonth(), dia);
+        const diaSemana = fechaDia.getDay();
+        const enRango = fechaDia >= fechaInicio && fechaDia <= fechaFin;
+        const esSeleccion = diasSeleccionados.includes(diaSemana);
+        const diaDiv = document.createElement('div');
+        diaDiv.className = 'calendar-day';
+        
+        if (enRango && esSeleccion) {
+          diaDiv.classList.add('calendar-day--selectable');
+          const label = document.createElement('label');
+          const checkbox = document.createElement('input');
+          checkbox.type='checkbox';
+          checkbox.name='fechasEspecificas[]';
+          checkbox.value=fechaDia.toISOString().split('T')[0];
+          checkbox.checked=true;
+          
+          // Event listener para validar límite de horas
+          checkbox.addEventListener('change', function() {
+            validarLimiteHoras();
+            actualizarInfoHoras();
+          });
+          
+          label.appendChild(checkbox);
+          label.appendChild(document.createTextNode(dia));
+          diaDiv.appendChild(label);
+        } else {
+          diaDiv.classList.add('calendar-day--disabled');
+          diaDiv.textContent = dia;
+        }
+        grid.appendChild(diaDiv);
+      }
+      mesDiv.appendChild(grid);
+      return mesDiv;
+    }
+
+    // Función para seleccionar/deseleccionar todos los días
+    function seleccionarTodos(seleccionar) {
+      document.querySelectorAll('input[name="fechasEspecificas[]"]').forEach(cb=>{cb.checked=seleccionar;cb.dispatchEvent(new Event('change'));});
+    }
+
+    // Función para obtener días seleccionados (para usar en el envío del formulario)
+    function obtenerFechasSeleccionadas() {
+      return Array.from(document.querySelectorAll('input[name="fechasEspecificas[]"]:checked'))
+                  .map(cb => cb.value);
+    }
+
+    // Función para calcular horas por día basado en horario de inicio y fin
+    function calcularHorasPorDia() {
+      const horaInicio = document.getElementById('horarioInicio').value;
+      const horaFin = document.getElementById('horarioFin').value;
+      
+      if (!horaInicio || !horaFin) return 0;
+
+      const [horaIni, minIni] = horaInicio.split(':').map(Number);
+      const [horaFinNum, minFin] = horaFin.split(':').map(Number);
+      
+      const inicioMinutos = horaIni * 60 + minIni;
+      const finMinutos = horaFinNum * 60 + minFin;
+      
+      if (finMinutos <= inicioMinutos) {
+        return 0;
+      }
+      
+      return (finMinutos - inicioMinutos) / 60; // Retorna horas decimales
+    }
+
+    // Función para obtener horas totales del programa
+    function obtenerHorasTotales() {
+  const campo = document.getElementById('horasPrograma');
+  if (!campo) return 0;
+  const raw = campo.value.trim();
+  if (!raw) return 0;
+  // Soporta formatos como "40", "40 horas", "40h".
+  const match = raw.match(/(\d+)/);
+  return match ? parseInt(match[1], 10) : 0;
+    }
+
+    // Función para calcular días necesarios
+    function calcularDiasNecesarios() {
+      const horasTotales = obtenerHorasTotales();
+      const horasPorDia = calcularHorasPorDia();
+      
+      if (horasPorDia === 0 || horasTotales === 0) return 0;
+      
+      return Math.ceil(horasTotales / horasPorDia);
+    }
+
+    // Función para actualizar información de horas (con autoajuste si excede)
+    function actualizarInfoHoras() {
+      const horasTotales = obtenerHorasTotales();
+      const horasPorDia = calcularHorasPorDia();
+      const diasNecesarios = calcularDiasNecesarios();
+      let checkboxesSeleccionados = Array.from(document.querySelectorAll('input[name="fechasEspecificas[]"]:checked'));
+      let diasSeleccionados = checkboxesSeleccionados.length;
+
+      // Autoajuste: si hay más días que los necesarios y se conocen horas
+      if (horasTotales > 0 && horasPorDia > 0 && diasNecesarios > 0 && diasSeleccionados > diasNecesarios) {
+        const exceso = diasSeleccionados - diasNecesarios;
+        // Desmarcar los últimos (fecha más reciente) para mantener las primeras fechas
+        checkboxesSeleccionados
+          .sort((a,b)=> b.value.localeCompare(a.value))
+          .slice(0, exceso)
+          .forEach(cb => { cb.checked = false; });
+        // Recalcular tras el ajuste
+        checkboxesSeleccionados = Array.from(document.querySelectorAll('input[name="fechasEspecificas[]"]:checked'));
+        diasSeleccionados = checkboxesSeleccionados.length;
+      }
+
+      document.getElementById('horasTotales').textContent = horasTotales + ' horas';
+      document.getElementById('horasPorDia').textContent = horasPorDia + ' horas';
+      document.getElementById('diasNecesarios').textContent = diasNecesarios + ' días';
+      document.getElementById('diasMaximos').textContent = diasSeleccionados + ' días seleccionados';
+
+      const infoDiv = document.getElementById('infoHoras');
+      infoDiv.classList.remove('estado-correcto', 'estado-exceso', 'estado-faltante');
+
+      if (diasSeleccionados === 0 || diasNecesarios === 0 || horasTotales === 0 || horasPorDia === 0) {
+        infoDiv.classList.add('estado-faltante');
+        return;
+      }
+
+      if (diasSeleccionados === diasNecesarios) {
+        infoDiv.classList.add('estado-correcto');
+      } else if (diasSeleccionados < diasNecesarios) {
+        infoDiv.classList.add('estado-faltante');
+      }
+    }
+
+    // Función para validar límite de horas
+    function validarLimiteHoras() {
+      const diasNecesarios = calcularDiasNecesarios();
+      const diasSeleccionados = document.querySelectorAll('input[name="fechasEspecificas[]"]:checked').length;
+      
+      if (diasSeleccionados > diasNecesarios) {
+  // Silenciado: el autoajuste en actualizarInfoHoras gestionará esto.
+      }
+      
+      return diasSeleccionados <= diasNecesarios;
+    }
   </script>
 {% endblock %}
