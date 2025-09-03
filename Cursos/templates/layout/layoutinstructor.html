@@ -42,13 +42,8 @@
               </li>
             <!-- Opción Estado de Cursos -->
             <li class="elemento-menu">
-              <a href="#" class="enlace-menu">Consultar Solicitudes</a>
+              <a href="{% url "consultas_instructor" %}" class="enlace-menu">Consultar Solicitudes</a>
             </li>
-
-            {% comment %} <!-- Opcion estado de fichas -->
-            <li class="elemento-menu">
-              <a href="{% url 'consultarficha' %}" class="enlace-menu">Consultar Fichas</a>
-            </li> {% endcomment %}
 
             <!-- Botón Cerrar Sesión -->
             <li class="elemento-menu">

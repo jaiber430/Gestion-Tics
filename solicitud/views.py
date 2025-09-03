@@ -12,6 +12,7 @@ from Cursos.models import (
     Programaespecial, Programaformacion, Solicitud, Tipoempresa, Tiposolicitud, Usuario
 )
 
+
 def _get_common_context():
     """
     Devuelve un diccionario con todos los objetos de DB necesarios para el formulario.
@@ -81,6 +82,7 @@ def _crear_solicitud_base(request, tipo_solicitud_id, template_name, mensaje_exi
     """
     Función base para crear solicitudes (regular o campesina)
     """
+
     user_id = request.session.get('user_id')
     if not user_id:
         messages.error(request, "Debes iniciar sesión para acceder.")
@@ -201,7 +203,7 @@ def _crear_solicitud_base(request, tipo_solicitud_id, template_name, mensaje_exi
 
     return render(request, template_name, context)
 
-
+# Si la solicitud es regular
 def solicitud_regular(request):
     """
     Crear la solicitud regular
@@ -213,7 +215,7 @@ def solicitud_regular(request):
         mensaje_exito='Solicitud de ficha regular creada exitosamente.'
     )
 
-
+# Si la solicitud es campesina
 def solicitud_campesina(request):
     """
     Crear la solicitud campesina (tipo 2, modalidad 1 - presencial)
@@ -224,3 +226,9 @@ def solicitud_campesina(request):
         template_name='forms/crearsolicitudcampesina.html',
         mensaje_exito='Solicitud de ficha campesina creada exitosamente.'
     )
+
+# Formulario para los aspirantes 
+def formulario_aspirantes(request):
+    return render(request, 'forms/formulario_aspirantes.html',{
+        
+    })

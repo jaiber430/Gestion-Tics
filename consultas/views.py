@@ -1,0 +1,45 @@
+from django.shortcuts import render
+from Cursos.models import Usuario
+# Sirve para Generar tokens, contraseñas y urls
+import secrets
+# Convertir todo a cadena
+import string
+
+# Create your views here.
+
+def consultas_instructor(request):
+
+    # Codigo encargado de generar numeros y letras aleatorios con las importaciones
+    caracteres = string.ascii_letters + string.digits
+    # choice = Elegir elemento al azar 
+    # Join = Concatencaión de caracteres
+    codigo = ''.join(secrets.choice(caracteres) for _ in range(5))
+
+    user_id = request.session.get('user_id')
+
+    # Obtener el rol por medio del id del usuario que ingreso
+    usuario = Usuario.objects.select_related('rol').get(idusuario=user_id)
+
+    # Crear una variable para almacenar el rol
+    id_rol = usuario.rol.idrol
+
+    # Definir layout según rol
+    if id_rol == 1:
+        layout = 'layout/layoutinstructor.html'
+        rol_name = 'Instructor'
+    elif id_rol == 2:
+        layout = 'layout/layoutcoordinador.html'
+        rol_name = 'Coordinador'
+    elif id_rol == 3:
+        layout = 'layout/layoutfuncionario.html'
+        rol_name = 'Funcionario'
+    elif id_rol == 4:
+        layout = 'layout/layout_admin.html'
+        rol_name = "Administrador"
+    
+    return render(request, "consultas/consultas_instructor.html", {
+            "layout": layout,
+            "rol": id_rol,
+            "user": rol_name,
+            'codigo': codigo
+        })

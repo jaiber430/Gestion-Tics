@@ -1,0 +1,176 @@
+{% extends layout %}
+
+{% block content %}
+  <!-- Sección principal - Consultar Fichas -->
+  <main class="contenido-principal">
+    <!-- Título de la sección -->
+    <div class="titulo-seccion">
+      <h2 class="titulo-pagina">Consultar solicitudes {{user}} {{user_name}}</h2>
+      <p class="subtitulo-pagina">Aquí puede consultar el estado de las fichas solicitadas y descargar los documentos correspondientes</p>
+    </div>
+
+    <!-- Contenedor de la tabla de fichas -->
+    <div class="contenedor-tabla-fichas">
+      <!-- Tabla de fichas solicitadas -->
+      <table class="tabla-fichas">
+        <thead>
+          <tr>
+            <th>Nombre del Programa</th>
+            <th>Estado</th>
+            <th>Ficha de Caracterización</th>
+            <th>Documentos de Aprendices</th>
+            <th>Fecha de Creación</th>
+            <th>Compartir</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Ficha 1 -->
+          <tr>
+            <td>
+              <a href="infocurso-instructor.html" class="enlace-programa">Desarrollo de Software</a>
+            </td>
+            <td>
+              <span class="estado-aprobado">Aprobado</span>
+            </td>
+            <td>
+              <a href="#" class="boton-descargar">Descargar Ficha</a>
+            </td>
+            <td>
+              <a href="#" class="boton-descargar">Descargar PDFs</a>
+            </td>
+            <td>15/07/2025</td>
+            <td>
+              <button class="boton-compartir" data-programa="Desarrollo de Software">Compartir</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <div id="modal-compartir" class="modal-compartir">
+    <div class="contenido-modal">
+      <div class="encabezado-modal">
+        <h3>Compartir Ficha</h3>
+        <button class="boton-cerrar-modal">&times;</button>
+      </div>
+
+      <div class="cuerpo-modal">
+        <p class="programa-seleccionado">
+          Programa: <span id="nombre-programa"></span>
+        </p>
+
+        <!-- Opciones de compartir -->
+        <div class="opciones-compartir">
+          <!-- Opción 1: Compartir con link -->
+          <div class="opcion-compartir">
+            <h4>Compartir con enlace</h4>
+            <div class="grupo-link">
+              <a href="{% url 'formularioaspirantes' %}">https://preinscripcion/{{codigo}}</a>
+              {% comment %} <button class="boton-copiar">Copiar</button> {% endcomment %}
+            </div>
+          </div>
+
+          <div class="separador-modal">
+            <span>O</span>
+          </div>
+
+          <!-- Opción 2: Buscar aprendiz específico -->
+          <div class="opcion-compartir">
+            <h4>Compartir con aprendiz específico</h4>
+            <p class="descripcion-opcion">Busca y selecciona un aprendiz para compartir directamente</p>
+
+            <div class="grupo-busqueda">
+              <label for="buscar-aprendiz">Buscar aprendiz:</label>
+              <input type="text" id="buscar-aprendiz" class="input-busqueda" placeholder="Escribe el nombre o documento del aprendiz..." />
+
+              <!-- Lista de resultados (simulada) -->
+              <div class="resultados-busqueda">
+                <div class="item-aprendiz">
+                  <div class="info-aprendiz">
+                    <span class="nombre-aprendiz">Juan Carlos Pérez</span>
+                    <span class="documento-aprendiz">C.C. 1.234.567.890</span>
+                  </div>
+                  <button class="boton-seleccionar">Seleccionar</button>
+                </div>
+
+                <div class="item-aprendiz">
+                  <div class="info-aprendiz">
+                    <span class="nombre-aprendiz">María Fernanda López</span>
+                    <span class="documento-aprendiz">C.C. 9.876.543.210</span>
+                  </div>
+                  <button class="boton-seleccionar">Seleccionar</button>
+                </div>
+
+                <div class="item-aprendiz">
+                  <div class="info-aprendiz">
+                    <span class="nombre-aprendiz">Carlos Eduardo Martínez</span>
+                    <span class="documento-aprendiz">C.C. 5.555.555.555</span>
+                  </div>
+                  <button class="boton-seleccionar">Seleccionar</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pie-modal">
+        <button class="boton-cancelar">Cancelar</button>
+        <button class="boton-compartir-modal">Compartir</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Obtener elementos del DOM
+    const modal = document.getElementById('modal-compartir')
+    const botonesCompartir = document.querySelectorAll('.boton-compartir')
+    const botonCerrar = document.querySelector('.boton-cerrar-modal')
+    const botonCancelar = document.querySelector('.boton-cancelar')
+    const nombrePrograma = document.getElementById('nombre-programa')
+    
+    // Agregar event listeners a todos los botones de compartir
+    botonesCompartir.forEach((boton) => {
+      boton.addEventListener('click', function () {
+        const programa = this.getAttribute('data-programa')
+        nombrePrograma.textContent = programa
+        modal.style.display = 'block'
+      })
+    })
+    
+    // Cerrar modal con el botón X
+    botonCerrar.addEventListener('click', function () {
+      modal.style.display = 'none'
+    })
+    
+    // Cerrar modal con el botón Cancelar
+    botonCancelar.addEventListener('click', function () {
+      modal.style.display = 'none'
+    })
+    
+    // Cerrar modal al hacer click fuera del contenido
+    window.addEventListener('click', function (event) {
+      if (event.target === modal) {
+        modal.style.display = 'none'
+      }
+    })
+    
+    // Funcionalidad de los botones seleccionar
+    const botonesSeleccionar = document.querySelectorAll('.boton-seleccionar')
+    
+    botonesSeleccionar.forEach((boton) => {
+      boton.addEventListener('click', function () {
+        // Remover selección previa
+        botonesSeleccionar.forEach((btn) => {
+          btn.textContent = 'Seleccionar'
+          btn.style.backgroundColor = ''
+        })
+    
+        // Marcar como seleccionado
+        this.textContent = 'Seleccionado'
+        this.style.backgroundColor = '#2e7d32'
+      })
+    })  
+  </script>
+{% endblock %}

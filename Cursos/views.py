@@ -60,4 +60,3 @@ def login_view(request):
             return render(request, "inicio/index.html")
 
     return render(request, "inicio/index.html")
-
