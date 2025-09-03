@@ -91,7 +91,7 @@
       </div>
 
       <!-- Sección Empresa (solo si es cerrada) -->
-      <div class="seccion-formulario" id="seccionEmpresa" style="display: none;">
+      <div class="seccion-formulario" id="seccionEmpresa">
         <h3 class="titulo-seccion-form">Empresa y Responsable</h3>
         <div class="campo-entrada">
           <label for="empresaSolicitante" class="etiqueta-campo">Empresa Solicitante*:</label>
@@ -302,13 +302,13 @@
 
       // Eventos
       document.getElementById('departamentoFormacion').addEventListener('change', filtrarMunicipios);
-      document.getElementById('tieneEmpresa').addEventListener('change', toggleEmpresa);
+      //document.getElementById('tieneEmpresa').addEventListener('change', toggleEmpresa);
       document.getElementById('modalArea').addEventListener('change', filtrarProgramasModal);
       document.getElementById('modalHoras').addEventListener('change', filtrarProgramasModal);
 
       // Inicializar
       llenarHorasModal();
-      toggleEmpresa();
+      //toggleEmpresa();
     });
 
     // Filtrar municipios por departamento
@@ -330,7 +330,7 @@
       });
     }
 
-    // Mostrar u ocultar sección de empresa
+    {% comment %} // Mostrar u ocultar sección de empresa
     function toggleEmpresa() {
       const valor = document.getElementById('tieneEmpresa').value;
       const seccion = document.getElementById('seccionEmpresa');
@@ -348,7 +348,7 @@
           }
         }
       });
-    }
+    } {% endcomment %}
 
     // Abrir modal
     function abrirModal() {
@@ -439,6 +439,7 @@
       }
 
       // Si es oferta cerrada, validar campos de empresa
+      /*
       if (document.getElementById('tieneEmpresa').value === 'si') {
         const campos = {
           'Empresa Solicitante': document.getElementById('empresaSolicitante').value.trim(),
@@ -455,6 +456,7 @@
           alert('Faltan datos obligatorios:\n- ' + faltantes.join('\n- '));
         }
       }
+      */
     });
   </script>
 {% endblock %}

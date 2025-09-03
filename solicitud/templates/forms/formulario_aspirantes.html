@@ -1,0 +1,70 @@
+{% extends 'layout/layout_aspirante.html' %}
+
+{% block content %}
+  <main class="contenido-principal">
+    <!-- Formulario Principal -->
+    <form class="formulario-ficha" action="#" method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+
+      <!-- Sección 1: Información del Programa -->
+      <div class="seccion-formulario">
+        <h3 class="titulo-seccion-form">Datos personales</h3>
+
+        <div class="campo-entrada">
+          <label for="nombres" class="etiqueta-campo">Nombres*</label>
+          <input type="text" id="nombres" name="nombres" class="entrada-texto" placeholder="Escriba sus nombres o nombre" required />
+        </div>
+
+        <div class="campo-entrada">
+          <label for="apellidos" class="etiqueta-campo">Apellidos*</label>
+          <input type="text" id="apellidos" name="apellidos" class="entrada-texto" placeholder="Escriba sus apellidos o apellidos" required />
+        </div>
+
+        <div class="campo-entrada">
+          <label for="tipo_caracterizacion" class="etiqueta-campo">Tipos caracterización *</label>
+          <select id="tipo_caracterizacion" name="tipo_caracterizacion" class="entrada-select" required>
+            <option value="">Seleccione una opción</option>
+            {% comment %}Codigo que traiga eso{% endcomment %}
+            {% for caracterizacion  in caracterizaciones %}
+            <option value="{{caracterizacion.idcaracterizacion}}">{{caracterizacion.caracterizacion}}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="campo-entrada">
+          <label for="telefono" class="etiqueta-campo">Telefono*:</label>
+          <input type="number" id="telefono" name="telefono" class="entrada-texto" placeholder="Numero de telefono" required />
+        </div>
+
+        <div class="campo-entrada">
+          <label for="pdf_documento" class="etiqueta-campo">Documento (PDF)*:</label>
+          <input type="file" id="pdf_documento" name="pdf_documento" required />
+        </div>
+
+        <div class="campo-entrada">
+          <label for="tipo_documento" class="etiqueta-campo">Tipos documento *</label>
+          <select id="tipo_documento" name="tipo_documento" class="entrada-select" required>
+            <option value="">Seleccione una opción</option>
+            {% for tipo_identificacion in tipos_identificacion  %}
+            <option value="{{tipo_identificacion.idtipoidentificacion}}">{{tipo_identificacion.tipoidentificacion}}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="campo-entrada">
+          <label for="numero_identificacion" class="etiqueta-campo">Numero identificación*:</label>
+          <input type="number" id="numero_identificacion" name="numero_identificacion" class="entrada-texto" placeholder="Numero de identificación" required />
+        </div>
+
+        <div class="campo-entrada">
+          <label for="correo" class="etiqueta-campo">Correo*</label>
+          <input type="text" id="correo" name="correo" class="entrada-texto" placeholder="Escriba su correo" required />
+        </div>
+      </div>
+      <div class="contenedor-botones-formulario">
+        <a href="#" class="boton-cancelar">Cancelar</a>
+        <button type="submit" class="boton-enviar">Enviar Solicitud</button>
+      </div>
+    </form>
+  </main>
+{% endblock %}
