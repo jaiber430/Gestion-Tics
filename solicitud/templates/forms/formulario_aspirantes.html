@@ -17,7 +17,7 @@
       {% endfor %}
     {% endif %}
     <!-- Formulario Principal -->
-    <form class="formulario-ficha" action="{% url 'Registroaspirantes' %}" method="post" enctype="multipart/form-data">
+    <form class="formulario-ficha" action="{% url 'Registroaspirantes'  %}" method="post" enctype="multipart/form-data">
       {% csrf_token %}
 
       <!-- Sección 1: Información del Programa -->
@@ -74,7 +74,7 @@
           <label for="correo" class="etiqueta-campo">Correo*</label>
           <input type="text" id="correo" name="correo" class="entrada-texto" placeholder="Escriba su correo" required />
         </div>
-          {{solicitud.idsolicitud}}
+         {{solicitud.idsolicitud}}
         <input type="hidden" name="idsolicitud" value="{{solicitud.idsolicitud}}">
       </div>
       <div class="contenedor-botones-formulario">

@@ -307,16 +307,17 @@ def registro_aspirante(request):
             )
 
             messages.success(request, 'Te has registrado exitosamente')
-            return redirect('formularioaspirantes')
+            return redirect('formularioaspirantes', idsolicitud=solicitud_inscripcion)
 
         except Exception as e:
-            print(e)
             messages.error(request, 'Error al registrarte')
+            return redirect('formularioaspirantes', idsolicitud=request.POST.get('idsolicitud'))
 
     # Si no es POST, o si hay error, se vuelve a renderizar el formulario con los datos
     caracterizacion = Caracterizacion.objects.all()
     tipo_documento = Tipoidentificacion.objects.all()
-    solicitud = Solicitud.objects.all()
+    # solicitud = get_object_or_404(Solicitud, idsolicitud=idsolicitud)
+    # solicitud = Solicitud.objects.all()
 
     return render(request, 'forms/formulario_aspirantes.html', {
         'tipos_identificacion': tipo_documento,
