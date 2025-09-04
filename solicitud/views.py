@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 # Se usa para obtener la fecha y horas del país
 from django.utils import timezone
@@ -8,10 +8,11 @@ from django.db import transaction
 from datetime import datetime
 import json
 # Importar datos de los modulos requeridos
-from Cursos.models import (
-    Ambiente, Area, Departamentos, Empresa, Horario, Modalidad, Municipios,
-    Programaespecial, Programaformacion, Solicitud, Tipoempresa, Tiposolicitud, Usuario
-)
+from Cursos.models import (Ambiente, Area, Aspirantes, Caracterizacion, Departamentos,
+                            Empresa, Horario, Modalidad, Municipios,Programaespecial, 
+                            Programaformacion, Solicitud, Tipoempresa, Tipoidentificacion, 
+                            Tiposolicitud, Usuario)
+
 
 
 def _get_common_context():
@@ -235,7 +236,90 @@ def solicitud_campesina(request):
     )
 
 # Formulario para los aspirantes 
-def formulario_aspirantes(request):
-    return render(request, 'forms/formulario_aspirantes.html',{
-        
+def formulario_aspirantes(request, idsolicitud):
+    # Obtener la solicitud específica o lanzar 404 si no existe
+    solicitud = get_object_or_404(Solicitud, idsolicitud=idsolicitud)
+
+    caracterizacion = Caracterizacion.objects.all()
+    tipo_documento = Tipoidentificacion.objects.all()
+
+    return render(request, 'forms/formulario_aspirantes.html', {
+        'tipos_identificacion': tipo_documento,
+        'caracterizaciones': caracterizacion,
+        'solicitud': solicitud,  # Pasas la solicitud al template
+    })
+
+
+def registro_aspirante(request):
+    if request.method == "POST":
+        try:
+            nombres = request.POST.get('nombres')
+            apellidos = request.POST.get('apellidos')
+            caracterizacion_id = request.POST.get('tipo_caracterizacion')
+            telefono = request.POST.get('telefono')
+            pdf = request.FILES.get('pdf_documento')
+            tipo_documento_id = request.POST.get('tipo_documento')
+            identificacion = request.POST.get('numero_identificacion')
+            correo = request.POST.get('correo')
+
+            # Obtener la fecha actual automáticamente
+            fecha_registro = datetime.now()
+            solicitud_inscripcion = request.POST.get('idsolicitud') 
+
+            """
+            Consulta para verificar que no se vuelva a inscribir
+            """
+            verificacion = Aspirantes.objects.all()
+
+            for verificacion_dato in verificacion:
+                if (verificacion_dato.telefono == telefono or
+                    verificacion_dato.numeroidentificacion == identificacion or 
+                    verificacion_dato.correo == correo):
+                    '''
+                    ==========================================================================================
+                    Si alguno de estos datos existe en la tabla de aspirantes le muestra un error al aspirante
+                    ==========================================================================================
+                    '''
+                    messages.error(request, 'Las credenciales ya han sido registradas')
+                    return redirect('formularioaspirantes')
+
+            '''
+            ===================================================================================================
+            Si no encuentra coincidencias, obtiene los objetos relacionados y guarda el nuevo aspirante
+            ===================================================================================================
+            '''
+            # Cuando son datos de foreing key se tiene que hacer una consulta que relcione los datos
+            id_tipo_caracterizacion = Caracterizacion.objects.get(idcaracterizacion=caracterizacion_id)
+            id_tipo_documento = Tipoidentificacion.objects.get(idtipoidentificacion=tipo_documento_id)
+            id_solicitud_preinscripcion = Solicitud.objects.get(idsolicitud=solicitud_inscripcion)
+
+            Aspirantes.objects.create(
+                nombre=nombres,
+                apellido=apellidos,
+                idcaracterizacion=id_tipo_caracterizacion,
+                telefono=telefono,
+                pdf=pdf,
+                tipoidentificacion=id_tipo_documento,
+                numeroidentificacion=identificacion,
+                correo=correo,
+                fecha=fecha_registro,
+                solicitudinscripcion = id_solicitud_preinscripcion,
+            )
+
+            messages.success(request, 'Te has registrado exitosamente')
+            return redirect('formularioaspirantes')
+
+        except Exception as e:
+            print(e)
+            messages.error(request, 'Error al registrarte')
+
+    # Si no es POST, o si hay error, se vuelve a renderizar el formulario con los datos
+    caracterizacion = Caracterizacion.objects.all()
+    tipo_documento = Tipoidentificacion.objects.all()
+    solicitud = Solicitud.objects.all()
+
+    return render(request, 'forms/formulario_aspirantes.html', {
+        'tipos_identificacion': tipo_documento,
+        'caracterizaciones': caracterizacion,
+        'solicitud': solicitud,  # Pasas la solicitud al template
     })
