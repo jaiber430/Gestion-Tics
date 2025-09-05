@@ -1,0 +1,306 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ficha de Caracterización - SENA</title>
+    <link rel="stylesheet" href="{% static 'css/ficha-caracterizacion.css' %}">
+</head>
+<body>
+    <div class="ficha-container">
+        <!-- Encabezado -->
+        <header class="header">
+            <div class="header-logo">
+                <img src="data:image/png;base64,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" 
+                     alt="Logo SENA" class="logo">
+            </div>
+            <div class="header-title">
+                <h1>SERVICIO NACIONAL DE APRENDIZAJE</h1>
+                <h2>SISTEMA INTEGRADO DE GESTIÓN</h2>
+            </div>
+            <div class="header-radicado">
+                <p><strong>La presente formación se programa en atención a la solicitud con Radicado</strong></p>
+                <p><strong>No {{ solicitud.codigosolicitud|default:'_____________' }} Fecha de asignación desde Coordinación Académica {{ solicitud.fechasolicitud|date:'d/m/Y'|default:'___/___/____' }}</strong></p>
+            </div>
+        </header>
+
+        <!-- Tipo de Formación -->
+        <section class="tipo-formacion">
+            <div class="formacion-item">
+                <span class="tipo">COMPLEMENTARIA</span>
+                <div class="checkbox" style="background-color: #000; color: white;">✓</div>
+            </div>
+            <div class="formacion-item">
+                <span class="tipo">TITULADA</span>
+                <div class="checkbox"></div>
+            </div>
+        </section>
+
+        <!-- Información del Programa -->
+        <section class="programa-info">
+            <div class="campo">
+                <label>Código programa de formación*</label>
+                <input type="text" class="input-campo" value="{{ programa.codigoprograma|default:'' }}" readonly>
+            </div>
+            <div class="campo">
+                <label>Nombre del Programa*</label>
+                <input type="text" class="input-campo" value="{{ programa.nombreprograma|default:'' }}" readonly>
+            </div>
+            <div class="campo">
+                <label>Versión del programa*</label>
+                <input type="text" class="input-campo" value="{{ programa.verision|default:'' }}" readonly>
+            </div>
+            <div class="campo">
+                <label>Duración Máxima (Horas)*</label>
+                <input type="text" class="input-campo" value="{{ programa.horas|default:'' }}" readonly>
+            </div>
+            <div class="campo">
+                <label>Fecha de Inicio*</label>
+                <input type="text" class="input-campo" value="{{ horario.fechainicio|default:'' }}" readonly>
+            </div>
+            <div class="campo">
+                <label>Fecha prevista de terminación*</label>
+                <input type="text" class="input-campo" value="{{ horario.fechafin|default:'' }}" readonly>
+            </div>
+            <div class="campo">
+                <label>Cupo*</label>
+                <input type="text" class="input-campo" value="{{ solicitud.cupo|default:'' }}" readonly>
+            </div>
+        </section>
+
+        <!-- Modalidad del Programa -->
+        <section class="modalidad-programa">
+            <label>Modalidad del programa*</label>
+            <div class="modalidades">
+                <div class="modalidad-item">
+                    <div class="checkbox" {% if modalidad.modalidad == 'Presencial' %}style="background-color: #000; color: white;"{% endif %}>{% if modalidad.modalidad == 'Presencial' %}✓{% endif %}</div>
+                    <span>PRESENCIAL</span>
+                </div>
+                <div class="modalidad-item">
+                    <div class="checkbox" {% if modalidad.modalidad == 'Desescolarizada' %}style="background-color: #000; color: white;"{% endif %}>{% if modalidad.modalidad == 'Desescolarizada' %}✓{% endif %}</div>
+                    <span>DESESCOLARIZADA</span>
+                </div>
+                <div class="modalidad-item">
+                    <div class="checkbox" {% if modalidad.modalidad == 'Virtual' %}style="background-color: #000; color: white;"{% endif %}>{% if modalidad.modalidad == 'Virtual' %}✓{% endif %}</div>
+                    <span>VIRTUAL</span>
+                </div>
+                <div class="modalidad-item">
+                    <div class="checkbox" {% if modalidad.modalidad == 'Combinada' %}style="background-color: #000; color: white;"{% endif %}>{% if modalidad.modalidad == 'Combinada' %}✓{% endif %}</div>
+                    <span>COMBINADA</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Ubicación -->
+        <section class="ubicacion">
+            <div class="campo">
+                <label>Departamento desarrollo de formación*</label>
+                <input type="text" class="input-campo" value="{{ departamento.departamentos|default:'' }}" readonly>
+            </div>
+            <div class="campo">
+                <label>Municipio desarrollo formación*</label>
+                <input type="text" class="input-campo" value="{{ municipio.municipio|default:'' }}" readonly>
+            </div>
+            <div class="campo">
+                <label>Dirección donde se va a realizar la formación*</label>
+                <input type="text" class="input-campo" value="{{ solicitud.direccion|default:'' }}" readonly>
+            </div>
+        </section>
+
+        <!-- Responsable -->
+        <section class="responsable">
+            <div class="campo">
+                <label>Nombre responsable*</label>
+                <input type="text" class="input-campo" value="{{ usuario.nombre }} {{ usuario.apellido }}" readonly>
+            </div>
+            <div class="campo">
+                <label>CC #</label>
+                <input type="text" class="input-campo" value="{{ usuario.numeroidentificacion|default:'' }}" readonly>
+            </div>
+            <div class="campo">
+                <label>Correo electrónico*</label>
+                <input type="text" class="input-campo" value="{{ usuario.correo|default:'' }}" readonly>
+            </div>
+            <div class="campo">
+                <label>Empresa solicitante</label>
+                <input type="text" class="input-campo" value="{{ empresa.nombreempresa|default:'' }}" readonly>
+            </div>
+            <div class="campo">
+                <label>Subsector económico*</label>
+                <input type="text" class="input-campo" value="{{ solicitud.subsectoreconomico|default:'' }}" readonly>
+            </div>
+        </section>
+
+        <!-- Programa Especial -->
+        <section class="programa-especial">
+            <label>Programa Especial*</label>
+            <div class="programas-lista">
+                <div class="programa-item">
+                    <div class="checkbox" {% if programa_especial.programaespecial == 'SENA EMPREDE RURAL' %}style="background-color: #000; color: white;"{% endif %}>{% if programa_especial.programaespecial == 'SENA EMPREDE RURAL' %}✓{% endif %}</div>
+                    <span>SENA EMPREDE RURAL</span>
+                </div>
+                <div class="programa-item">
+                    <div class="checkbox" {% if programa_especial.programaespecial == 'SENA EMPRENDE RURAL- POST CONFLICTO (ETCR)' %}style="background-color: #000; color: white;"{% endif %}>{% if programa_especial.programaespecial == 'SENA EMPRENDE RURAL- POST CONFLICTO (ETCR)' %}✓{% endif %}</div>
+                    <span>SENA EMPRENDE RURAL- POST CONFLICTO (ETCR)</span>
+                </div>
+                <div class="programa-item">
+                    <div class="checkbox" {% if programa_especial.programaespecial == 'AULAS ABIERTAS' %}style="background-color: #000; color: white;"{% endif %}>{% if programa_especial.programaespecial == 'AULAS ABIERTAS' %}✓{% endif %}</div>
+                    <span>AULAS ABIERTAS</span>
+                </div>
+                <div class="programa-item">
+                    <div class="checkbox" {% if programa_especial.programaespecial == 'PROGRAMA DE EMPRENDIMIENTO' %}style="background-color: #000; color: white;"{% endif %}>{% if programa_especial.programaespecial == 'PROGRAMA DE EMPRENDIMIENTO' %}✓{% endif %}</div>
+                    <span>PROGRAMA DE EMPRENDIMIENTO</span>
+                </div>
+                <div class="programa-item">
+                    <div class="checkbox" {% if programa_especial.programaespecial == 'CATEDRA VIRTUAL DE PRODUCTIVIDAD' %}style="background-color: #000; color: white;"{% endif %}>{% if programa_especial.programaespecial == 'CATEDRA VIRTUAL DE PRODUCTIVIDAD' %}✓{% endif %}</div>
+                    <span>CATEDRA VIRTUAL DE PRODUCTIVIDAD</span>
+                </div>
+                <div class="programa-item">
+                    <div class="checkbox" {% if programa_especial.programaespecial == 'PROGRAMA DE BILINGÜISMO' %}style="background-color: #000; color: white;"{% endif %}>{% if programa_especial.programaespecial == 'PROGRAMA DE BILINGÜISMO' %}✓{% endif %}</div>
+                    <span>PROGRAMA DE BILINGÜISMO</span>
+                </div>
+                <div class="programa-item">
+                    <div class="checkbox" {% if programa_especial.programaespecial == 'JÓVENES RURALES SIN ALIANZAS' %}style="background-color: #000; color: white;"{% endif %}>{% if programa_especial.programaespecial == 'JÓVENES RURALES SIN ALIANZAS' %}✓{% endif %}</div>
+                    <span>JÓVENES RURALES SIN ALIANZAS</span>
+                </div>
+                <div class="programa-item">
+                    <div class="checkbox" {% if programa_especial.programaespecial == 'CAPACIDAD DE GESTIÓN DE EXPORTACIONES' %}style="background-color: #000; color: white;"{% endif %}>{% if programa_especial.programaespecial == 'CAPACIDAD DE GESTIÓN DE EXPORTACIONES' %}✓{% endif %}</div>
+                    <span>CAPACIDAD DE GESTIÓN DE EXPORTACIONES</span>
+                </div>
+                <div class="programa-item">
+                    <div class="checkbox" {% if programa_especial.programaespecial == 'LEOS – LABORATORIOS EXPERIMENTALES' %}style="background-color: #000; color: white;"{% endif %}>{% if programa_especial.programaespecial == 'LEOS – LABORATORIOS EXPERIMENTALES' %}✓{% endif %}</div>
+                    <span>LEOS – LABORATORIOS EXPERIMENTALES</span>
+                </div>
+                <div class="programa-item">
+                    <div class="checkbox" {% if programa_especial.programaespecial == 'AULA MÓVIL' %}style="background-color: #000; color: white;"{% endif %}>{% if programa_especial.programaespecial == 'AULA MÓVIL' %}✓{% endif %}</div>
+                    <span>AULA MÓVIL</span>
+                </div>
+                <div class="programa-item">
+                    <div class="checkbox" {% if programa_especial.programaespecial == 'AMBIENTES VIRTUALES DE APRENDIZAJE' %}style="background-color: #000; color: white;"{% endif %}>{% if programa_especial.programaespecial == 'AMBIENTES VIRTUALES DE APRENDIZAJE' %}✓{% endif %}</div>
+                    <span>AMBIENTES VIRTUALES DE APRENDIZAJE</span>
+                </div>
+                <div class="programa-item">
+                    <div class="checkbox" {% if programa_especial.programaespecial == 'CATEDRA VIRTUAL DE PENSAMIENTO EMPRESARIAL' %}style="background-color: #000; color: white;"{% endif %}>{% if programa_especial.programaespecial == 'CATEDRA VIRTUAL DE PENSAMIENTO EMPRESARIAL' %}✓{% endif %}</div>
+                    <span>CATEDRA VIRTUAL DE PENSAMIENTO EMPRESARIAL</span>
+                </div>
+                <div class="programa-item">
+                    <div class="checkbox" {% if programa_especial.programaespecial == 'PROGRAMA JÓVENES EN ACCIÓN' %}style="background-color: #000; color: white;"{% endif %}>{% if programa_especial.programaespecial == 'PROGRAMA JÓVENES EN ACCIÓN' %}✓{% endif %}</div>
+                    <span>PROGRAMA JÓVENES EN ACCIÓN</span>
+                </div>
+                <div class="programa-item">
+                    <div class="checkbox" {% if programa_especial.programaespecial == 'ALIANZAS ESTRATÉGICAS' %}style="background-color: #000; color: white;"{% endif %}>{% if programa_especial.programaespecial == 'ALIANZAS ESTRATÉGICAS' %}✓{% endif %}</div>
+                    <span>ALIANZAS ESTRATÉGICAS</span>
+                </div>
+                <div class="programa-item">
+                    <div class="checkbox" {% if programa_especial.programaespecial == 'ALTA GERENCIA' %}style="background-color: #000; color: white;"{% endif %}>{% if programa_especial.programaespecial == 'ALTA GERENCIA' %}✓{% endif %}</div>
+                    <span>ALTA GERENCIA</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Convenio -->
+        <section class="convenio">
+            <div class="campo">
+                <label>Convenio</label>
+                <input type="text" class="input-campo" value="{{ solicitud.convenio|default:'' }}" readonly>
+            </div>
+        </section>
+
+        <!-- Ambiente -->
+        <section class="ambiente">
+            <div class="campo">
+                <label>Nombre y área en metros del ambiente</label>
+                <input type="text" class="input-campo" value="{{ ambiente.ambiente|default:'' }}" readonly>
+            </div>
+        </section>
+
+        <!-- Horarios -->
+        <section class="horarios">
+            <div class="campo">
+                <label>Días semana de programación*</label>
+                <div class="dias-semana">
+                    <div class="dia-item">
+                        <div class="checkbox" {% if '1' in horario.diassemana|default:'' %}style="background-color: #000; color: white;"{% endif %}>{% if '1' in horario.diassemana|default:'' %}✓{% endif %}</div>
+                        <span>LUN</span>
+                    </div>
+                    <div class="dia-item">
+                        <div class="checkbox" {% if '2' in horario.diassemana|default:'' %}style="background-color: #000; color: white;"{% endif %}>{% if '2' in horario.diassemana|default:'' %}✓{% endif %}</div>
+                        <span>MAR</span>
+                    </div>
+                    <div class="dia-item">
+                        <div class="checkbox" {% if '3' in horario.diassemana|default:'' %}style="background-color: #000; color: white;"{% endif %}>{% if '3' in horario.diassemana|default:'' %}✓{% endif %}</div>
+                        <span>MIE</span>
+                    </div>
+                    <div class="dia-item">
+                        <div class="checkbox" {% if '4' in horario.diassemana|default:'' %}style="background-color: #000; color: white;"{% endif %}>{% if '4' in horario.diassemana|default:'' %}✓{% endif %}</div>
+                        <span>JUE</span>
+                    </div>
+                    <div class="dia-item">
+                        <div class="checkbox" {% if '5' in horario.diassemana|default:'' %}style="background-color: #000; color: white;"{% endif %}>{% if '5' in horario.diassemana|default:'' %}✓{% endif %}</div>
+                        <span>VIE</span>
+                    </div>
+                    <div class="dia-item">
+                        <div class="checkbox" {% if '6' in horario.diassemana|default:'' %}style="background-color: #000; color: white;"{% endif %}>{% if '6' in horario.diassemana|default:'' %}✓{% endif %}</div>
+                        <span>SAB</span>
+                    </div>
+                    <div class="dia-item">
+                        <div class="checkbox" {% if '7' in horario.diassemana|default:'' %}style="background-color: #000; color: white;"{% endif %}>{% if '7' in horario.diassemana|default:'' %}✓{% endif %}</div>
+                        <span>DOM</span>
+                    </div>
+                </div>
+            </div>
+            <div class="campo">
+                <label>Horario del curso de formación*</label>
+                <input type="text" class="input-campo" value="{{ horario.horas|default:'' }}" readonly>
+            </div>
+        </section>
+
+        <!-- Fechas de ejecución -->
+        <section class="fechas-ejecucion">
+            <div class="campo">
+                <label>Fechas de ejecución de la formación (mes 1)</label>
+                <input type="text" class="input-campo" value="{{ horario.mes1|default:'' }}" readonly>
+            </div>
+            <div class="campo">
+                <label>Fechas de ejecución de la formación (mes 2)</label>
+                <input type="text" class="input-campo" value="{{ horario.mes2|default:'' }}" readonly>
+            </div>
+        </section>
+
+        <!-- Códigos -->
+        <section class="codigos">
+            <div class="campo">
+                <label>Código de solicitud</label>
+                <input type="text" class="input-campo" value="{{ solicitud.codigosolicitud|default:'' }}" readonly>
+            </div>
+            <div class="campo">
+                <label>Código de ficha</label>
+                <input type="text" class="input-campo" value="" readonly>
+            </div>
+            <div class="campo">
+                <label>Fecha de inscripción</label>
+                <input type="text" class="input-campo" value="{{ solicitud.fechasolicitud|default:'' }}" readonly>
+            </div>
+        </section>
+
+        <!-- Firmas -->
+        <footer class="firmas">
+            <div class="firma-section">
+                <div class="campo-firma">
+                    <label>Nombre del instructor:</label>
+                    <div class="linea-firma"></div>
+                </div>
+                <div class="campo-firma">
+                    <label>Firma Instructor:</label>
+                    <div class="linea-firma"></div>
+                </div>
+            </div>
+            <div class="visto-bueno">
+                <div class="linea-firma"></div>
+                <p>Vo.Bo. Coordinador Académico</p>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>
