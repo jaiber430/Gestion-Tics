@@ -34,6 +34,7 @@ urlpatterns = [
     path('preinscripcion/<int:idsolicitud>/', views_solicitud.formulario_aspirantes, name="formularioaspirantes"),
     path('Consultas_instructor/', views_consultas.consultas_instructor, name="consultas_instructor"),
     path('ficha_caracterizacion/<int:solicitud_id>/', views_consultas.ficha_caracterizacion, name="ficha_caracterizacion"),
+    path('preinscripcion/', views_solicitud.registro_aspirante, name="Registroaspirantes"),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
