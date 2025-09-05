@@ -148,17 +148,28 @@ def _crear_solicitud_base(request, tipo_solicitud_id, template_name, mensaje_exi
                 convenio = request.POST.get('convenio', '')
                 nombre_ambiente = request.POST.get('nombreAmbiente')
 
-                # Crear horario (mes1 almacena el resumen del nuevo calendario y horario) POR AHORA
-                resumen_calendario = ""
+                # Procesar las fechas: solo guardar el número de día en mes1 / mes2
+                mes1_fechas = ""
+                mes2_fechas = ""
                 if fechas_calendario:
-                    resumen_calendario = f"Fechas: {', '.join(fechas_calendario)} | "
-                resumen_calendario += f"Días semana: {', '.join(dias_semana)} | Horario: {hora_inicio}-{hora_fin}"
+                    fechas_ordenadas = sorted(fechas_calendario)
+                    dias = [f.split('-')[2] if '-' in f else f for f in fechas_ordenadas]
+                    mitad = len(dias) // 2
+                    if mitad > 0:
+                        mes1_fechas = ', '.join(dias[:mitad])
+                        if len(dias) > mitad:
+                            mes2_fechas = ', '.join(dias[mitad:])
+                    else:
+                        mes1_fechas = ', '.join(dias)
 
+                # Crear el horario con los campos separados correctamente
                 horario = Horario.objects.create(
                     fechainicio=datetime.strptime(fecha_inicio, '%Y-%m-%d').date(),
                     fechafin=datetime.strptime(fecha_finalizacion, '%Y-%m-%d').date(),
-                    mes1=resumen_calendario,
-                    mes2=None
+                    mes1=mes1_fechas if mes1_fechas else None,
+                    mes2=mes2_fechas if mes2_fechas else None,
+                    horas=f"{hora_inicio}-{hora_fin}",
+                    diassemana=', '.join(dias_semana)
                 )
 
                 # Empresa opcional
