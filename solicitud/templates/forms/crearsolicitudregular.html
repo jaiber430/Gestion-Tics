@@ -21,7 +21,7 @@
     {% endif %}
 
     <!-- Formulario Principal -->
-    <form class="formulario-ficha" action="{% url 'consultas_instructor' %}" method="post" enctype="multipart/form-data">
+    <form class="formulario-ficha" action="{% url 'crearregular' %}" method="post" enctype="multipart/form-data">
       {% csrf_token %}
 
       <!-- Sección 1: Información del Programa -->
