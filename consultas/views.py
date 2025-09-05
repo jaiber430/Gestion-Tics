@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from Cursos.models import Usuario
+from Cursos.models import Usuario, Solicitud, Programaformacion
 # Sirve para Generar tokens, contraseñas y urls
 import secrets
 # Convertir todo a cadena
@@ -8,6 +8,7 @@ import string
 # Create your views here.
 
 def consultas_instructor(request):
+
 
     # Codigo encargado de generar numeros y letras aleatorios con las importaciones
     caracteres = string.ascii_letters + string.digits
@@ -36,10 +37,24 @@ def consultas_instructor(request):
     elif id_rol == 4:
         layout = 'layout/layout_admin.html'
         rol_name = "Administrador"
+
     
+    """
+    ======================================
+    Obtener la solicitud para la consulta
+    ======================================
+    """
+
+    solicitudes = Solicitud.objects.select_related(
+        'idusuario'   
+        ).filter(idusuario=user_id)
+
+    # programa_formacion = Solicitud.objects.select_related('codigoprograma')
+
     return render(request, "consultas/consultas_instructor.html", {
             "layout": layout,
             "rol": id_rol,
             "user": rol_name,
-            'codigo': codigo
+            'codigo': codigo,
+            'solicitudes': solicitudes,
         })
