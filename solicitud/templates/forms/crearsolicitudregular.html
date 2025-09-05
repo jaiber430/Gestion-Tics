@@ -21,7 +21,7 @@
     {% endif %}
 
     <!-- Formulario Principal -->
-    <form class="formulario-ficha" action="{% url 'crearregular' %}" method="post" enctype="multipart/form-data">
+    <form class="formulario-ficha" action="{% url 'consultas_instructor' %}" method="post" enctype="multipart/form-data">
       {% csrf_token %}
 
       <!-- Sección 1: Información del Programa -->
@@ -314,7 +314,6 @@
 
       // Eventos
       document.getElementById('departamentoFormacion').addEventListener('change', filtrarMunicipios);
-      document.getElementById('tieneEmpresa').addEventListener('change', toggleEmpresa);
       document.getElementById('modalArea').addEventListener('change', filtrarProgramasModal);
       document.getElementById('modalHoras').addEventListener('change', filtrarProgramasModal);
       document.getElementById('fechaInicio').addEventListener('change', generarCalendario);
@@ -343,7 +342,7 @@
 
       // Inicializar
       llenarHorasModal();
-      toggleEmpresa();
+      //toggleEmpresa();
   actualizarInfoHoras();
     });
 
@@ -367,24 +366,14 @@
     }
 
     // Mostrar u ocultar sección de empresa
-    function toggleEmpresa() {
-      const valor = document.getElementById('tieneEmpresa').value;
-      const seccion = document.getElementById('seccionEmpresa');
-      seccion.style.display = (valor === 'si') ? 'block' : 'none';
+    const seccion = document.getElementById('seccionEmpresa');
+    seccion.style.display = 'block'; // siempre visible
 
-      // Ajustar required
-      const campos = ['empresaSolicitante', 'tipoEmpresa', 'nombreResponsable', 'correoResponsable', 'nitEmpresa', 'cartaSolicitud'];
-      campos.forEach(id => {
+    const campos = ['empresaSolicitante', 'tipoEmpresa', 'nombreResponsable', 'correoResponsable', 'nitEmpresa', 'cartaSolicitud'];
+    campos.forEach(id => {
         const el = document.getElementById(id);
-        if (el) {
-          if (valor === 'si') {
-            el.setAttribute('required', 'required');
-          } else {
-            el.removeAttribute('required');
-          }
-        }
-      });
-    }
+        if (el) el.setAttribute('required', 'required');
+    });
 
     // Abrir modal
     function abrirModal() {
@@ -508,25 +497,6 @@
           : `Hay ${Math.abs(diferencia)} día(s) de más seleccionados.`;
         alert(`No puede continuar.\n\nHoras del programa: ${horasTotales} horas\nHoras por día: ${horasPorDia} horas\nDías necesarios: ${diasNecesarios} días\nDías seleccionados: ${diasSeleccionados} días\n\n${mensaje}`);
         return;
-      }
-
-      // Si es oferta cerrada, validar campos de empresa
-      if (document.getElementById('tieneEmpresa').value === 'si') {
-        const campos = {
-          'Empresa Solicitante': document.getElementById('empresaSolicitante').value.trim(),
-          'Tipo de Empresa': document.getElementById('tipoEmpresa').value,
-          'Nombre del Responsable': document.getElementById('nombreResponsable').value.trim(),
-          'Correo Electrónico': document.getElementById('correoResponsable').value.trim(),
-          'NIT de la Empresa': document.getElementById('nitEmpresa').value.trim(),
-          'Carta de Solicitud': document.getElementById('cartaSolicitud').value
-        };
-
-        const faltantes = Object.keys(campos).filter(campo => !campos[campo]);
-        if (faltantes.length > 0) {
-          e.preventDefault();
-          alert('Faltan datos obligatorios:\n- ' + faltantes.join('\n- '));
-          return;
-        }
       }
 
       // Agregar información de fechas seleccionadas al formulario

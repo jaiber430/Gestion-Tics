@@ -279,8 +279,8 @@ def registro_aspirante(request):
             id_solicitud_preinscripcion = Solicitud.objects.get(idsolicitud=solicitud_inscripcion)
 
             # Carpeta del instructor
-            instructor = id_solicitud_preinscripcion.idusuario
-            carpeta_destino = os.path.join(settings.MEDIA_ROOT, f"solicitud_{instructor.nombre}")
+            instructor = id_solicitud_preinscripcion
+            carpeta_destino = os.path.join(settings.MEDIA_ROOT, f"solicitud_{instructor.idsolicitud}")
             os.makedirs(carpeta_destino, exist_ok=True)
 
             # Guardar PDF
