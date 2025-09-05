@@ -19,6 +19,8 @@ from django.urls import path
 from Cursos import views
 from solicitud import views as views_solicitud
 from consultas import views as views_consultas
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     #Paginas princiales Login - Pagina inicio (Todos los roles)
@@ -33,3 +35,5 @@ urlpatterns = [
     path('Consultas_instructor/', views_consultas.consultas_instructor, name="consultas_instructor"),
     path('ficha_caracterizacion/<int:solicitud_id>/', views_consultas.ficha_caracterizacion, name="ficha_caracterizacion"),
 ]
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

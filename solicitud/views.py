@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.utils import timezone
 # Juntar datos que deben completarse para la Db (transaction) y trabajar con los campos de los modelos (models)
 from django.db import transaction
-# Importar fehas 
+# Importar fechas 
 from datetime import datetime
 import json
 # Importar datos de los modulos requeridos
@@ -12,8 +12,10 @@ from Cursos.models import (Ambiente, Area, Aspirantes, Caracterizacion, Departam
                             Empresa, Horario, Modalidad, Municipios,Programaespecial, 
                             Programaformacion, Solicitud, Tipoempresa, Tipoidentificacion, 
                             Tiposolicitud, Usuario)
-
-
+"Importaciones para el PDF"
+import os 
+from django.conf import settings
+from solicitud.utils import eliminar_carpetas_vencidas, combinar_pdfs
 
 def _get_common_context():
     """
@@ -37,18 +39,14 @@ def crear_solicitud(request):
     """
     # Llamar el id del usuario 
     user_id = request.session.get('user_id')
-    # Se asegura de que el ID del usuario esxista
     if not user_id:
         messages.error(request, "Debes iniciar sesión para acceder.")
         return redirect('login')
 
     try:
-        # Ontener el rol por medio del id del usuario que ingreso
         usuario = Usuario.objects.select_related('rol').get(idusuario=user_id)
-        # Crear una variable para almacenar el rol
         id_rol = usuario.rol.idrol
 
-        # Definir layout según rol
         if id_rol == 1:
             layout = 'layout/layoutinstructor.html'
             rol_name = 'Instructor'
@@ -62,9 +60,7 @@ def crear_solicitud(request):
             layout = 'layout/layout_admin.html'
             rol_name = "Administrador"
 
-        # Verificar fecha para crear cursos
-        hoy = datetime.now().day
-        # Verificar fecha para crear cursos
+        # Verificar fecha
         hoy = datetime.now().day
         if (hoy in range (1,16)):
             dato = 'Creaciones_abiertas'
@@ -127,11 +123,10 @@ def _crear_solicitud_base(request, tipo_solicitud_id, template_name, mensaje_exi
                 cupo_aprendices = request.POST.get('cupoAprendices')
                 municipio_formacion = request.POST.get('municipioFormacion')
                 direccion_formacion = request.POST.get('direccionFormacion')
-                dias_semana = request.POST.getlist('diasSemana[]')  # valores de 0-6
-                #campos de horario y fechas específicas
+                dias_semana = request.POST.getlist('diasSemana[]')  
                 hora_inicio = request.POST.get('horario_inicio') or request.POST.get('horarioInicio')
                 hora_fin = request.POST.get('horario_fin') or request.POST.get('horarioFin')
-                fechas_calendario_raw = request.POST.get('fechas_calendario')  #lista de fechas seleccionadas
+                fechas_calendario_raw = request.POST.get('fechas_calendario')  
                 try:
                     fechas_calendario = json.loads(fechas_calendario_raw) if fechas_calendario_raw else []
                 except json.JSONDecodeError:
@@ -149,9 +144,6 @@ def _crear_solicitud_base(request, tipo_solicitud_id, template_name, mensaje_exi
                 convenio = request.POST.get('convenio', '')
                 nombre_ambiente = request.POST.get('nombreAmbiente')
 
-                # Procesar las fechas: solo guardar el número de día en mes1 / mes2
-                mes1_fechas = ""
-                mes2_fechas = ""
                 if fechas_calendario:
                     fechas_ordenadas = sorted(fechas_calendario)
                     dias = [f.split('-')[2] if '-' in f else f for f in fechas_ordenadas]
@@ -189,13 +181,12 @@ def _crear_solicitud_base(request, tipo_solicitud_id, template_name, mensaje_exi
                         )
 
                 programa_formacion = Programaformacion.objects.get(codigoprograma=nombre_programa_codigo)
-                modalidad = Modalidad.objects.get(idmodalidad=1)  # Modalidad siempre 1 (presencial)
+                modalidad = Modalidad.objects.get(idmodalidad=1)  
                 municipio = Municipios.objects.get(codigomunicipio=municipio_formacion)
                 programa_especial_obj = Programaespecial.objects.get(idespecial=programa_especial)
                 ambiente_obj = Ambiente.objects.filter(idambiente=nombre_ambiente).first() if nombre_ambiente else None
                 tipo_solicitud = Tiposolicitud.objects.get(idtiposolicitud=tipo_solicitud_id)
 
-                # No se genera código, debe ser nulo según requerimiento
                 Solicitud.objects.create(
                     idtiposolicitud=tipo_solicitud,
                     codigoprograma=programa_formacion,
@@ -211,22 +202,18 @@ def _crear_solicitud_base(request, tipo_solicitud_id, template_name, mensaje_exi
                     convenio=convenio or None,
                     ambiente=ambiente_obj,
                     fechasolicitud=timezone.now().date()
-                    # codigosolicitud se deja nulo por defecto
                 )
                 
                 messages.success(request, mensaje_exito)
-                return redirect('Crearsolicitud')  # Regresar a la página de creación
+                return redirect('Crearsolicitud')
 
         except Exception as e:
             messages.error(request, f'Error al crear la solicitud: {str(e)}')
 
     return render(request, template_name, context)
 
-# Si la solicitud es regular
+
 def solicitud_regular(request):
-    """
-    Crear la solicitud regular
-    """
     return _crear_solicitud_base(
         request, 
         tipo_solicitud_id=1, 
@@ -234,11 +221,7 @@ def solicitud_regular(request):
         mensaje_exito='Solicitud de ficha regular creada exitosamente.'
     )
 
-# Si la solicitud es campesina
 def solicitud_campesina(request):
-    """
-    Crear la solicitud campesina (tipo 2, modalidad 1 - presencial)
-    """
     return _crear_solicitud_base(
         request, 
         tipo_solicitud_id=2, 
@@ -246,9 +229,7 @@ def solicitud_campesina(request):
         mensaje_exito='Solicitud de ficha campesina creada exitosamente.'
     )
 
-# Formulario para los aspirantes 
 def formulario_aspirantes(request, idsolicitud):
-    # Obtener la solicitud específica o lanzar 404 si no existe
     solicitud = get_object_or_404(Solicitud, idsolicitud=idsolicitud)
 
     caracterizacion = Caracterizacion.objects.all()
@@ -257,12 +238,15 @@ def formulario_aspirantes(request, idsolicitud):
     return render(request, 'forms/formulario_aspirantes.html', {
         'tipos_identificacion': tipo_documento,
         'caracterizaciones': caracterizacion,
-        'solicitud': solicitud,  # Pasas la solicitud al template
+        'solicitud': solicitud,
     })
 
 
 def registro_aspirante(request):
     if request.method == "POST":
+        # 🔹 Limpieza automática de carpetas vencidas
+        eliminar_carpetas_vencidas()
+
         try:
             nombres = request.POST.get('nombres')
             apellidos = request.POST.get('apellidos')
@@ -272,66 +256,70 @@ def registro_aspirante(request):
             tipo_documento_id = request.POST.get('tipo_documento')
             identificacion = request.POST.get('numero_identificacion')
             correo = request.POST.get('correo')
+            solicitud_inscripcion = request.POST.get('idsolicitud')
 
-            # Obtener la fecha actual automáticamente
             fecha_registro = datetime.now()
-            solicitud_inscripcion = request.POST.get('idsolicitud') 
 
-            """
-            Consulta para verificar que no se vuelva a inscribir
-            """
-            verificacion = Aspirantes.objects.all()
+            # Validar duplicados correctamente y con redirect al mismo formulario
+            duplicado = Aspirantes.objects.filter(
+                telefono=telefono
+            ).exists() or Aspirantes.objects.filter(
+                numeroidentificacion=identificacion
+            ).exists() or Aspirantes.objects.filter(
+                correo=correo
+            ).exists()
 
-            for verificacion_dato in verificacion:
-                if (verificacion_dato.telefono == telefono or
-                    verificacion_dato.numeroidentificacion == identificacion or 
-                    verificacion_dato.correo == correo):
-                    '''
-                    ==========================================================================================
-                    Si alguno de estos datos existe en la tabla de aspirantes le muestra un error al aspirante
-                    ==========================================================================================
-                    '''
-                    messages.error(request, 'Las credenciales ya han sido registradas')
-                    return redirect('formularioaspirantes')
+            if duplicado:
+                messages.error(request, 'Las credenciales ya han sido registradas')
+                return redirect('formularioaspirantes', idsolicitud=solicitud_inscripcion)
 
-            '''
-            ===================================================================================================
-            Si no encuentra coincidencias, obtiene los objetos relacionados y guarda el nuevo aspirante
-            ===================================================================================================
-            '''
-            # Cuando son datos de foreing key se tiene que hacer una consulta que relcione los datos
+            # Obtener objetos relacionados
             id_tipo_caracterizacion = Caracterizacion.objects.get(idcaracterizacion=caracterizacion_id)
             id_tipo_documento = Tipoidentificacion.objects.get(idtipoidentificacion=tipo_documento_id)
             id_solicitud_preinscripcion = Solicitud.objects.get(idsolicitud=solicitud_inscripcion)
 
+            # Carpeta del instructor
+            instructor = id_solicitud_preinscripcion.idusuario
+            carpeta_destino = os.path.join(settings.MEDIA_ROOT, f"solicitud_{instructor.nombre}")
+            os.makedirs(carpeta_destino, exist_ok=True)
+
+            # Guardar PDF
+            pdf_path = os.path.join(carpeta_destino, pdf.name)
+            with open(pdf_path, 'wb+') as destino:
+                for chunk in pdf.chunks():
+                    destino.write(chunk)
+
+            # Crear aspirante
             Aspirantes.objects.create(
                 nombre=nombres,
                 apellido=apellidos,
                 idcaracterizacion=id_tipo_caracterizacion,
                 telefono=telefono,
-                pdf=pdf,
+                pdf=pdf.name,
                 tipoidentificacion=id_tipo_documento,
                 numeroidentificacion=identificacion,
                 correo=correo,
                 fecha=fecha_registro,
-                solicitudinscripcion = id_solicitud_preinscripcion,
+                solicitudinscripcion=id_solicitud_preinscripcion,
             )
+
+            # Combinar PDFs si se completa el cupo
+            total_aspirantes = Aspirantes.objects.filter(solicitudinscripcion=id_solicitud_preinscripcion).count()
+            if total_aspirantes >= id_solicitud_preinscripcion.cupo:
+                combinar_pdfs(carpeta_destino)
 
             messages.success(request, 'Te has registrado exitosamente')
             return redirect('formularioaspirantes', idsolicitud=solicitud_inscripcion)
 
         except Exception as e:
-            messages.error(request, 'Error al registrarte')
+            messages.error(request, f'Error al registrarte: {e}')
             return redirect('formularioaspirantes', idsolicitud=request.POST.get('idsolicitud'))
 
-    # Si no es POST, o si hay error, se vuelve a renderizar el formulario con los datos
+    # GET request
     caracterizacion = Caracterizacion.objects.all()
     tipo_documento = Tipoidentificacion.objects.all()
-    # solicitud = get_object_or_404(Solicitud, idsolicitud=idsolicitud)
-    # solicitud = Solicitud.objects.all()
 
     return render(request, 'forms/formulario_aspirantes.html', {
         'tipos_identificacion': tipo_documento,
         'caracterizaciones': caracterizacion,
-        'solicitud': solicitud,  # Pasas la solicitud al template
     })
