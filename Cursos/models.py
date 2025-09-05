@@ -55,6 +55,8 @@ class Horario(models.Model):
     fechafin = models.DateField()
     mes1 = models.TextField(blank=True, null=True)
     mes2 = models.TextField(blank=True, null=True)
+    horas = models.CharField(max_length=20, blank=True, null=True)
+    diassemana = models.CharField(max_length=60, blank=True, null=True)
 
     class Meta:
         db_table = 'horario'

@@ -1,5 +1,8 @@
-from django.shortcuts import render
-from Cursos.models import Usuario, Solicitud, Programaformacion
+from django.shortcuts import render, get_object_or_404
+from Cursos.models import (
+    Usuario, Solicitud, Programaformacion, Horario, Modalidad, 
+    Departamentos, Municipios, Empresa, Programaespecial, Ambiente
+)
 # Sirve para Generar tokens, contraseñas y urls
 import secrets
 # Convertir todo a cadena
@@ -58,3 +61,67 @@ def consultas_instructor(request):
             'codigo': codigo,
             'solicitudes': solicitudes,
         })
+
+
+def ficha_caracterizacion(request, solicitud_id):
+    """
+    Vista para mostrar la ficha de caracterización
+    """
+    user_id = request.session.get('user_id')
+    usuario_actual = get_object_or_404(Usuario.objects.select_related('rol'), idusuario=user_id)
+    
+    # Obtener la solicitud con todas las relaciones necesarias
+    solicitud = get_object_or_404(
+        Solicitud.objects.select_related(
+            'codigoprograma',
+            'idhorario', 
+            'idmodalidad',
+            'codigomunicipio__codigodepartamento',
+            'idusuario',
+            'idempresa',
+            'idespecial',
+            'ambiente'
+        ), 
+        idsolicitud=solicitud_id
+    )
+    
+    # Obtener todas las variables que necesita el template
+    programa = solicitud.codigoprograma
+    horario = solicitud.idhorario
+    modalidad = solicitud.idmodalidad
+    municipio = solicitud.codigomunicipio
+    departamento = municipio.codigodepartamento
+    usuario = solicitud.idusuario
+    empresa = solicitud.idempresa
+    programa_especial = solicitud.idespecial
+    ambiente = solicitud.ambiente
+    
+    # Definir layout según rol del usuario actual
+    id_rol = usuario_actual.rol.idrol
+    if id_rol == 1:
+        layout = 'layout/layoutinstructor.html'
+    elif id_rol == 2:
+        layout = 'layout/layoutcoordinador.html'
+    elif id_rol == 3:
+        layout = 'layout/layoutfuncionario.html'
+    elif id_rol == 4:
+        layout = 'layout/layout_admin.html'
+    else:
+        layout = 'layout/layout_admin.html'
+    
+    context = {
+        'layout': layout,
+        'rol': id_rol,
+        'solicitud': solicitud,
+        'programa': programa,
+        'horario': horario,
+        'modalidad': modalidad,
+        'departamento': departamento,
+        'municipio': municipio,
+        'usuario': usuario,
+        'empresa': empresa,
+        'programa_especial': programa_especial,
+        'ambiente': ambiente,
+    }
+    
+    return render(request, 'fichacaracterizacion/fichacaracterizacion.html', context)
