@@ -19,6 +19,8 @@ from django.urls import path
 from Cursos import views
 from solicitud import views as views_solicitud
 from consultas import views as views_consultas
+# from aspirantes import views as views_aspirantes
+from aspirantes import views as views_aspirantes
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -31,10 +33,11 @@ urlpatterns = [
     path('crearficha/', views_solicitud.crear_solicitud, name="Crearsolicitud"),
     path('formulario_solicitud_regular/', views_solicitud.solicitud_regular, name="crearregular"),
     path('formulario_solicitud_campesina/', views_solicitud.solicitud_campesina, name="crearcampesina"),
-    path('preinscripcion/<int:idsolicitud>/', views_solicitud.formulario_aspirantes, name="formularioaspirantes"),
     path('Consultas_instructor/', views_consultas.consultas_instructor, name="consultas_instructor"),
     path('ficha_caracterizacion/<int:solicitud_id>/', views_consultas.ficha_caracterizacion, name="ficha_caracterizacion"),
-    path('preinscripcion/', views_solicitud.registro_aspirante, name="Registroaspirantes"),
+    path('preinscripcion/<int:idsolicitud>/', views_aspirantes.formulario_aspirantes, name="formularioaspirantes"),
+    path('preinscripcion/', views_aspirantes.registro_aspirante, name="Registroaspirantes"),
+    path('pdf/<int:id>/', views_consultas.descargar_pdf, name='descargar_pdf'),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -52,7 +52,7 @@
 
         <div class="campo-entrada">
           <label for="pdf_documento" class="etiqueta-campo">Documento (PDF)*:</label>
-          <input type="file" id="pdf_documento" name="pdf_documento" required />
+          <input type="file" id="pdf_documento" name="pdf_documento" accept=".pdf" required />
         </div>
 
         <div class="campo-entrada">
@@ -74,7 +74,6 @@
           <label for="correo" class="etiqueta-campo">Correo*</label>
           <input type="text" id="correo" name="correo" class="entrada-texto" placeholder="Escriba su correo" required />
         </div>
-         {{solicitud.idsolicitud}}
         <input type="hidden" name="idsolicitud" value="{{solicitud.idsolicitud}}">
       </div>
       <div class="contenedor-botones-formulario">

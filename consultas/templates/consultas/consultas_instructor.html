@@ -1,6 +1,8 @@
 {% extends layout %}
 
 {% block content %}
+
+{%  if rol == 3 %}
 <!-- Sección principal - Consultar Fichas -->
 <main class="contenido-principal">
   <!-- Título de la sección -->
@@ -29,8 +31,138 @@
         <tr>
           <td>{{ solicitud_consulta.codigoprograma.nombreprograma }}</td>
           <td><span class="estado-aprobado">Esto depende de la tabla ficha</span></td>
-          <td><a href="#" class="boton-descargar">Descargar Ficha</a></td>
-          <td><a href="#" class="boton-descargar">Descargar PDFs</a></td>
+          <td><a href="#" class="boton-descargar">Ver ficha Caracterización</a></td>
+          <td><a href="{% url 'descargar_pdf' solicitud_consulta.idsolicitud %}" class="boton-descargar">Descargar PDF</a></td>
+          <td>{{ solicitud_consulta.fechasolicitud }}</td>
+          <td>
+            <!-- Botón para abrir su propio modal -->
+            <button
+              onclick="document.getElementById('modal-{{ solicitud_consulta.idsolicitud }}').style.display='block'"
+              class="boton-compartir">
+              Compartir
+            </button>
+          </td>
+        </tr>
+
+        <!-- Modal único para esta solicitud -->
+        <div id="modal-{{ solicitud_consulta.idsolicitud }}" class="modal-compartir" style="display: none;">
+          <div class="contenido-modal">
+            <div class="encabezado-modal">
+              <h3>Compartir Ficha</h3>
+              <!-- Botón para cerrar este modal -->
+              <button
+                onclick="document.getElementById('modal-{{ solicitud_consulta.idsolicitud }}').style.display='none'"
+                class="boton-cerrar-modal">&times;</button>
+            </div>
+
+            <div class="cuerpo-modal">
+              <p class="programa-seleccionado">
+                Programa: {{ solicitud_consulta.codigoprograma.nombreprograma }}
+              </p>
+              {% comment %} <p class="programa-seleccionado">
+                ID de Solicitud: {{ solicitud_consulta.idsolicitud }}
+              </p> {% endcomment %}
+
+              <!-- ✅ Enlace con href correcto y texto original -->
+              <div class="opcion-compartir">
+                <h4>Compartir con enlace</h4>
+                <div class="grupo-link">
+                  <!-- HREF con el ID correcto, texto NO modificado -->
+                  <a href="{% url 'formularioaspirantes' solicitud_consulta.idsolicitud %}">
+                    https://preinscripcion/{{codigo}}
+                  </a>
+                </div>
+              </div>
+
+              <div class="separador-modal">
+                <span>O</span>
+              </div>
+
+              <!-- Opción 2: Compartir con aprendiz específico -->
+              <div class="opcion-compartir">
+                <h4>Compartir con aprendiz específico</h4>
+                <p class="descripcion-opcion">
+                  Busca y selecciona un aprendiz para compartir directamente
+                </p>
+
+                <div class="grupo-busqueda">
+                  <label for="buscar-aprendiz-{{ solicitud_consulta.idsolicitud }}">Buscar aprendiz:</label>
+                  <input type="text" id="buscar-aprendiz-{{ solicitud_consulta.idsolicitud }}"
+                    class="input-busqueda" placeholder="Escribe el nombre o documento del aprendiz..." />
+
+                  <!-- Lista de resultados (estática/simulada) -->
+                  <div class="resultados-busqueda">
+                    <div class="item-aprendiz">
+                      <div class="info-aprendiz">
+                        <span class="nombre-aprendiz">Juan Carlos Pérez</span>
+                        <span class="documento-aprendiz">C.C. 1.234.567.890</span>
+                      </div>
+                      <button>Seleccionar</button>
+                    </div>
+                    <div class="item-aprendiz">
+                      <div class="info-aprendiz">
+                        <span class="nombre-aprendiz">María Fernanda López</span>
+                        <span class="documento-aprendiz">C.C. 9.876.543.210</span>
+                      </div>
+                      <button>Seleccionar</button>
+                    </div>
+                    <div class="item-aprendiz">
+                      <div class="info-aprendiz">
+                        <span class="nombre-aprendiz">Carlos Eduardo Martínez</span>
+                        <span class="documento-aprendiz">C.C. 5.555.555.555</span>
+                      </div>
+                      <button>Seleccionar</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Pie del modal -->
+            <div class="pie-modal">
+              <button
+                onclick="document.getElementById('modal-{{ solicitud_consulta.idsolicitud }}').style.display='none'"
+                class="boton-cancelar">Cancelar</button>
+              <button class="boton-compartir-modal">Compartir</button>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</main>
+{% endif %}
+<!-- Sección principal - Consultar Fichas -->
+<main class="contenido-principal">
+  <!-- Título de la sección -->
+  <div class="titulo-seccion">
+    <h2 class="titulo-pagina">Consultar solicitudes {{ user }} {{ user_name }}</h2>
+    <p class="subtitulo-pagina">
+      Aquí puede consultar el estado de las fichas solicitadas y descargar los documentos correspondientes
+    </p>
+  </div>
+
+  <!-- Contenedor de la tabla de fichas -->
+  <div class="contenedor-tabla-fichas">
+    <table class="tabla-fichas">
+      <thead>
+        <tr>
+          <th>Nombre del Programa</th>
+          <th>Estado</th>
+          <th>Ficha de Caracterización</th>
+          <th>Documentos de Aprendices</th>
+          <th>Fecha de Creación</th>
+          <th>Compartir</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for solicitud_consulta in solicitudes %}
+        <tr>
+          <td>{{ solicitud_consulta.codigoprograma.nombreprograma }}</td>
+          <td><span class="estado-aprobado">Esto depende de la tabla ficha</span></td>
+          <td><a href="{% url 'ficha_caracterizacion' solicitud_consulta.idsolicitud %}" class="boton-descargar">Ver ficha Caracterización</a></td>
+          <td><a href="{% url 'descargar_pdf' solicitud_consulta.idsolicitud %}" class="boton-descargar">Descargar PDF</a></td>
           <td>{{ solicitud_consulta.fechasolicitud }}</td>
           <td>
             <!-- Botón para abrir su propio modal -->

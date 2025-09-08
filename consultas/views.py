@@ -7,7 +7,9 @@ from Cursos.models import (
 import secrets
 # Convertir todo a cadena
 import string
-
+import os 
+from django.http import Http404, FileResponse
+from django.conf import settings
 # Create your views here.
 
 def consultas_instructor(request):
@@ -35,7 +37,7 @@ def consultas_instructor(request):
         layout = 'layout/layoutcoordinador.html'
         rol_name = 'Coordinador'
     elif id_rol == 3:
-        layout = 'layout/layoutfuncionario.html'
+        layout = 'layout/layout_funcionario.html'
         rol_name = 'Funcionario'
     elif id_rol == 4:
         layout = 'layout/layout_admin.html'
@@ -48,9 +50,12 @@ def consultas_instructor(request):
     ======================================
     """
 
-    solicitudes = Solicitud.objects.select_related(
-        'idusuario'   
-        ).filter(idusuario=user_id)
+    if id_rol == 3:
+        solicitudes = Solicitud.objects.all()
+    else:
+        solicitudes = Solicitud.objects.select_related(
+            'idusuario'   
+            ).filter(idusuario=user_id) 
 
     # programa_formacion = Solicitud.objects.select_related('codigoprograma')
 
@@ -103,7 +108,7 @@ def ficha_caracterizacion(request, solicitud_id):
     elif id_rol == 2:
         layout = 'layout/layoutcoordinador.html'
     elif id_rol == 3:
-        layout = 'layout/layoutfuncionario.html'
+        layout = 'layout/layout_funcionario.html'
     elif id_rol == 4:
         layout = 'layout/layout_admin.html'
     else:
@@ -125,3 +130,22 @@ def ficha_caracterizacion(request, solicitud_id):
     }
     
     return render(request, 'fichacaracterizacion/fichacaracterizacion.html', context)
+
+def descargar_pdf(request, id):
+
+    folder_name = f"solicitud_{id}"
+
+    # Expecificar la ruta donde se encuntra el PDF
+    buscar_pdf = os.path.join(settings.MEDIA_ROOT, folder_name, 'combinado.pdf') 
+
+    # Comprobar si la carpeta existe
+
+    if not os.path.exists(buscar_pdf):
+        raise Http404("PDF no encontrado")
+
+    return FileResponse(
+        open(buscar_pdf, 'rb'),
+        as_attachment=True,
+        filename='combinado.pdf',  # Puedes personalizar el nombre descargado
+        content_type='application/pdf'
+    )
