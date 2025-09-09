@@ -3,7 +3,8 @@ from django.http import HttpResponse
 from django.template.loader import render_to_string
 from Cursos.models import (
     Usuario, Solicitud, Programaformacion, Horario, Modalidad, 
-    Departamentos, Municipios, Empresa, Programaespecial, Ambiente
+    Departamentos, Municipios, Empresa, Programaespecial, Ambiente,
+    Aspirantes, Caracterizacion, Tipoidentificacion
 )
 from django.conf import settings
 import os
@@ -12,13 +13,25 @@ from weasyprint import HTML, CSS
 import secrets
 # Convertir todo a cadena
 import string
+import os 
+from django.http import Http404, FileResponse,  HttpResponse
 
+# Poder buscar la ruta para descargar el PDF
+from django.conf import settings
+
+# Libreria de Django para generar un excel
+from openpyxl import Workbook
+# Importar las fechas
+import datetime
+# Libreria para usar el calendario
+import calendar
+# Crear copias
+import shutil
 # Create your views here.
 
 def consultas_instructor(request):
 
-
-    # Codigo encargado de generar numeros y letras aleatorios con las importaciones
+    # Codigo encargado de generar numeros y letras aleatorios con las importaciones 
     caracteres = string.ascii_letters + string.digits
     # choice = Elegir elemento al azar 
     # Join = Concatencaión de caracteres
@@ -40,7 +53,7 @@ def consultas_instructor(request):
         layout = 'layout/layoutcoordinador.html'
         rol_name = 'Coordinador'
     elif id_rol == 3:
-        layout = 'layout/layoutfuncionario.html'
+        layout = 'layout/layout_funcionario.html'
         rol_name = 'Funcionario'
     elif id_rol == 4:
         layout = 'layout/layout_admin.html'
@@ -53,9 +66,22 @@ def consultas_instructor(request):
     ======================================
     """
 
-    solicitudes = Solicitud.objects.select_related(
-        'idusuario'   
-        ).filter(idusuario=user_id)
+    if id_rol == 3:
+        # Obtener fecha actual
+        hoy = datetime.date.today()
+        anio = hoy.year
+        mes = hoy.month
+
+        # Obtener el primer y último día del mes actual
+        primer_dia = datetime.date(anio, mes, 1)
+        ultimo_dia = datetime.date(anio, mes, calendar.monthrange(anio, mes)[1])
+
+        # Filtrar solicitudes por rango de fechas del mes actual
+        solicitudes = Solicitud.objects.filter(fechasolicitud__range=(primer_dia, ultimo_dia))
+    else:
+        solicitudes = Solicitud.objects.select_related(
+            'idusuario'   
+            ).filter(idusuario=user_id) 
 
     # programa_formacion = Solicitud.objects.select_related('codigoprograma')
 
@@ -108,7 +134,7 @@ def ficha_caracterizacion(request, solicitud_id):
     elif id_rol == 2:
         layout = 'layout/layoutcoordinador.html'
     elif id_rol == 3:
-        layout = 'layout/layoutfuncionario.html'
+        layout = 'layout/layout_funcionario.html'
     elif id_rol == 4:
         layout = 'layout/layout_admin.html'
     else:
@@ -130,6 +156,7 @@ def ficha_caracterizacion(request, solicitud_id):
     }
     
     return render(request, 'fichacaracterizacion/fichacaracterizacion.html', context)
+
 
 
 def ficha_caracterizacion_pdf(request, solicitud_id):
@@ -194,3 +221,97 @@ def ficha_caracterizacion_pdf(request, solicitud_id):
     response = HttpResponse(pdf_bytes, content_type='application/pdf')
     response['Content-Disposition'] = f'inline; filename="ficha_{solicitud.codigosolicitud}.pdf"'
     return response
+
+def descargar_pdf(request, id, idrol):
+    folder_name = f"solicitud_{id}"
+
+    # Ruta del archivo original
+    buscar_pdf = os.path.join(settings.MEDIA_ROOT, 'pdf', folder_name, 'combinado.pdf')
+
+    if not os.path.exists(buscar_pdf):
+        raise Http404("PDF no encontrado")
+
+    # Si el rol es 3 = funcionario crear una copia del archivo
+    if int(idrol) == 3:
+        # Ruta de destino donde se guardará una copia
+        carpeta_destino = os.path.join(settings.MEDIA_ROOT, 'Funcionario',  folder_name)
+        os.makedirs(carpeta_destino, exist_ok=True)
+
+        guardar_pdf = os.path.join(carpeta_destino, 'combinado.pdf')
+
+        # Copiar el archivo original al nuevo destino
+        shutil.copy2(buscar_pdf, guardar_pdf)
+
+    # Descargar el archivo original
+    return FileResponse(
+        open(buscar_pdf, 'rb'),
+        as_attachment=True,
+        filename='Documentos_aspirantes.pdf',
+        content_type='application/pdf'
+    )
+
+def generar_excel(request, idsolicitud):
+    # Asegurarse de que el id este siendo enviado cuando se oprima el boton de descargar
+    solicitud = get_object_or_404(Solicitud, idsolicitud=idsolicitud)
+
+    # Consulta para obtener el nombre del programa relacionado con la solicitud 
+    programa = solicitud.codigoprograma  # Ya tienes la solicitud, accedes directo al FK
+    # Mostrar el nombre del programa
+    nombre_programa = programa.nombreprograma
+ 
+    # Crear un nuevo archivo de excel en blanco
+    nuevo_archivo = Workbook()
+    # Selceccionar la hoja del excel (Primera por defecto)
+    hoja = nuevo_archivo.active
+    # Colocar nombre a esa hoja 
+    hoja.title = f"Aspirantes Inscritos"
+
+    # Agregar fila a la hoja de excel con los siguientes encabezados
+    hoja.append(['Tipo de identificacion', 'Numero identificacion', 'Codigo de ficha', 'Tipo poblacion aspirantes', 'Codigo empresa'])
+
+    # Consulta para obtener los aspirantes relacionados con la solicitud 
+    aspirantes = Aspirantes.objects.filter(solicitudinscripcion=solicitud)
+
+    for agregar in aspirantes:
+        # Nombre del tipo de población
+        caracterizacion = agregar.idcaracterizacion
+        tipo_caracterizacion = caracterizacion.caracterizacion
+
+        # Nombre del tipo de identificacion
+        identificacion = agregar.tipoidentificacion
+        tipo_identificacion = identificacion.tipoidentificacion
+
+        # Buscar el NIT de la empresa desde la solicitud
+        empresa = agregar.solicitudinscripcion.idempresa
+        if empresa is not None:
+            mostrar_empresa = empresa.nitempresa
+        else:
+            mostrar_empresa = ''
+
+        hoja.append([
+            tipo_identificacion, 
+            agregar.numeroidentificacion, 
+            '',  # Código de ficha (no definido aún)
+            tipo_caracterizacion, 
+            mostrar_empresa
+        ])
+
+    # Crear carpeta donde se van a almacenar los formatos masivos
+    nombre_archivo_excel = f"formato_inscripcion_{idsolicitud}.xlsx"
+    carpeta_excel = os.path.join(settings.MEDIA_ROOT, 'excel')
+    os.makedirs(carpeta_excel, exist_ok=True)
+
+    # Direción donde se encuntra el directorio
+    directorio_excel = os.path.join(carpeta_excel, nombre_archivo_excel)
+
+    # Guardar directorio
+    nuevo_archivo.save(directorio_excel)
+
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = 'attachment; filename=Formato inscripcion masivo.xlsx'
+
+    nuevo_archivo.save(response)
+    return response
+

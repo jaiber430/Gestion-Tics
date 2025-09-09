@@ -1,4 +1,5 @@
 from django.db import models
+from aspirantes.utils import upload_to_dynamic  # 👈 Importamos la función de rutas dinámicasa
 
 class Ambiente(models.Model):
     idambiente = models.AutoField(primary_key=True)
@@ -160,7 +161,8 @@ class Aspirantes(models.Model):
     apellido = models.CharField(max_length=100)
     idcaracterizacion = models.ForeignKey('Caracterizacion', models.DO_NOTHING, db_column='idcaracterizacion')
     telefono = models.CharField(unique=True, max_length=50)
-    pdf = models.TextField(blank=True, null=True)
+    # Aqui se llama la funcion para crear las rutas dinamicas
+    pdf = models.FileField(upload_to=upload_to_dynamic, blank=True, null=True)
     tipoidentificacion = models.ForeignKey('Tipoidentificacion', models.DO_NOTHING, db_column='tipoidentificacion')
     numeroidentificacion = models.IntegerField(unique=True)
     correo = models.CharField(unique=True, max_length=255)
