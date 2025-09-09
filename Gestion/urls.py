@@ -35,6 +35,7 @@ urlpatterns = [
     path('formulario_solicitud_campesina/', views_solicitud.solicitud_campesina, name="crearcampesina"),
     path('Consultas_instructor/', views_consultas.consultas_instructor, name="consultas_instructor"),
     path('ficha_caracterizacion/<int:solicitud_id>/', views_consultas.ficha_caracterizacion, name="ficha_caracterizacion"),
+    path('ficha_caracterizacion/<int:solicitud_id>/pdf/', views_consultas.ficha_caracterizacion_pdf, name="ficha_caracterizacion_pdf"),
     path('preinscripcion/<int:idsolicitud>/', views_aspirantes.formulario_aspirantes, name="formularioaspirantes"),
     path('preinscripcion/', views_aspirantes.registro_aspirante, name="Registroaspirantes"),
     path('pdf/<int:id>/<int:idrol>', views_consultas.descargar_pdf, name='descargar_pdf'),

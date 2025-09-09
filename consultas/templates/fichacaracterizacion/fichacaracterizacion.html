@@ -8,6 +8,11 @@
     <link rel="stylesheet" href="{% static 'css/ficha-caracterizacion.css' %}">
 </head>
 <body>
+    {% if not pdf_mode %}
+    <div style="text-align:right; margin-bottom:10px;">
+        <a href="{% url 'ficha_caracterizacion_pdf' solicitud.idsolicitud %}" style="background:#007bff;color:#fff;padding:8px 14px;text-decoration:none;border-radius:4px;font-size:12px;">Descargar PDF</a>
+    </div>
+    {% endif %}
     <div class="ficha-container">
         <!-- Encabezado -->
         <header class="header">
@@ -285,20 +290,18 @@
         </section>
 
         <!-- Firmas -->
-        <footer class="firmas">
-            <div class="firma-section">
-                <div class="campo-firma">
-                    <label>Nombre del instructor:</label>
-                    <div class="linea-firma"></div>
-                </div>
-                <div class="campo-firma">
-                    <label>Firma Instructor:</label>
-                    <div class="linea-firma"></div>
-                </div>
-            </div>
-            <div class="visto-bueno">
+        <footer class="firmas firmas-compacto">
+            <div class="firma-bloque">
+                <span class="etiqueta-firma">Nombre Instructor:</span>
                 <div class="linea-firma"></div>
-                <p>Vo.Bo. Coordinador Académico</p>
+            </div>
+            <div class="firma-bloque">
+                <span class="etiqueta-firma">Firma Instructor:</span>
+                <div class="linea-firma"></div>
+            </div>
+            <div class="firma-bloque">
+                <span class="etiqueta-firma">Vo.Bo. Coordinador</span>
+                <div class="linea-firma"></div>
             </div>
         </footer>
     </div>
