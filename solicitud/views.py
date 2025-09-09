@@ -49,7 +49,7 @@ def crear_solicitud(request):
             layout = 'layout/layoutinstructor.html'
             rol_name = 'Instructor'
         elif id_rol == 2:
-            layout = 'layout/layoutcoordinador.html'
+            layout = 'layout/layout_coordinador.html'
             rol_name = 'Coordinador'
         elif id_rol == 3:
             layout = 'layout/layoutfuncionario.html'
@@ -92,7 +92,7 @@ def _crear_solicitud_base(request, tipo_solicitud_id, template_name, mensaje_exi
             layout = 'layout/layoutinstructor.html'
             rol_name = 'Instructor'
         elif id_rol == 2:
-            layout = 'layout/layoutcoordinador.html'
+            layout = 'layout/layout_coordinador.html'
             rol_name = 'Coordinador'
         elif id_rol == 3:
             layout = 'layout/layoutfuncionario.html'

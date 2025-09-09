@@ -182,3 +182,15 @@ class Ficha(models.Model):
 
     class Meta:
         db_table = 'ficha'
+
+class Solicitudcoordinador(models.Model):
+    idsolicitudcoordinador = models.AutoField(primary_key=True)
+    idusuario = models.ForeignKey('Usuario', models.DO_NOTHING, db_column='idusuario')
+    idsolicitud = models.ForeignKey('Solicitud', models.DO_NOTHING, db_column='idsolicitud')
+    idestado = models.ForeignKey('Estados', models.DO_NOTHING, db_column='idestado')
+    observacion = models.IntegerField()
+    fecha = models.DateField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'solicitudcoordinador'

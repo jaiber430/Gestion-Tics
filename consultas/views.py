@@ -4,7 +4,7 @@ from django.template.loader import render_to_string
 from Cursos.models import (
     Usuario, Solicitud, Programaformacion, Horario, Modalidad, 
     Departamentos, Municipios, Empresa, Programaespecial, Ambiente,
-    Aspirantes, Caracterizacion, Tipoidentificacion
+    Aspirantes, Caracterizacion, Tipoidentificacion, Estados
 )
 from django.conf import settings
 import os
@@ -50,7 +50,7 @@ def consultas_instructor(request):
         layout = 'layout/layoutinstructor.html'
         rol_name = 'Instructor'
     elif id_rol == 2:
-        layout = 'layout/layoutcoordinador.html'
+        layout = 'layout/layout_coordinador.html'
         rol_name = 'Coordinador'
     elif id_rol == 3:
         layout = 'layout/layout_funcionario.html'
@@ -65,6 +65,8 @@ def consultas_instructor(request):
     Obtener la solicitud para la consulta
     ======================================
     """
+
+    # estado =  Estados.objects.values_list(estados, flat=True)
 
     if id_rol == 3:
         # Obtener fecha actual
@@ -85,12 +87,15 @@ def consultas_instructor(request):
 
     # programa_formacion = Solicitud.objects.select_related('codigoprograma')
 
+    estado = Estados.objects.values('idestado', 'estados')  # ← devuelve diccionarios
+
     return render(request, "consultas/consultas_instructor.html", {
             "layout": layout,
             "rol": id_rol,
             "user": rol_name,
             'codigo': codigo,
             'solicitudes': solicitudes,
+            'estado': estado,
         })
 
 
@@ -132,7 +137,7 @@ def ficha_caracterizacion(request, solicitud_id):
     if id_rol == 1:
         layout = 'layout/layoutinstructor.html'
     elif id_rol == 2:
-        layout = 'layout/layoutcoordinador.html'
+        layout = 'layout/layout_coordinador.html'
     elif id_rol == 3:
         layout = 'layout/layout_funcionario.html'
     elif id_rol == 4:
@@ -184,7 +189,7 @@ def ficha_caracterizacion_pdf(request, solicitud_id):
     if id_rol == 1:
         layout = 'layout/layoutinstructor.html'
     elif id_rol == 2:
-        layout = 'layout/layoutcoordinador.html'
+        layout = 'layout/layout_coordinador.html'
     elif id_rol == 3:
         layout = 'layout/layoutfuncionario.html'
     elif id_rol == 4:

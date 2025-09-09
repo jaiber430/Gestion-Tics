@@ -135,6 +135,64 @@
     </table>
   </div>
 </main>
+
+{% elif rol == 2 %}
+
+<main class="contenido-principal">
+  <!-- Título de la sección -->
+  <div class="titulo-seccion">
+    <h2 class="titulo-pagina">Consultar solicitudes {{ user }} {{ user_name }}</h2>
+    <p class="subtitulo-pagina">
+      Aquí puede consultar el estado de las fichas solicitadas y descargar los documentos correspondientes
+    </p>
+  </div>
+
+  <!-- Contenedor de la tabla de fichas -->
+  <div class="contenedor-tabla-fichas">
+    <table class="tabla-fichas">
+      <thead>
+        <tr>
+          <th>Nombre del Programa</th>
+          <th>Estado</th>
+          <th>Ficha de Caracterización</th>
+          <th>Fecha de Creación</th>
+          <th>obsevacion de solicitud</th>
+          <th>Compartir</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for solicitud_consulta in solicitudes %}
+            <tr>
+              <td>{{ solicitud_consulta.codigoprograma.nombreprograma }}</td>
+              <td>        
+                <select>
+                  <option value="">-- Seleccione un estado --</option>
+                  {% for item in estado %}
+                    <option value="{{ item.idestado }}">{{ item.estados }}</option>
+                  {% endfor %}
+                </select>
+              </td>
+              <td><a href="{% url 'ficha_caracterizacion' solicitud_consulta.idsolicitud %}" class="boton-descargar">Ver ficha Caracterización</a></td>
+              {% comment %} <td><a href="{% url 'descargar_pdf' solicitud_consulta.idsolicitud %}" class="boton-descargar">Descargar PDF</a></td> {% endcomment %}
+              <td>{{ solicitud_consulta.fechasolicitud }}</td>
+              <td>
+              <textarea name="observacion" id="observacion" cols="30" rows="2" placeholder="Escribe tu observación aquí..."></textarea>
+              </td>
+              <td>
+                  <button
+                      class="boton-compartir"
+                      data-id="{{ solicitud_consulta.idsolicitud }}"
+                      onclick="compartirSolicitud(this)">
+                      Compartir
+                  </button>
+              </td>
+           </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</main>
+
 {% else %}
 <!-- Sección principal - Consultar Fichas -->
 <main class="contenido-principal">
@@ -165,6 +223,7 @@
           <td>{{ solicitud_consulta.codigoprograma.nombreprograma }}</td>
           <td><span class="estado-aprobado">Esto depende de la tabla ficha</span></td>
           <td><a href="{% url 'ficha_caracterizacion' solicitud_consulta.idsolicitud %}" class="boton-descargar">Ver ficha Caracterización</a></td>
+          {% comment %} <td><a href="{% url 'descargar_pdf' solicitud_consulta.idsolicitud %}" class="boton-descargar">Descargar PDF</a></td> {% endcomment %}
           <td>{{ solicitud_consulta.fechasolicitud }}</td>
           <td>
             <!-- Botón para abrir su propio modal -->

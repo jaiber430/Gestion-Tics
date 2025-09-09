@@ -35,7 +35,7 @@ def login_view(request):
                 layout = "layout/layoutinstructor.html"
                 rol_name = "Instructor"
             elif rol == 2:
-                layout = "layout/layoutcoordinador.html"
+                layout = "layout/layout_coordinador.html"
                 rol_name = "Coordinador"
             elif rol == 3:
                 layout = "layout/layout_funcionario.html"
