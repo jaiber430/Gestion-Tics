@@ -37,7 +37,7 @@ urlpatterns = [
     path('ficha_caracterizacion/<int:solicitud_id>/', views_consultas.ficha_caracterizacion, name="ficha_caracterizacion"),
     path('preinscripcion/<int:idsolicitud>/', views_aspirantes.formulario_aspirantes, name="formularioaspirantes"),
     path('preinscripcion/', views_aspirantes.registro_aspirante, name="Registroaspirantes"),
-    path('pdf/<int:id>/', views_consultas.descargar_pdf, name='descargar_pdf'),
+    path('pdf/<int:id>/<int:idrol>', views_consultas.descargar_pdf, name='descargar_pdf'),
     path('exportar-excel/<int:idsolicitud>', views_consultas.generar_excel, name='exportar_excel'),
 ]
 if settings.DEBUG:

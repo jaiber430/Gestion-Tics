@@ -34,7 +34,7 @@
           <td>{{ solicitud_consulta.codigoprograma.nombreprograma }}</td>
           <td><span class="estado-aprobado">Esto depende de la tabla ficha</span></td>
           <td><a href="#" class="boton-descargar">Ver ficha Caracterización</a></td>
-          <td><a href="{% url 'descargar_pdf' solicitud_consulta.idsolicitud %}" class="boton-descargar">Descargar PDF</a></td>
+          <td><a href="{% url 'descargar_pdf' solicitud_consulta.idsolicitud rol %}" class="boton-descargar">Descargar PDF</a></td>
           <td><a href="{% url 'exportar_excel' solicitud_consulta.idsolicitud %}" class="boton-descargar">Descargar excel</a></td>
           <td>{{ solicitud_consulta.fechasolicitud }}</td>
           {% comment %} <td>

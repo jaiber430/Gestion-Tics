@@ -20,6 +20,8 @@ from openpyxl import Workbook
 import datetime
 # Libreria para usar el calendario
 import calendar
+# Crear copias
+import shutil
 # Create your views here.
 
 def consultas_instructor(request):
@@ -150,22 +152,31 @@ def ficha_caracterizacion(request, solicitud_id):
     
     return render(request, 'fichacaracterizacion/fichacaracterizacion.html', context)
 
-def descargar_pdf(request, id):
-
+def descargar_pdf(request, id, idrol):
     folder_name = f"solicitud_{id}"
 
-    # Expecificar la ruta donde se encuntra el PDF
-    buscar_pdf = os.path.join(settings.MEDIA_ROOT, 'pdf', folder_name, 'combinado.pdf') 
-
-    # Comprobar si la carpeta existe
+    # Ruta del archivo original
+    buscar_pdf = os.path.join(settings.MEDIA_ROOT, 'pdf', folder_name, 'combinado.pdf')
 
     if not os.path.exists(buscar_pdf):
         raise Http404("PDF no encontrado")
 
+    # Si el rol es 3 = funcionario crear una copia del archivo
+    if int(idrol) == 3:
+        # Ruta de destino donde se guardará una copia
+        carpeta_destino = os.path.join(settings.MEDIA_ROOT, 'Funcionario',  folder_name)
+        os.makedirs(carpeta_destino, exist_ok=True)
+
+        guardar_pdf = os.path.join(carpeta_destino, 'combinado.pdf')
+
+        # Copiar el archivo original al nuevo destino
+        shutil.copy2(buscar_pdf, guardar_pdf)
+
+    # Descargar el archivo original
     return FileResponse(
         open(buscar_pdf, 'rb'),
         as_attachment=True,
-        filename='Documentos_aspirantes.pdf',  
+        filename='Documentos_aspirantes.pdf',
         content_type='application/pdf'
     )
 
