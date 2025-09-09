@@ -165,7 +165,6 @@
           <td>{{ solicitud_consulta.codigoprograma.nombreprograma }}</td>
           <td><span class="estado-aprobado">Esto depende de la tabla ficha</span></td>
           <td><a href="{% url 'ficha_caracterizacion' solicitud_consulta.idsolicitud %}" class="boton-descargar">Ver ficha Caracterización</a></td>
-          <td><a href="{% url 'descargar_pdf' solicitud_consulta.idsolicitud %}" class="boton-descargar">Descargar PDF</a></td>
           <td>{{ solicitud_consulta.fechasolicitud }}</td>
           <td>
             <!-- Botón para abrir su propio modal -->
