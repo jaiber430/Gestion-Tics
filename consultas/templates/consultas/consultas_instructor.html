@@ -2,6 +2,7 @@
 
 {% block content %}
 
+{% comment %} Mostar esto solo al funcionario {% endcomment %}
 {%  if rol == 3 %}
 <!-- Sección principal - Consultar Fichas -->
 <main class="contenido-principal">
@@ -20,10 +21,11 @@
         <tr>
           <th>Nombre del Programa</th>
           <th>Estado</th>
-          <th>Ficha de Caracterización</th>
-          <th>Documentos de Aprendices</th>
+          <th>Descargar ficha de caracterización</th>
+          <th>Descargar documento de los aspirantes</th>
+          <th>Descargar formato inscripcion masivo</th>
           <th>Fecha de Creación</th>
-          <th>Compartir</th>
+          {% comment %} <th>Compartir</th> {% endcomment %}
         </tr>
       </thead>
       <tbody>
@@ -33,15 +35,16 @@
           <td><span class="estado-aprobado">Esto depende de la tabla ficha</span></td>
           <td><a href="#" class="boton-descargar">Ver ficha Caracterización</a></td>
           <td><a href="{% url 'descargar_pdf' solicitud_consulta.idsolicitud %}" class="boton-descargar">Descargar PDF</a></td>
+          <td><a href="{% url 'exportar_excel' solicitud_consulta.idsolicitud %}" class="boton-descargar">Descargar excel</a></td>
           <td>{{ solicitud_consulta.fechasolicitud }}</td>
-          <td>
+          {% comment %} <td>
             <!-- Botón para abrir su propio modal -->
             <button
               onclick="document.getElementById('modal-{{ solicitud_consulta.idsolicitud }}').style.display='block'"
               class="boton-compartir">
               Compartir
-            </button>
-          </td>
+            </button> 
+          </td> {% endcomment %}
         </tr>
 
         <!-- Modal único para esta solicitud -->
@@ -132,7 +135,7 @@
     </table>
   </div>
 </main>
-{% endif %}
+{% else %}
 <!-- Sección principal - Consultar Fichas -->
 <main class="contenido-principal">
   <!-- Título de la sección -->
@@ -262,4 +265,5 @@
     </table>
   </div>
 </main>
+{% endif %}
 {% endblock %}

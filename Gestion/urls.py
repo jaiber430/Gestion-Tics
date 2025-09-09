@@ -38,6 +38,7 @@ urlpatterns = [
     path('preinscripcion/<int:idsolicitud>/', views_aspirantes.formulario_aspirantes, name="formularioaspirantes"),
     path('preinscripcion/', views_aspirantes.registro_aspirante, name="Registroaspirantes"),
     path('pdf/<int:id>/', views_consultas.descargar_pdf, name='descargar_pdf'),
+    path('exportar-excel/<int:idsolicitud>', views_consultas.generar_excel, name='exportar_excel'),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

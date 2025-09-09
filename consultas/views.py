@@ -1,21 +1,30 @@
 from django.shortcuts import render, get_object_or_404
 from Cursos.models import (
     Usuario, Solicitud, Programaformacion, Horario, Modalidad, 
-    Departamentos, Municipios, Empresa, Programaespecial, Ambiente
+    Departamentos, Municipios, Empresa, Programaespecial, Ambiente,
+    Aspirantes, Caracterizacion, Tipoidentificacion
 )
 # Sirve para Generar tokens, contraseñas y urls
 import secrets
 # Convertir todo a cadena
 import string
 import os 
-from django.http import Http404, FileResponse
+from django.http import Http404, FileResponse,  HttpResponse
+
+# Poder buscar la ruta para descargar el PDF
 from django.conf import settings
+
+# Libreria de Django para generar un excel
+from openpyxl import Workbook
+# Importar las fechas
+import datetime
+# Libreria para usar el calendario
+import calendar
 # Create your views here.
 
 def consultas_instructor(request):
 
-
-    # Codigo encargado de generar numeros y letras aleatorios con las importaciones
+    # Codigo encargado de generar numeros y letras aleatorios con las importaciones 
     caracteres = string.ascii_letters + string.digits
     # choice = Elegir elemento al azar 
     # Join = Concatencaión de caracteres
@@ -51,7 +60,17 @@ def consultas_instructor(request):
     """
 
     if id_rol == 3:
-        solicitudes = Solicitud.objects.all()
+        # Obtener fecha actual
+        hoy = datetime.date.today()
+        anio = hoy.year
+        mes = hoy.month
+
+        # Obtener el primer y último día del mes actual
+        primer_dia = datetime.date(anio, mes, 1)
+        ultimo_dia = datetime.date(anio, mes, calendar.monthrange(anio, mes)[1])
+
+        # Filtrar solicitudes por rango de fechas del mes actual
+        solicitudes = Solicitud.objects.filter(fechasolicitud__range=(primer_dia, ultimo_dia))
     else:
         solicitudes = Solicitud.objects.select_related(
             'idusuario'   
@@ -136,7 +155,7 @@ def descargar_pdf(request, id):
     folder_name = f"solicitud_{id}"
 
     # Expecificar la ruta donde se encuntra el PDF
-    buscar_pdf = os.path.join(settings.MEDIA_ROOT, folder_name, 'combinado.pdf') 
+    buscar_pdf = os.path.join(settings.MEDIA_ROOT, 'pdf', folder_name, 'combinado.pdf') 
 
     # Comprobar si la carpeta existe
 
@@ -146,6 +165,71 @@ def descargar_pdf(request, id):
     return FileResponse(
         open(buscar_pdf, 'rb'),
         as_attachment=True,
-        filename='combinado.pdf',  # Puedes personalizar el nombre descargado
+        filename='Documentos_aspirantes.pdf',  
         content_type='application/pdf'
     )
+
+def generar_excel(request, idsolicitud):
+    # Asegurarse de que el id este siendo enviado cuando se oprima el boton de descargar
+    solicitud = get_object_or_404(Solicitud, idsolicitud=idsolicitud)
+
+    # Consulta para obtener el nombre del programa relacionado con la solicitud 
+    programa = solicitud.codigoprograma  # Ya tienes la solicitud, accedes directo al FK
+    # Mostrar el nombre del programa
+    nombre_programa = programa.nombreprograma
+ 
+    # Crear un nuevo archivo de excel en blanco
+    nuevo_archivo = Workbook()
+    # Selceccionar la hoja del excel (Primera por defecto)
+    hoja = nuevo_archivo.active
+    # Colocar nombre a esa hoja 
+    hoja.title = f"Aspirantes Inscritos"
+
+    # Agregar fila a la hoja de excel con los siguientes encabezados
+    hoja.append(['Tipo de identificacion', 'Numero identificacion', 'Codigo de ficha', 'Tipo poblacion aspirantes', 'Codigo empresa'])
+
+    # Consulta para obtener los aspirantes relacionados con la solicitud 
+    aspirantes = Aspirantes.objects.filter(solicitudinscripcion=solicitud)
+
+    for agregar in aspirantes:
+        # Nombre del tipo de población
+        caracterizacion = agregar.idcaracterizacion
+        tipo_caracterizacion = caracterizacion.caracterizacion
+
+        # Nombre del tipo de identificacion
+        identificacion = agregar.tipoidentificacion
+        tipo_identificacion = identificacion.tipoidentificacion
+
+        # Buscar el NIT de la empresa desde la solicitud
+        empresa = agregar.solicitudinscripcion.idempresa
+        if empresa is not None:
+            mostrar_empresa = empresa.nitempresa
+        else:
+            mostrar_empresa = ''
+
+        hoja.append([
+            tipo_identificacion, 
+            agregar.numeroidentificacion, 
+            '',  # Código de ficha (no definido aún)
+            tipo_caracterizacion, 
+            mostrar_empresa
+        ])
+
+    # Crear carpeta donde se van a almacenar los formatos masivos
+    nombre_archivo_excel = f"formato_inscripcion_{idsolicitud}.xlsx"
+    carpeta_excel = os.path.join(settings.MEDIA_ROOT, 'excel')
+    os.makedirs(carpeta_excel, exist_ok=True)
+
+    # Direción donde se encuntra el directorio
+    directorio_excel = os.path.join(carpeta_excel, nombre_archivo_excel)
+
+    # Guardar directorio
+    nuevo_archivo.save(directorio_excel)
+
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = 'attachment; filename=Formato inscripcion masivo.xlsx'
+
+    nuevo_archivo.save(response)
+    return response

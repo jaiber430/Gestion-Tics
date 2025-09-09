@@ -19,7 +19,7 @@ def formulario_aspirantes(request, idsolicitud):
 
     # Asegurarse de que no se puedan voler a registrar aspirantes una vez se cumpla la cantidad
     cerrar_inscripciones = Aspirantes.objects.filter(solicitudinscripcion=solicitud).count()
-    if cerrar_inscripciones == solicitud.cupo:
+    if cerrar_inscripciones >= solicitud.cupo:
         raise Http404("Ya se alcanzó el cupo máximo de aspirantes.")
 
     caracterizacion = Caracterizacion.objects.all()
@@ -34,9 +34,7 @@ def formulario_aspirantes(request, idsolicitud):
 
 def registro_aspirante(request):
     if request.method == "POST":
-        # 🔹 Limpieza automática de carpetas vencidas
-        # eliminar_carpetas_vencidas()
-
+        
         try:
             nombres = request.POST.get('nombres')
             apellidos = request.POST.get('apellidos')
@@ -70,22 +68,34 @@ def registro_aspirante(request):
 
             # Crear carpeta con la solicitud para almacenar los pdf 
             instructor = id_solicitud_preinscripcion
-            carpeta_destino = os.path.join(settings.MEDIA_ROOT, f"solicitud_{instructor.idsolicitud}")
-            os.makedirs(carpeta_destino, exist_ok=True)
 
-            # Guardar PDF
-            pdf_path = os.path.join(carpeta_destino, pdf.name)
-            with open(pdf_path, 'wb+') as destino:
+            # Subcarpeta con el id de la solicitud
+            carpeta_solicitud = f"solicitud_{instructor.idsolicitud}"
+            pdf_aspirantes = os.path.join(settings.MEDIA_ROOT, 'pdf', carpeta_solicitud)
+            os.makedirs(pdf_aspirantes, exist_ok=True)
+
+            # Contador para el nombre del archivo
+            contador = 1
+            while True:
+                nombre_archivo = f"PDF_{contador}.pdf"
+                direccion_archivo = os.path.join(pdf_aspirantes, nombre_archivo)
+                if not os.path.exists(direccion_archivo):
+                    break
+                contador += 1
+
+            # Guardar PDF manualmente en la carpeta creada
+            with open(direccion_archivo, 'wb+') as destino:
                 for chunk in pdf.chunks():
                     destino.write(chunk)
 
-            # Crear aspirante
+            # Crear aspirante y asignar ruta relativa correcta en el campo pdf
+            ruta_relativa_pdf = os.path.join('pdf', carpeta_solicitud, nombre_archivo)
             Aspirantes.objects.create(
                 nombre=nombres,
                 apellido=apellidos,
                 idcaracterizacion=id_tipo_caracterizacion,
                 telefono=telefono,
-                pdf=pdf.name,
+                pdf=ruta_relativa_pdf,  # ruta relativa para FileField
                 tipoidentificacion=id_tipo_documento,
                 numeroidentificacion=identificacion,
                 correo=correo,
@@ -96,7 +106,7 @@ def registro_aspirante(request):
             # Combinar PDFs si se completa el cupo
             total_aspirantes = Aspirantes.objects.filter(solicitudinscripcion=id_solicitud_preinscripcion).count()
             if total_aspirantes >= id_solicitud_preinscripcion.cupo:
-                combinar_pdfs(carpeta_destino)
+                combinar_pdfs(pdf_aspirantes)
 
             messages.success(request, 'Te has registrado exitosamente')
             return redirect('formularioaspirantes', idsolicitud=solicitud_inscripcion)
