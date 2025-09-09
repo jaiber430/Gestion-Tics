@@ -32,4 +32,5 @@ urlpatterns = [
     path('preinscripcion/<int:idsolicitud>/', views_solicitud.formulario_aspirantes, name="formularioaspirantes"),
     path('Consultas_instructor/', views_consultas.consultas_instructor, name="consultas_instructor"),
     path('ficha_caracterizacion/<int:solicitud_id>/', views_consultas.ficha_caracterizacion, name="ficha_caracterizacion"),
+    path('ficha_caracterizacion/<int:solicitud_id>/pdf/', views_consultas.ficha_caracterizacion_pdf, name="ficha_caracterizacion_pdf"),
 ]
