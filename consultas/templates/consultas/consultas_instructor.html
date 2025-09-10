@@ -46,7 +46,7 @@
               </select>
             </td>
           <td><input type="number" id="codigo_ficha" name="codigo_ficha" class="entrada-texto" placeholder="codigo de ficha" required /></td>
-          <td><a href="{% url 'ficha_caracterizacion_pdf' solicitud_consulta.idsolicitud %}" style="background:#007bff;color:#fff;padding:8px 14px;text-decoration:none;border-radius:4px;font-size:12px;">Descargar PDF</a></td>
+          <td><a href="{% url 'ficha_caracterizacion_pdf' solicitud_consulta.idsolicitud %}" class="boton-descargar">Descargar PDF</a></td>
           <td><a href="{% url 'descargar_pdf' solicitud_consulta.idsolicitud rol %}" class="boton-descargar">Descargar PDF</a></td>
           <td><a href="{% url 'descargar_carta' solicitud_consulta.idsolicitud rol %}" class="boton-descargar">Descargar Carta</a></td>
           {% comment %} Descargar excel y si se descarga dejar el campo de subir archivo {% endcomment %}
@@ -65,7 +65,7 @@
             </td>
           <td>{{ solicitud_consulta.fechasolicitud }}</td>
           <td><textarea name="observacion" id="observacion" class="entrada-texto" ></textarea></td>
-          <td><button type="submit">Enviar </button></td>
+          <td><button type="submit" class="boton-enviar">Enviar</button></td>
         </tr>
         </form>
         {% endfor %}
