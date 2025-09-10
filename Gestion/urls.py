@@ -42,6 +42,7 @@ urlpatterns = [
     path('exportar-excel/<int:idsolicitud>', views_consultas.generar_excel, name='exportar_excel'),
     path('descargar_excel/<int:id>/<int:idrol>', views_consultas.descargar_excel, name="descargar_excel"),
     path('descargar_carta/<int:id>/<int:idrol>', views_consultas.descargar_carta, name="descargar_carta"),
+    path('revision_funcionario/<int:id>/', views_consultas.revision_fichas, name="ficha_funcionario")
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

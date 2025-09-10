@@ -178,6 +178,7 @@ class Ficha(models.Model):
     codigoficha = models.IntegerField(unique=True)
     idsolicitud = models.ForeignKey(Solicitud, on_delete=models.CASCADE, db_column='idsolicitud')
     idestado = models.ForeignKey(Estados, on_delete=models.CASCADE, db_column='idestado')
+    idusuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, db_column='idusuario')
     observacion = models.TextField()
 
     class Meta:

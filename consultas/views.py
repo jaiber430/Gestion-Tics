@@ -1,10 +1,10 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse
 from django.template.loader import render_to_string
 from Cursos.models import (
     Usuario, Solicitud, Programaformacion, Horario, Modalidad, 
     Departamentos, Municipios, Empresa, Programaespecial, Ambiente,
-    Aspirantes, Caracterizacion, Tipoidentificacion, Estados
+    Aspirantes, Caracterizacion, Tipoidentificacion, Estados, Ficha
 )
 from django.conf import settings
 import os
@@ -27,6 +27,8 @@ import datetime
 import calendar
 # Crear copias
 import shutil
+# Importar mensajes
+from django.contrib import messages
 # Create your views here.
 
 def consultas_instructor(request):
@@ -424,3 +426,80 @@ def descargar_carta(request, id, idrol):
         filename='Carta solicitud.pdf',
         content_type='application/pdf'
     )
+# ===========================================
+# Funcionario respuestas a las solicitudes
+# ===========================================
+
+def revision_fichas(request, id):
+
+    # Buscar la solicitud
+    solicitud = get_object_or_404(Solicitud, idsolicitud=id)
+
+    # Obtener el id del usuario en sesión
+    user_id = request.session.get('user_id')
+
+    # Obtener el usuario y su rol
+    usuario = Usuario.objects.select_related('rol').get(idusuario=user_id)
+    id_rol = usuario.rol.idrol
+
+    # Definir layout según rol del usuario actual
+    if id_rol == 1:
+        layout = 'layout/layoutinstructor.html'
+    elif id_rol == 2:
+        layout = 'layout/layout_coordinador.html'
+    elif id_rol == 3:
+        layout = 'layout/layout_funcionario.html'
+    elif id_rol == 4:
+        layout = 'layout/layout_admin.html'
+    else:
+        layout = 'layout/layout_admin.html'
+
+    # Validar envío de formulario
+    if request.method == "POST":
+        try:
+            # Capturar datos enviados
+            estados = request.POST.get('estado')
+            numero_ficha = request.POST.get('codigo_ficha')
+            observacion = request.POST.get('observacion')
+            actualizacion_excel = request.FILES.get('actualizar_excel')  # Solo si lo necesitas
+
+            # Validar duplicados correctamente y con redirect al mismo formulario
+            # ✅ Cambio: se valida en Aspirantes (antes lo hacías en Ficha)
+            duplicado = Ficha.objects.filter(
+                codigoficha=numero_ficha
+            ).exists()
+
+            if duplicado:
+                messages.error(request, 'La ficha ya existe')
+                return redirect('consultas_instructor')
+
+            # Obtener objetos relacionados
+            id_estado = Estados.objects.get(idestado=estados)
+
+            # Ya tienes la solicitud desde arriba, no es necesario volver a consultarla
+            usuario_solicitud = solicitud
+            creado_por = usuario_solicitud.idusuario
+
+            # Crear registro en la tabla de aspirantes
+            Ficha.objects.create(
+                codigoficha=numero_ficha,
+                idsolicitud=solicitud,
+                idestado=id_estado,
+                idusuario=creado_por,
+                observacion=observacion,
+            )
+
+            # Mensaje de éxito
+            messages.success(request, 'Te has registrado exitosamente')
+            return redirect('consultas_instructor')
+
+        except Exception as e:
+            # Mensaje de error en caso de excepción
+            messages.error(request, f'Error al registrarte: {e}')
+            return redirect('consultas_instructor')
+
+    # Renderizar plantilla si no hay envío de formulario
+    return render(request, 'consultas/consultas_instructor.html', {
+        'layout': layout,
+        'messages': messages
+    })
