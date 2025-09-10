@@ -8,11 +8,6 @@
     <link rel="stylesheet" href="{% static 'css/ficha-caracterizacion.css' %}">
 </head>
 <body>
-    {% if not pdf_mode %}
-    <div style="text-align:right; margin-bottom:10px;">
-        <a href="{% url 'ficha_caracterizacion_pdf' solicitud.idsolicitud %}" style="background:#007bff;color:#fff;padding:8px 14px;text-decoration:none;border-radius:4px;font-size:12px;">Descargar PDF</a>
-    </div>
-    {% endif %}
     <div class="ficha-container">
         <!-- Encabezado -->
         <header class="header">
