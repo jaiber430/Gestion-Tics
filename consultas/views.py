@@ -373,3 +373,41 @@ def descargar_excel(request, id, idrol):
         filename='Formato_inscripcion.xlsx',
         content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     )
+
+def descargar_carta(request, id, idrol):
+    # Buscar la solicitud
+    buscar_nit = Solicitud.objects.get(idsolicitud=id)
+
+    # Obtener NIT de la empresa relacionada
+    nit = buscar_nit.idempresa.nitempresa
+
+    guardar_carta = f"solicitud_{id}"
+
+    # Nombre de la carpeta
+    folder_name = f"carta_{nit}"
+
+    # Ruta del archivo original (en su carpeta correspondiente)
+    buscar_carta = os.path.join(settings.MEDIA_ROOT, 'Cartas_de_solicitud', folder_name, f'carta_{nit}.pdf')
+
+    if not os.path.exists(buscar_carta):
+        raise Http404("PDF no encontrado")
+
+    # Si el rol es 3 = funcionario, crear una copia del archivo
+    if int(idrol) == 3:
+        # Carpeta destino
+        carpeta_destino = os.path.join(settings.MEDIA_ROOT, 'Funcionario', guardar_carta)
+        os.makedirs(carpeta_destino, exist_ok=True)
+
+        # Ruta completa del archivo copia
+        generar_copia = os.path.join(carpeta_destino, f'carta_{nit}.pdf')
+
+        # Copiar el archivo original al nuevo destino
+        shutil.copy2(buscar_carta, generar_copia)
+
+    # Descargar el archivo original
+    return FileResponse(
+        open(buscar_carta, 'rb'),
+        as_attachment=True,
+        filename='Carta solicitud.pdf',
+        content_type='application/pdf'
+    )

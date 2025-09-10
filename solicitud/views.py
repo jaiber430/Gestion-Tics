@@ -12,7 +12,10 @@ from Cursos.models import (Ambiente, Area, Departamentos,
                             Empresa, Horario, Modalidad, Municipios,Programaespecial, 
                             Programaformacion, Solicitud, Tipoempresa, Tipoidentificacion, 
                             Tiposolicitud, Usuario)
-"Importaciones para el PDF"
+
+# Requerido para crear carpetas en rutas especificas
+import os 
+from django.conf import settings
 
 
 def _get_common_context():
@@ -136,6 +139,22 @@ def _crear_solicitud_base(request, tipo_solicitud_id, template_name, mensaje_exi
                 nombre_responsable = request.POST.get('nombreResponsable', '')
                 correo_responsable = request.POST.get('correoResponsable', '')
                 nit_empresa = request.POST.get('nitEmpresa', '')
+                carta_solicitud = request.FILES.get('cartaSolicitud', '')
+
+                if carta_solicitud:
+                    # Usamos el NIT recibido del formulario
+                    folder_name = f"carta_{nit_empresa}"
+                    carpeta_destino = os.path.join(settings.MEDIA_ROOT, 'Cartas_de_solicitud', folder_name)
+                    os.makedirs(carpeta_destino, exist_ok=True)
+
+                    filename_pdf = f"carta_{nit_empresa}.pdf"
+                    ruta_guardado = os.path.join(carpeta_destino, filename_pdf)
+
+                    # Guardar el archivo en disco
+                    with open(ruta_guardado, 'wb') as f:
+                         # importante para archivos grandes
+                        for chunk in carta_solicitud.chunks(): 
+                            f.write(chunk)
 
                 # Campos opcionales
                 programa_especial = request.POST.get('programaEspecial')

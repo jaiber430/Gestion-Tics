@@ -23,6 +23,7 @@
           <th>Estado</th>
           <th>Descargar ficha de caracterización</th>
           <th>Descargar documento de los aspirantes</th>
+          <th>Descargar carta de solicitud</th>
           <th>Descargar formato inscripcion masivo</th>
           <th>Fecha de Creación</th>
           {% comment %} <th>Compartir</th> {% endcomment %}
@@ -42,6 +43,7 @@
             </td>
           <td><a href="{% url 'ficha_caracterizacion_pdf' solicitud_consulta.idsolicitud %}" style="background:#007bff;color:#fff;padding:8px 14px;text-decoration:none;border-radius:4px;font-size:12px;">Descargar PDF</a></td>
           <td><a href="{% url 'descargar_pdf' solicitud_consulta.idsolicitud rol %}" class="boton-descargar">Descargar PDF</a></td>
+          <td><a href="{% url 'descargar_carta' solicitud_consulta.idsolicitud rol %}" class="boton-descargar">Descargar Carta</a></td>
           <td>
             <!-- Este es el enlace de descarga (visible al inicio) -->
             <a href="{% url 'descargar_excel' solicitud_consulta.idsolicitud rol %}" 
