@@ -245,7 +245,13 @@
           <td>{{ solicitud_consulta.codigoprograma.nombreprograma }}</td>
           <td><span class="estado-aprobado">Esto depende de la tabla ficha</span></td>
           <td><a href="{% url 'ficha_caracterizacion' solicitud_consulta.idsolicitud %}" class="boton-descargar">Ver ficha Caracterización</a></td>
-          {% comment %} <td><a href="{% url 'descargar_pdf' solicitud_consulta.idsolicitud %}" class="boton-descargar">Descargar PDF</a></td> {% endcomment %}
+          <td>
+            {% if solicitud_consulta.aspirantes %}
+              {{ solicitud_consulta.aspirantes|length }} aspirante{{ solicitud_consulta.aspirantes|length|pluralize }}
+            {% else %}
+              Sin aspirantes
+            {% endif %}
+          </td>
           <td>{{ solicitud_consulta.fechasolicitud }}</td>
           <td>
             <!-- Botón para abrir su propio modal -->
@@ -291,41 +297,29 @@
                 <span>O</span>
               </div>
 
-              <!-- Opción 2: Compartir con aprendiz específico -->
+              <!-- Opción 2: Ver aspirantes inscritos -->
               <div class="opcion-compartir">
-                <h4>Compartir con aprendiz específico</h4>
-                <p class="descripcion-opcion">
-                  Busca y selecciona un aprendiz para compartir directamente
-                </p>
-
+                <h4>Ver aspirantes Inscritos</h4>
                 <div class="grupo-busqueda">
-                  <label for="buscar-aprendiz-{{ solicitud_consulta.idsolicitud }}">Buscar aprendiz:</label>
-                  <input type="text" id="buscar-aprendiz-{{ solicitud_consulta.idsolicitud }}"
-                    class="input-busqueda" placeholder="Escribe el nombre o documento del aprendiz..." />
 
-                  <!-- Lista de resultados (estática/simulada) -->
+                  <!-- Lista de aspirantes -->
                   <div class="resultados-busqueda">
+                    {% for aspirante in solicitud_consulta.aspirantes %}
                     <div class="item-aprendiz">
                       <div class="info-aprendiz">
-                        <span class="nombre-aprendiz">Juan Carlos Pérez</span>
-                        <span class="documento-aprendiz">C.C. 1.234.567.890</span>
+                        <span class="nombre-aprendiz">{{ aspirante.nombre }} {{ aspirante.apellido }}</span>
+                        <span class="documento-aprendiz">{{ aspirante.tipoidentificacion.tipoidentificacion }} {{ aspirante.numeroidentificacion }}</span>
+                        <span class="documento-aprendiz">Teléfono: {{ aspirante.telefono }}</span>
+                        <span class="documento-aprendiz">Correo: {{ aspirante.correo }}</span>
                       </div>
-                      <button>Seleccionar</button>
                     </div>
+                    {% empty %}
                     <div class="item-aprendiz">
                       <div class="info-aprendiz">
-                        <span class="nombre-aprendiz">María Fernanda López</span>
-                        <span class="documento-aprendiz">C.C. 9.876.543.210</span>
+                        <span class="nombre-aprendiz">No hay aspirantes registrados para esta ficha</span>
                       </div>
-                      <button>Seleccionar</button>
                     </div>
-                    <div class="item-aprendiz">
-                      <div class="info-aprendiz">
-                        <span class="nombre-aprendiz">Carlos Eduardo Martínez</span>
-                        <span class="documento-aprendiz">C.C. 5.555.555.555</span>
-                      </div>
-                      <button>Seleccionar</button>
-                    </div>
+                    {% endfor %}
                   </div>
                 </div>
               </div>
