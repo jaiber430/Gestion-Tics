@@ -21,16 +21,20 @@
         <tr>
           <th>Nombre del Programa</th>
           <th>Estado</th>
+          <th>Codigo de la ficha</th>
           <th>Descargar ficha de caracterización</th>
           <th>Descargar documento de los aspirantes</th>
           <th>Descargar carta de solicitud</th>
           <th>Descargar formato inscripcion masivo</th>
           <th>Fecha de Creación</th>
+          <th>observacion</th>
+          <th>Enviar</th>
           {% comment %} <th>Compartir</th> {% endcomment %}
         </tr>
       </thead>
       <tbody>
         {% for solicitud_consulta in solicitudes %}
+        <form action="">
         <tr>
           <td>{{ solicitud_consulta.codigoprograma.nombreprograma }}</td>
             <td>        
@@ -41,115 +45,29 @@
                 {% endfor %}
               </select>
             </td>
+          <td><input type="number" id="codigo_ficha" name="codigo_ficha" class="entrada-texto" placeholder="codigo de ficha" required /></td>
           <td><a href="{% url 'ficha_caracterizacion_pdf' solicitud_consulta.idsolicitud %}" style="background:#007bff;color:#fff;padding:8px 14px;text-decoration:none;border-radius:4px;font-size:12px;">Descargar PDF</a></td>
           <td><a href="{% url 'descargar_pdf' solicitud_consulta.idsolicitud rol %}" class="boton-descargar">Descargar PDF</a></td>
           <td><a href="{% url 'descargar_carta' solicitud_consulta.idsolicitud rol %}" class="boton-descargar">Descargar Carta</a></td>
-          <td>
-            <!-- Este es el enlace de descarga (visible al inicio) -->
-            <a href="{% url 'descargar_excel' solicitud_consulta.idsolicitud rol %}" 
-              class="boton-descargar"
-              id="descargar-excel">Descargar excel</a>
+          {% comment %} Descargar excel y si se descarga dejar el campo de subir archivo {% endcomment %}
+            <td>
+              <!-- Enlace de descarga -->
+              <a href="{% url 'descargar_excel' solicitud_consulta.idsolicitud rol %}" 
+                class="link-excel"
+                data-id="{{ solicitud_consulta.idsolicitud }}">
+                Descargar excel
+              </a>
 
-            <!-- Este es el campo de subida (oculto al inicio) -->
-            {% comment %} <div id="subida-reemplazo" style="display: none;">
-              <input type="file" id="archivo-subida">
-              <button>Subir archivo</button>
-            </div> {% endcomment %}
-          </td>
+              <!-- Campo de subida -->
+              <div class="subida-reemplazo" data-id="{{ solicitud_consulta.idsolicitud }}" style="display: none;">
+                <input type="file" class="archivo-subida" data-id="{{ solicitud_consulta.idsolicitud }}">
+              </div>
+            </td>
           <td>{{ solicitud_consulta.fechasolicitud }}</td>
-          {% comment %} <td>
-            <!-- Botón para abrir su propio modal -->
-            <button
-              onclick="document.getElementById('modal-{{ solicitud_consulta.idsolicitud }}').style.display='block'"
-              class="boton-compartir">
-              Compartir
-            </button> 
-          </td> {% endcomment %}
+          <td><textarea name="observacion" id="observacion" class="entrada-texto" ></textarea></td>
+          <td><button type="submit">Enviar </button></td>
         </tr>
-
-        <!-- Modal único para esta solicitud -->
-        <div id="modal-{{ solicitud_consulta.idsolicitud }}" class="modal-compartir" style="display: none;">
-          <div class="contenido-modal">
-            <div class="encabezado-modal">
-              <h3>Compartir Ficha</h3>
-              <!-- Botón para cerrar este modal -->
-              <button
-                onclick="document.getElementById('modal-{{ solicitud_consulta.idsolicitud }}').style.display='none'"
-                class="boton-cerrar-modal">&times;</button>
-            </div>
-
-            <div class="cuerpo-modal">
-              <p class="programa-seleccionado">
-                Programa: {{ solicitud_consulta.codigoprograma.nombreprograma }}
-              </p>
-              {% comment %} <p class="programa-seleccionado">
-                ID de Solicitud: {{ solicitud_consulta.idsolicitud }}
-              </p> {% endcomment %}
-
-              <!-- ✅ Enlace con href correcto y texto original -->
-              <div class="opcion-compartir">
-                <h4>Compartir con enlace</h4>
-                <div class="grupo-link">
-                  <!-- HREF con el ID correcto, texto NO modificado -->
-                  <a href="{% url 'formularioaspirantes' solicitud_consulta.idsolicitud %}">
-                    https://preinscripcion/{{codigo}}
-                  </a>
-                </div>
-              </div>
-
-              <div class="separador-modal">
-                <span>O</span>
-              </div>
-
-              <!-- Opción 2: Compartir con aprendiz específico -->
-              <div class="opcion-compartir">
-                <h4>Compartir con aprendiz específico</h4>
-                <p class="descripcion-opcion">
-                  Busca y selecciona un aprendiz para compartir directamente
-                </p>
-
-                <div class="grupo-busqueda">
-                  <label for="buscar-aprendiz-{{ solicitud_consulta.idsolicitud }}">Buscar aprendiz:</label>
-                  <input type="text" id="buscar-aprendiz-{{ solicitud_consulta.idsolicitud }}"
-                    class="input-busqueda" placeholder="Escribe el nombre o documento del aprendiz..." />
-
-                  <!-- Lista de resultados (estática/simulada) -->
-                  <div class="resultados-busqueda">
-                    <div class="item-aprendiz">
-                      <div class="info-aprendiz">
-                        <span class="nombre-aprendiz">Juan Carlos Pérez</span>
-                        <span class="documento-aprendiz">C.C. 1.234.567.890</span>
-                      </div>
-                      <button>Seleccionar</button>
-                    </div>
-                    <div class="item-aprendiz">
-                      <div class="info-aprendiz">
-                        <span class="nombre-aprendiz">María Fernanda López</span>
-                        <span class="documento-aprendiz">C.C. 9.876.543.210</span>
-                      </div>
-                      <button>Seleccionar</button>
-                    </div>
-                    <div class="item-aprendiz">
-                      <div class="info-aprendiz">
-                        <span class="nombre-aprendiz">Carlos Eduardo Martínez</span>
-                        <span class="documento-aprendiz">C.C. 5.555.555.555</span>
-                      </div>
-                      <button>Seleccionar</button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Pie del modal -->
-            <div class="pie-modal">
-              <button
-                onclick="document.getElementById('modal-{{ solicitud_consulta.idsolicitud }}').style.display='none'"
-                class="boton-cancelar">Cancelar</button>
-              <button class="boton-compartir-modal">Compartir</button>
-            </div>
-          </div>
-        </div>
+        </form>
         {% endfor %}
       </tbody>
     </table>
@@ -342,5 +260,39 @@
   </div>
 </main>
 {% endif %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  // Recorremos todos los enlaces de excel
+  document.querySelectorAll(".link-excel").forEach(enlace => {
+    const id = enlace.dataset.id;
+    const subida = document.querySelector(`.subida-reemplazo[data-id="${id}"]`);
+    const inputArchivo = document.querySelector(`.archivo-subida[data-id="${id}"]`);
 
+    // Revisamos el estado guardado en localStorage
+    const estado = localStorage.getItem("estadoExcel_" + id);
+
+    if (estado === "descargado") {
+      enlace.style.display = "none";
+      subida.style.display = "block";
+    } else {
+      enlace.style.display = "block";
+      subida.style.display = "none";
+    }
+
+    // Cuando se hace clic en el enlace (DESCARGAR)
+    enlace.addEventListener("click", function() {
+      enlace.style.display = "none";
+      subida.style.display = "block";
+      localStorage.setItem("estadoExcel_" + id, "descargado");
+    });
+
+    // Cuando se sube un archivo
+    inputArchivo.addEventListener("change", function() {
+      enlace.style.display = "block";
+      subida.style.display = "none";
+      localStorage.setItem("estadoExcel_" + id, "subido");
+    });
+  });
+});
+</script>
 {% endblock %}

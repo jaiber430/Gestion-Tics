@@ -83,7 +83,6 @@ def consultas_instructor(request):
 
         solicitudes = solicitudes_filtradas if solicitudes_filtradas else Solicitud.objects.none()
 
-
     else:
         # Para otros roles, traer solicitudes del usuario directamente
         solicitudes = Solicitud.objects.select_related('idusuario').filter(idusuario=user_id)
