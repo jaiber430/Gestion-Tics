@@ -16,13 +16,40 @@
     font-weight: 600;
 }
 
-/* Información de horas */
+/* Información de horas - Mejorada */
 .info-horas {
     margin: 15px 0;
-    padding: 12px;
+    padding: 15px;
     border: 1px solid #ddd;
-    border-radius: 5px;
+    border-radius: 8px;
     background-color: #f8f9fa;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+}
+
+.info-horas-item {
+    text-align: center;
+    padding: 10px;
+    background-color: white;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.info-horas-label {
+    display: block;
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    font-weight: 500;
+}
+
+.info-horas-valor {
+    display: block;
+    font-size: 16px;
+    font-weight: 600;
+    color: #2E7D32;
 }
 
 .info-horas.estado-correcto {
@@ -56,12 +83,41 @@
     font-weight: 600;
 }
 
-/* Contenedor de meses */
+/* Contenedor de meses - Mejor organización */
 .calendario-meses {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 25px;
     margin: 20px 0;
+}
+
+/* NUEVO: Botones de control del calendario */
+.controles-calendario {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+}
+
+.btn-control-calendario {
+    padding: 8px 16px;
+    background-color: #2E7D32;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-control-calendario:hover {
+    background-color: #1B5E20;
+    transform: translateY(-1px);
 }
 
 /* Calendario individual por mes */
