@@ -464,7 +464,6 @@ def revision_fichas(request, id):
             actualizacion_excel = request.FILES.get('actualizar_excel')  # Solo si lo necesitas
 
             # Validar duplicados correctamente y con redirect al mismo formulario
-            # ✅ Cambio: se valida en Aspirantes (antes lo hacías en Ficha)
             duplicado = Ficha.objects.filter(
                 codigoficha=numero_ficha
             ).exists()
