@@ -31,18 +31,14 @@ import shutil
 
 def consultas_instructor(request):
 
-    # Codigo encargado de generar numeros y letras aleatorios con las importaciones 
+    # Codigo encargado de generar numeros y letras aleatorios
     caracteres = string.ascii_letters + string.digits
-    # choice = Elegir elemento al azar 
-    # Join = Concatencaión de caracteres
     codigo = ''.join(secrets.choice(caracteres) for _ in range(5))
 
     user_id = request.session.get('user_id')
 
-    # Obtener el rol por medio del id del usuario que ingreso
+    # Obtener el usuario y su rol
     usuario = Usuario.objects.select_related('rol').get(idusuario=user_id)
-
-    # Crear una variable para almacenar el rol
     id_rol = usuario.rol.idrol
 
     # Definir layout según rol
@@ -59,41 +55,51 @@ def consultas_instructor(request):
         layout = 'layout/layout_admin.html'
         rol_name = "Administrador"
 
-    
     """
     ======================================
     Obtener la solicitud para la consulta
     ======================================
     """
     if id_rol == 3:
-        # Obtener fecha actual
+
+        # Fecha actual y rango del mes
         hoy = datetime.date.today()
         anio = hoy.year
         mes = hoy.month
- 
-        # Obtener el primer y último día del mes actual
         primer_dia = datetime.date(anio, mes, 1)
         ultimo_dia = datetime.date(anio, mes, calendar.monthrange(anio, mes)[1])
 
-        # Filtrar solicitudes por rango de fechas del mes actual
-        solicitudes = Solicitud.objects.filter(fechasolicitud__range=(primer_dia, ultimo_dia))
+        # Traer todas las solicitudes dentro del mes actual (sin limitar al funcionario logueado)
+        solicitudes_mes = Solicitud.objects.filter(
+            fechasolicitud__range=(primer_dia, ultimo_dia)
+        )
+
+        # Filtrar solo las solicitudes que cumplan la condición de cupo
+        solicitudes_filtradas = []
+        for solicitud in solicitudes_mes:
+            aspirantes_registrados = Aspirantes.objects.filter(solicitudinscripcion=solicitud).count()
+            if aspirantes_registrados >= solicitud.cupo:
+                solicitudes_filtradas.append(solicitud)
+
+        solicitudes = solicitudes_filtradas if solicitudes_filtradas else Solicitud.objects.none()
+
+
     else:
-        solicitudes = Solicitud.objects.select_related(
-            'idusuario'   
-            ).filter(idusuario=user_id) 
+        # Para otros roles, traer solicitudes del usuario directamente
+        solicitudes = Solicitud.objects.select_related('idusuario').filter(idusuario=user_id)
 
-    # programa_formacion = Solicitud.objects.select_related('codigoprograma')
+    # Obtener estados
+    estado = Estados.objects.values('idestado', 'estados')
 
-    estado = Estados.objects.values('idestado', 'estados')  # ← devuelve diccionarios
-
+    # Renderizar el template
     return render(request, "consultas/consultas_instructor.html", {
-            "layout": layout,
-            "rol": id_rol,
-            "user": rol_name,
-            'codigo': codigo,
-            'solicitudes': solicitudes,
-            'estado': estado,
-        })
+        "layout": layout,
+        "rol": id_rol,
+        "user": rol_name,
+        'codigo': codigo,
+        'solicitudes': solicitudes,
+        'estado': estado,
+    })
 
 
 def ficha_caracterizacion(request, solicitud_id):
