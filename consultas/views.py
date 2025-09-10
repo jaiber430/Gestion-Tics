@@ -91,6 +91,20 @@ def consultas_instructor(request):
     # Obtener estados
     estado = Estados.objects.values('idestado', 'estados')
 
+    # Para roles de instructor (1) y administrador (4), obtener aspirantes de cada solicitud
+    solicitudes_con_aspirantes = []
+    if id_rol in [1, 4]:  # Solo para instructor y administrador
+        for solicitud in solicitudes:
+            # Obtener aspirantes relacionados con esta solicitud con toda la información necesaria
+            aspirantes = Aspirantes.objects.select_related(
+                'tipoidentificacion', 'idcaracterizacion'
+            ).filter(solicitudinscripcion=solicitud.idsolicitud)
+            
+            # Agregar los aspirantes a la solicitud como un atributo temporal
+            solicitud.aspirantes = aspirantes
+            solicitudes_con_aspirantes.append(solicitud)
+        solicitudes = solicitudes_con_aspirantes
+
     # Renderizar el template
     return render(request, "consultas/consultas_instructor.html", {
         "layout": layout,
