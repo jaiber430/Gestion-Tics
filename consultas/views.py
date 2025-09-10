@@ -65,15 +65,12 @@ def consultas_instructor(request):
     Obtener la solicitud para la consulta
     ======================================
     """
-
-    # estado =  Estados.objects.values_list(estados, flat=True)
-
     if id_rol == 3:
         # Obtener fecha actual
         hoy = datetime.date.today()
         anio = hoy.year
         mes = hoy.month
-
+ 
         # Obtener el primer y último día del mes actual
         primer_dia = datetime.date(anio, mes, 1)
         ultimo_dia = datetime.date(anio, mes, calendar.monthrange(anio, mes)[1])
