@@ -28,28 +28,31 @@
       <div class="seccion-formulario">
         <h3 class="titulo-seccion-form">Información del Programa</h3>
 
-        <div class="campo-entrada">
-          <label for="tieneEmpresa" class="etiqueta-campo">Tipo de oferta*:</label>
-          <select id="tieneEmpresa" name="tieneEmpresa" class="entrada-select" required>
-            <option value="">Seleccione una opción</option>
-            <option value="no">Abierta</option>
-            <option value="si">Cerrada</option>
-          </select>
+        <div class="fila-campos-2">
+          <div class="campo-entrada">
+            <label for="tieneEmpresa" class="etiqueta-campo">Tipo de oferta*:</label>
+            <select id="tieneEmpresa" name="tieneEmpresa" class="entrada-select" required>
+              <option value="">Seleccione una opción</option>
+              <option value="no">Abierta</option>
+              <option value="si">Cerrada</option>
+            </select>
+          </div>
+          <div class="campo-entrada">
+            <label class="etiqueta-campo">&nbsp;</label>
+            <button type="button" class="boton-modal" onclick="abrirModal()">Filtrar y Seleccionar Programa</button>
+          </div>
         </div>
 
-        <div class="campo-entrada">
-          <button type="button" class="boton-modal" onclick="abrirModal()">Filtrar y Seleccionar Programa</button>
-        </div>
-
-        <div class="campo-entrada">
-          <label for="tipoPrograma" class="etiqueta-campo">Tipo de Programa*:</label>
-          <input type="text" id="tipoPrograma" name="tipoPrograma" class="entrada-texto" readonly required placeholder="Seleccionar desde el modal" />
-          <input type="hidden" id="tipoPrograma_id" name="tipoPrograma_id" />
-        </div>
-
-        <div class="campo-entrada">
-          <label for="horasPrograma" class="etiqueta-campo">Horas del Programa*:</label>
-          <input type="text" id="horasPrograma" name="horasPrograma" class="entrada-texto" readonly required />
+        <div class="fila-campos-2">
+          <div class="campo-entrada">
+            <label for="tipoPrograma" class="etiqueta-campo">Tipo de Programa*:</label>
+            <input type="text" id="tipoPrograma" name="tipoPrograma" class="entrada-texto" readonly required placeholder="Seleccionar desde el modal" />
+            <input type="hidden" id="tipoPrograma_id" name="tipoPrograma_id" />
+          </div>
+          <div class="campo-entrada">
+            <label for="horasPrograma" class="etiqueta-campo">Horas del Programa*:</label>
+            <input type="text" id="horasPrograma" name="horasPrograma" class="entrada-texto" readonly required />
+          </div>
         </div>
 
         <div class="campo-entrada">
@@ -69,150 +72,163 @@
           {% endfor %}
         </div>
 
-        <div class="campo-entrada">
-          <label for="codigoCurso" class="etiqueta-campo">Código de Curso*:</label>
-          <input type="text" id="codigoCurso" name="codigoCurso" class="entrada-texto" readonly required />
-        </div>
-
-        <div class="campo-entrada">
-          <label for="versionPrograma" class="etiqueta-campo">Versión del Programa*:</label>
-          <input type="text" id="versionPrograma" name="versionPrograma" class="entrada-texto" readonly required />
-        </div>
-
-        <div class="campo-entrada">
-          <label for="subsectorEconomico" class="etiqueta-campo">Subsector Económico*:</label>
-          <input type="text" id="subsectorEconomico" name="subsectorEconomico" class="entrada-texto" required />
+        <div class="fila-campos-3">
+          <div class="campo-entrada">
+            <label for="codigoCurso" class="etiqueta-campo">Código de Curso*:</label>
+            <input type="text" id="codigoCurso" name="codigoCurso" class="entrada-texto" readonly required />
+          </div>
+          <div class="campo-entrada">
+            <label for="versionPrograma" class="etiqueta-campo">Versión del Programa*:</label>
+            <input type="text" id="versionPrograma" name="versionPrograma" class="entrada-texto" readonly required />
+          </div>
+          <div class="campo-entrada">
+            <label for="subsectorEconomico" class="etiqueta-campo">Subsector Económico*:</label>
+            <input type="text" id="subsectorEconomico" name="subsectorEconomico" class="entrada-texto" required />
+          </div>
         </div>
       </div>
 
       <!-- Sección Empresa (solo si es cerrada) -->
       <div class="seccion-formulario" id="seccionEmpresa" style="display: none;">
         <h3 class="titulo-seccion-form">Empresa y Responsable</h3>
-        <div class="campo-entrada">
-          <label for="empresaSolicitante" class="etiqueta-campo">Empresa Solicitante*:</label>
-          <input type="text" id="empresaSolicitante" name="empresaSolicitante" class="entrada-texto" placeholder="Nombre de la empresa" />
+        
+        <div class="info-empresa">
+          <div class="campo-entrada">
+            <label for="empresaSolicitante" class="etiqueta-campo">Empresa Solicitante*:</label>
+            <input type="text" id="empresaSolicitante" name="empresaSolicitante" class="entrada-texto" placeholder="Nombre de la empresa" />
+          </div>
+          <div class="campo-entrada">
+            <label for="tipoEmpresa" class="etiqueta-campo">Tipo de Empresa*:</label>
+            <select id="tipoEmpresa" name="tipoEmpresa" class="entrada-select">
+              <option value="">Seleccione...</option>
+              {% for tipo in tipos_empresas %}
+                <option value="{{ tipo.idtipoempresa }}">{{ tipo.tipoempresa }}</option>
+              {% endfor %}
+            </select>
+          </div>
         </div>
-        <div class="campo-entrada">
-          <label for="tipoEmpresa" class="etiqueta-campo">Tipo de Empresa*:</label>
-          <select id="tipoEmpresa" name="tipoEmpresa" class="entrada-select">
-            <option value="">Seleccione...</option>
-            {% for tipo in tipos_empresas %}
-              <option value="{{ tipo.idtipoempresa }}">{{ tipo.tipoempresa }}</option>
-            {% endfor %}
-          </select>
+        
+        <div class="responsable-empresa">
+          <div class="campo-entrada">
+            <label for="nombreResponsable" class="etiqueta-campo">Nombre del Responsable*:</label>
+            <input type="text" id="nombreResponsable" name="nombreResponsable" class="entrada-texto" placeholder="Nombre completo" />
+          </div>
+          <div class="campo-entrada">
+            <label for="correoResponsable" class="etiqueta-campo">Correo Electrónico*:</label>
+            <input type="email" id="correoResponsable" name="correoResponsable" class="entrada-texto" placeholder="correo@empresa.com" />
+          </div>
         </div>
-        <div class="campo-entrada">
-          <label for="nombreResponsable" class="etiqueta-campo">Nombre del Responsable*:</label>
-          <input type="text" id="nombreResponsable" name="nombreResponsable" class="entrada-texto" placeholder="Nombre completo" />
-        </div>
-        <div class="campo-entrada">
-          <label for="correoResponsable" class="etiqueta-campo">Correo Electrónico*:</label>
-          <input type="email" id="correoResponsable" name="correoResponsable" class="entrada-texto" placeholder="correo@empresa.com" />
-        </div>
-        <div class="campo-entrada">
-          <label for="nitEmpresa" class="etiqueta-campo">NIT de la Empresa*:</label>
-          <input type="text" id="nitEmpresa" name="nitEmpresa" class="entrada-texto" placeholder="123.456.789-0" />
-        </div>
-        <div class="campo-entrada">
-          <label for="cartaSolicitud" class="etiqueta-campo">Carta de Solicitud (PDF)*:</label>
-          <input type="file" id="cartaSolicitud" name="cartaSolicitud" accept=".pdf" required />
-          <small class="texto-ayuda">Solo archivos PDF. Máximo 5MB.</small>
-        </div>
-      </div>
-
-      <!-- Sección 2: Fechas -->
-      <div class="seccion-formulario">
-        <h3 class="titulo-seccion-form">Cupos</h3>
-        <div class="campo-entrada">
-          <label for="cupoAprendices" class="etiqueta-campo">Cupo de Aprendices*:</label>
-          <select id="cupoAprendices" name="cupoAprendices" class="entrada-select" required>
-            <option value="">Seleccione cupo</option>
-            <option value="25">25</option>
-            <option value="30">30</option>
-          </select>
+        
+        <div class="fila-campos-2">
+          <div class="campo-entrada">
+            <label for="nitEmpresa" class="etiqueta-campo">NIT de la Empresa*:</label>
+            <input type="text" id="nitEmpresa" name="nitEmpresa" class="entrada-texto" placeholder="123.456.789-0" />
+          </div>
+          <div class="campo-entrada">
+            <label for="cartaSolicitud" class="etiqueta-campo">Carta de Solicitud (PDF)*:</label>
+            <input type="file" id="cartaSolicitud" name="cartaSolicitud" accept=".pdf" required />
+            <small class="texto-ayuda">Solo archivos PDF. Máximo 5MB.</small>
+          </div>
         </div>
       </div>
 
-      <!-- Sección 3: Ubicación -->
+      <!-- Sección 2: Cupos y Ubicación -->
       <div class="seccion-formulario">
-        <h3 class="titulo-seccion-form">Ubicación de Formación</h3>
-        <div class="campo-entrada">
-          <label for="departamentoFormacion" class="etiqueta-campo">Departamento de Formación*:</label>
-          <select id="departamentoFormacion" name="departamentoFormacion" class="entrada-select" required>
-            <option value="">Seleccione departamento</option>
-            {% for dpto in departamentos %}
-              <option value="{{ dpto.codigodepartamentos }}">{{ dpto.departamentos }}</option>
-            {% endfor %}
-          </select>
+        <h3 class="titulo-seccion-form">Cupos y Ubicación de Formación</h3>
+        
+        <div class="fila-campos-3">
+          <div class="campo-entrada">
+            <label for="cupoAprendices" class="etiqueta-campo">Cupo de Aprendices*:</label>
+            <select id="cupoAprendices" name="cupoAprendices" class="entrada-select" required>
+              <option value="">Seleccione cupo</option>
+              <option value="25">25</option>
+              <option value="30">30</option>
+            </select>
+          </div>
+          <div class="campo-entrada">
+            <label for="departamentoFormacion" class="etiqueta-campo">Departamento de Formación*:</label>
+            <select id="departamentoFormacion" name="departamentoFormacion" class="entrada-select" required>
+              <option value="">Seleccione departamento</option>
+              {% for dpto in departamentos %}
+                <option value="{{ dpto.codigodepartamentos }}">{{ dpto.departamentos }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="campo-entrada">
+            <label for="municipioFormacion" class="etiqueta-campo">Municipio de Formación*:</label>
+            <select id="municipioFormacion" name="municipioFormacion" class="entrada-select" required>
+              <option value="">Primero seleccione departamento</option>
+              {% for m in municipios %}
+                <option value="{{ m.codigomunicipio }}"
+                        data-dep="{{ m.codigodepartamento.codigodepartamentos|default:'' }}">
+                  {{ m.municipio }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
         </div>
-        <div class="campo-entrada">
-          <label for="municipioFormacion" class="etiqueta-campo">Municipio de Formación*:</label>
-          <select id="municipioFormacion" name="municipioFormacion" class="entrada-select" required>
-            <option value="">Primero seleccione departamento</option>
-            {% for m in municipios %}
-              <option value="{{ m.codigomunicipio }}"
-                      data-dep="{{ m.codigodepartamento.codigodepartamentos|default:'' }}">
-                {{ m.municipio }}
-              </option>
-            {% endfor %}
-          </select>
-        </div>
+        
         <div class="campo-entrada">
           <label for="direccionFormacion" class="etiqueta-campo">Dirección de Formación*:</label>
           <textarea id="direccionFormacion" name="direccionFormacion" class="entrada-textarea" rows="3" required></textarea>
         </div>
       </div>
 
-      <!-- Sección 4: Programa Especial -->
+      <!-- Sección 3: Programa Especial y Ambiente -->
       <div class="seccion-formulario">
-        <h3 class="titulo-seccion-form">Programa Especial</h3>
-        <div class="campo-entrada">
-          <label for="programaEspecial" class="etiqueta-campo">Programa Especial*:</label>
-          <select id="programaEspecial" name="programaEspecial" class="entrada-select" required>
-            <option value="">Seleccione programa</option>
-            {% for especial in programas_especiales %}
-              <option value="{{ especial.idespecial }}">{{ especial.programaespecial }}</option>
-            {% endfor %}
-          </select>
+        <h3 class="titulo-seccion-form">Programa Especial y Ambiente de Formación</h3>
+        
+        <div class="fila-campos-2">
+          <div class="campo-entrada">
+            <label for="programaEspecial" class="etiqueta-campo">Programa Especial*:</label>
+            <select id="programaEspecial" name="programaEspecial" class="entrada-select" required>
+              <option value="">Seleccione programa</option>
+              {% for especial in programas_especiales %}
+                <option value="{{ especial.idespecial }}">{{ especial.programaespecial }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="campo-entrada">
+            <label for="nombreAmbiente" class="etiqueta-campo">Nombre del Ambiente*:</label>
+            <select id="nombreAmbiente" name="nombreAmbiente" class="entrada-select" required>
+              <option value="">Seleccione ambiente</option>
+              {% for amb in ambientes %}
+                <option value="{{ amb.idambiente }}">{{ amb.ambiente }}</option>
+              {% endfor %}
+            </select>
+          </div>
         </div>
+        
         <div class="campo-entrada">
           <label for="convenio" class="etiqueta-campo">Convenio (opcional):</label>
           <input type="text" id="convenio" name="convenio" class="entrada-texto" placeholder="Nombre o número del convenio" />
         </div>
       </div>
 
-      <!-- Sección 5: Ambiente de Formación -->
-      <div class="seccion-formulario">
-        <h3 class="titulo-seccion-form">Ambiente de Formación</h3>
-        <div class="campo-entrada">
-          <label for="nombreAmbiente" class="etiqueta-campo">Nombre del Ambiente*:</label>
-          <select id="nombreAmbiente" name="nombreAmbiente" class="entrada-select" required>
-            <option value="">Seleccione ambiente</option>
-            {% for amb in ambientes %}
-              <option value="{{ amb.idambiente }}">{{ amb.ambiente }}</option>
-            {% endfor %}
-          </select>
-        </div>
-      </div>
-
-      <!-- Sección 6: Programación del Curso -->
+      <!-- Sección 4: Programación del Curso -->
       <div class="seccion-formulario">
         <h3 class="titulo-seccion-form">Programación del Curso y Horario</h3>
-        <div class="campo-entrada">
-          <label for="fechaInicio" class="etiqueta-campo">Fecha de Inicio*:</label>
-          <input type="date" id="fechaInicio" name="fechaInicio" class="entrada-texto" required />
+        
+        <div class="fila-campos-2">
+          <div class="campo-entrada">
+            <label for="fechaInicio" class="etiqueta-campo">Fecha de Inicio*:</label>
+            <input type="date" id="fechaInicio" name="fechaInicio" class="entrada-texto" required />
+          </div>
+          <div class="campo-entrada">
+            <label for="fechaFinalizacion" class="etiqueta-campo">Fecha de Finalización*:</label>
+            <input type="date" id="fechaFinalizacion" name="fechaFinalizacion" class="entrada-texto" required />
+          </div>
         </div>
-        <div class="campo-entrada">
-          <label for="fechaFinalizacion" class="etiqueta-campo">Fecha de Finalización*:</label>
-          <input type="date" id="fechaFinalizacion" name="fechaFinalizacion" class="entrada-texto" required />
-        </div>
-        <div class="campo-entrada">
-          <label for="horarioInicio" class="etiqueta-campo">Hora de Inicio*:</label>
-          <input type="time" id="horarioInicio" name="horarioInicio" class="entrada-texto" required />
-        </div>
-        <div class="campo-entrada">
-          <label for="horarioFin" class="etiqueta-campo">Hora de Fin*:</label>
-          <input type="time" id="horarioFin" name="horarioFin" class="entrada-texto" required />
+        
+        <div class="contenedor-horarios">
+          <div class="campo-entrada">
+            <label for="horarioInicio" class="etiqueta-campo">Hora de Inicio*:</label>
+            <input type="time" id="horarioInicio" name="horarioInicio" class="entrada-texto" required />
+          </div>
+          <div class="campo-entrada">
+            <label for="horarioFin" class="etiqueta-campo">Hora de Fin*:</label>
+            <input type="time" id="horarioFin" name="horarioFin" class="entrada-texto" required />
+          </div>
         </div>
         <div class="campo-entrada">
           <label class="etiqueta-campo">Días de la Semana*:</label>

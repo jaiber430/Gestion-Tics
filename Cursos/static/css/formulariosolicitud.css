@@ -119,6 +119,7 @@ body {
     display: block;
 }
 
+
 .enlace-menu:hover {
     background-color: var(--color-primario-hover);
 }
@@ -207,6 +208,36 @@ body {
     margin-bottom: var(--espaciado-lg);
 }
 
+/* campos en fila */
+.fila-campos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--espaciado-md);
+    margin-bottom: var(--espaciado-lg);
+}
+
+.fila-campos-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--espaciado-md);
+    margin-bottom: var(--espaciado-lg);
+}
+
+.fila-campos-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: var(--espaciado-md);
+    margin-bottom: var(--espaciado-lg);
+}
+
+.campo-completo {
+    grid-column: 1 / -1;
+}
+
+.campo-pequeno {
+    max-width: 200px;
+}
+
 .etiqueta-campo {
     display: block;
     font-weight: var(--peso-medio);
@@ -217,7 +248,8 @@ body {
 
 .entrada-texto,
 .entrada-select,
-.entrada-textarea {
+.entrada-textarea,
+input[type="file"] {
     width: 100%;
     padding: var(--espaciado-md);
     border: 0.2rem solid var(--color-borde);
@@ -228,20 +260,8 @@ body {
     color: var(--color-texto-principal);
 }
 
-/* NUEVO: Estilos para campo de archivo */
-.entrada-archivo {
-    width: 100%;
-    padding: var(--espaciado-sm);
-    border: 0.2rem solid var(--color-borde);
-    border-radius: var(--radio-borde);
-    font-family: var(--fuente-principal);
-    font-size: 1.4rem;
-    background-color: var(--color-secundario);
-    color: var(--color-texto-principal);
-    cursor: pointer;
-}
-
-.entrada-archivo::file-selector-button {
+/* Botón del selector de archivo unificado */
+input[type="file"]::file-selector-button {
     background-color: var(--color-primario);
     color: var(--color-secundario);
     border: none;
@@ -253,20 +273,14 @@ body {
     margin-right: var(--espaciado-md);
 }
 
-.entrada-archivo::file-selector-button:hover {
+input[type="file"]::file-selector-button:hover {
     background-color: var(--color-primario-hover);
 }
 
 .entrada-texto:focus,
 .entrada-select:focus,
-.entrada-textarea:focus {
-    outline: none;
-    border-color: var(--color-primario);
-    box-shadow: 0 0 0 0.3rem rgba(76, 175, 80, 0.2);
-}
-
-/* NUEVO: Focus para campo de archivo */
-.entrada-archivo:focus {
+.entrada-textarea:focus,
+input[type="file"]:focus {
     outline: none;
     border-color: var(--color-primario);
     box-shadow: 0 0 0 0.3rem rgba(76, 175, 80, 0.2);
@@ -275,6 +289,26 @@ body {
 .contenedor-checkboxes {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: var(--espaciado-md);
+}
+
+/* Estilo para contenedor de horarios */
+.contenedor-horarios {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--espaciado-md);
+}
+
+/* campos de empresa en fila */
+.info-empresa {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: var(--espaciado-md);
+}
+
+.responsable-empresa {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: var(--espaciado-md);
 }
 
@@ -292,12 +326,31 @@ body {
     accent-color: var(--color-primario);
 }
 
-/* NUEVO: Texto de ayuda para archivos */
+/*Texto de ayuda para archivos */
 .texto-ayuda {
     font-size: 1.2rem;
     color: var(--color-texto-secundario);
     margin-top: var(--espaciado-xs);
     font-style: italic;
+}
+
+/* Estilo para botón modal */
+.boton-modal {
+    width: 100%;
+    padding: var(--espaciado-md);
+    background-color: var(--color-primario-claro);
+    color: var(--color-secundario);
+    border: none;
+    border-radius: var(--radio-borde);
+    font-family: var(--fuente-principal);
+    font-size: 1.4rem;
+    font-weight: var(--peso-medio);
+    cursor: pointer;
+    margin-top: 2.8rem; /* Para alinearse con otros campos */
+}
+
+.boton-modal:hover {
+    background-color: var(--color-primario-hover);
 }
 
 .contenedor-botones-formulario {
