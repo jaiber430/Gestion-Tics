@@ -162,10 +162,11 @@ def ficha_caracterizacion(request, solicitud_id):
     
     return render(request, 'fichacaracterizacion/fichacaracterizacion.html', context)
 
-
-
 def ficha_caracterizacion_pdf(request, solicitud_id):
-    """Genera un PDF de la ficha de caracterización usando WeasyPrint"""
+    """Genera un PDF de la ficha de caracterización usando WeasyPrint.
+    Solo lo guarda en disco si el rol es 3 (funcionario). En otros roles, solo lo descarga sin guardar.
+    """
+
     # Reutilizar la lógica de la vista HTML
     user_id = request.session.get('user_id')
     usuario_actual = get_object_or_404(Usuario.objects.select_related('rol'), idusuario=user_id)
@@ -210,7 +211,7 @@ def ficha_caracterizacion_pdf(request, solicitud_id):
         'empresa': empresa,
         'programa_especial': programa_especial,
         'ambiente': ambiente,
-        'pdf_mode': True,  # bandera para ocultar botón en PDF
+        'pdf_mode': True,
     }
 
     html_string = render_to_string('fichacaracterizacion/fichacaracterizacion.html', context)
@@ -223,9 +224,32 @@ def ficha_caracterizacion_pdf(request, solicitud_id):
 
     pdf_bytes = html.write_pdf(stylesheets=[css])
 
-    response = HttpResponse(pdf_bytes, content_type='application/pdf')
-    response['Content-Disposition'] = f'inline; filename="ficha_{solicitud.codigosolicitud}.pdf"'
-    return response
+    # ✅ SOLO si el rol es 3, guardar en disco
+    if int(id_rol) == 3:
+        folder_name = f"solicitud_{solicitud.idsolicitud}"
+        carpeta_destino = os.path.join(settings.MEDIA_ROOT, 'funcionario', folder_name)
+        os.makedirs(carpeta_destino, exist_ok=True)
+
+        filename_pdf = f"ficha_caracterizacion_{solicitud.idsolicitud}.pdf"
+        ruta_guardado = os.path.join(carpeta_destino, filename_pdf)
+
+        # Guardar el archivo en disco
+        with open(ruta_guardado, 'wb') as f:
+            f.write(pdf_bytes)
+
+        # Abrir el archivo guardado para descargarlo
+        response_file = open(ruta_guardado, 'rb')
+    else:
+        # Para otros roles: no guardar en disco, usar los bytes directamente
+        response_file = pdf_bytes
+
+    # Descargar el archivo (desde disco si rol=3, desde bytes si otro rol)
+    return FileResponse(
+        response_file,
+        as_attachment=True,
+        filename='Documentos_aspirantes.pdf',
+        content_type='application/pdf'
+    )
 
 def descargar_pdf(request, id, idrol):
     folder_name = f"solicitud_{id}"
@@ -320,3 +344,29 @@ def generar_excel(request, idsolicitud):
     nuevo_archivo.save(response)
     return response
 
+def descargar_excel(request, id, idrol):
+    folder_name = f"solicitud_{id}"
+
+    buscar_excel = os.path.join(settings.MEDIA_ROOT, 'excel', f'formato_inscripcion_{id}.xlsx')
+
+    if not os.path.exists(buscar_excel):
+        raise Http404("Excel no encontrado")
+
+    # Si el rol es 3 = funcionario crear una copia del archivo
+    if int(idrol) == 3:
+        # Ruta de destino donde se guardará una copia
+        carpeta_destino = os.path.join(settings.MEDIA_ROOT, 'Funcionario', folder_name)
+        os.makedirs(carpeta_destino, exist_ok=True)
+
+        guardar_excel = os.path.join(carpeta_destino, f'formato_inscripcion_{id}.xlsx')
+
+        # Copiar el archivo original al nuevo destino
+        shutil.copy2(buscar_excel, guardar_excel)
+
+    # Descargar el archivo original
+    return FileResponse(
+        open(buscar_excel, 'rb'),
+        as_attachment=True,
+        filename='Formato_inscripcion.xlsx',
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
