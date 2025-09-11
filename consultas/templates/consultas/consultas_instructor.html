@@ -1,74 +1,6 @@
 {% extends layout %}
 
 {% block content %}
-
-{% comment %} Mostar esto solo al funcionario {% endcomment %}
-{%  if rol == 3 %}
-<!-- Sección principal - Consultar Fichas -->
-<main class="contenido-principal">
-  <!-- Título de la sección -->
-  <div class="titulo-seccion">
-    <h2 class="titulo-pagina">Consultar solicitudes {{ user }} {{ user_name }}</h2>
-    <p class="subtitulo-pagina">
-      Aquí puede consultar el estado de las fichas solicitadas y descargar los documentos correspondientes
-    </p>
-  </div>
-
-  <!-- Contenedor de la tabla de fichas -->
-  <div class="contenedor-tabla-fichas">
-    <table class="tabla-fichas">
-      <thead>
-        <tr>
-          <th>Nombre del Programa</th>
-          <th>Estado</th>
-          <th>Codigo de la ficha</th>
-          <th>Descargar ficha de caracterización</th>
-          <th>Descargar documento de los aspirantes</th>
-          <th>Descargar carta de solicitud</th>
-          <th>Descargar formato inscripcion masivo</th>
-          <th>Fecha de Creación</th>
-          <th>observacion</th>
-          <th>Enviar</th>
-          {% comment %} <th>Compartir</th> {% endcomment %}
-        </tr>
-      </thead>
-      <tbody>
-        {% for solicitud_consulta in solicitudes %}
-        <form action="">
-        <tr>
-          <td>{{ solicitud_consulta.codigoprograma.nombreprograma }}</td>
-            <td>        
-              <select>
-                <option value="">-- Seleccione un estado --</option>
-                {% for item in estado %}
-                <option value="{{ item.idestado }}">{{ item.estados }}</option>
-                {% endfor %}
-              </select>
-            </td>
-          <td><input type="number" id="codigo_ficha" name="codigo_ficha" class="entrada-texto" placeholder="codigo de ficha" required /></td>
-          <td><a href="{% url 'ficha_caracterizacion_pdf' solicitud_consulta.idsolicitud %}" class="boton-descargar">Descargar PDF</a></td>
-          <td><a href="{% url 'descargar_pdf' solicitud_consulta.idsolicitud rol %}" class="boton-descargar">Descargar PDF</a></td>
-          <td><a href="{% url 'descargar_carta' solicitud_consulta.idsolicitud rol %}" class="boton-descargar">Descargar Carta</a></td>
-          {% comment %} Descargar excel y si se descarga dejar el campo de subir archivo {% endcomment %}
-            <td>
-              <!-- Enlace de descarga -->
-              <a href="{% url 'descargar_excel' solicitud_consulta.idsolicitud rol %}" 
-                class="link-excel"
-                data-id="{{ solicitud_consulta.idsolicitud }}">
-                Descargar excel
-              </a>
-
-              <!-- Campo de subida -->
-              <div class="subida-reemplazo" data-id="{{ solicitud_consulta.idsolicitud }}" style="display: none;">
-                <input type="file" class="archivo-subida" data-id="{{ solicitud_consulta.idsolicitud }}">
-              </div>
-            </td>
-          <td>{{ solicitud_consulta.fechasolicitud }}</td>
-          <td><textarea name="observacion" id="observacion" class="entrada-texto" ></textarea></td>
-          <td><button type="submit" class="boton-enviar">Enviar</button></td>
-        </tr>
-        </form>
-=======
   {% comment %}Mostar esto solo al funcionario{% endcomment %}
   {% if rol == 3 %}
     <!-- Sección principal - Consultar Fichas -->
@@ -77,15 +9,16 @@
         {% for message in messages %}
           <div class="alert"
             style="padding: 12px; margin: 15px 0; border-radius: 6px; font-size: 14px; border: 1px solid;
-                      {% if message.tags == 'success' %}
-                        background-color: #d4edda; color: #155724; border-color: #c3e6cb;
+                    {% if message.tags == 'success' %}
+                      background-color: #d4edda; color: #155724; border-color: #c3e6cb;
             {% elif message.tags == 'error' %}
-                        background-color: #f8d7da; color: #721c24; border-color: #f5c6cb;
+                      background-color: #f8d7da; color: #721c24; border-color: #f5c6cb;
             {% else %}
-                        background-color: #d1ecf1; color: #0c5460; border-color: #bee5eb;
+                      background-color: #d1ecf1; color: #0c5460; border-color: #bee5eb;
             {% endif %}">{{ message }}</div>
         {% endfor %}
       {% endif %}
+
       <!-- Título de la sección -->
       <div class="titulo-seccion">
         <h2 class="titulo-pagina">Consultar solicitudes {{ user }} {{ user_name }}</h2>
@@ -105,15 +38,14 @@
               <th>Descargar carta de solicitud</th>
               <th>Descargar formato inscripcion masivo</th>
               <th>Fecha de Creación</th>
-              <th>observacion</th>
+              <th>Observación</th>
               <th>Enviar</th>
-              {% comment %} <th>Compartir</th> {% endcomment %}
             </tr>
           </thead>
           <tbody>
             {% for solicitud_consulta in solicitudes %}
               <form action="{% url 'ficha_funcionario' solicitud_consulta.idsolicitud %}" method="POST" enctype="multipart/form-data">
-                 {% csrf_token %}
+                {% csrf_token %}
                 <tr>
                   <td>{{ solicitud_consulta.codigoprograma.nombreprograma }}</td>
                   <td>
@@ -128,7 +60,7 @@
                     <input type="number" id="codigo_ficha" name="codigo_ficha" class="entrada-texto" placeholder="codigo de ficha" required />
                   </td>
                   <td>
-                    <a href="{% url 'ficha_caracterizacion_pdf' solicitud_consulta.idsolicitud %}" style="background:#007bff;color:#fff;padding:8px 14px;text-decoration:none;border-radius:4px;font-size:12px;">Descargar PDF</a>
+                    <a href="{% url 'ficha_caracterizacion_pdf' solicitud_consulta.idsolicitud %}" class="boton-descargar">Descargar PDF</a>
                   </td>
                   <td>
                     <a href="{% url 'descargar_pdf' solicitud_consulta.idsolicitud rol %}" class="boton-descargar">Descargar PDF</a>
@@ -136,7 +68,6 @@
                   <td>
                     <a href="{% url 'descargar_carta' solicitud_consulta.idsolicitud rol %}" class="boton-descargar">Descargar Carta</a>
                   </td>
-                  {% comment %}Descargar excel y si se descarga dejar el campo de subir archivo{% endcomment %}
                   <td>
                     <!-- Enlace de descarga -->
                     <a href="{% url 'descargar_excel' solicitud_consulta.idsolicitud rol %}" class="link-excel" data-id="{{ solicitud_consulta.idsolicitud }}">Descargar excel</a>
@@ -148,7 +79,7 @@
                   </td>
                   <td>{{ solicitud_consulta.fechasolicitud }}</td>
                   <td>
-                    <textarea name="observacion" id="observacion" class="entrada-texto"></textarea>
+                    <textarea name="observacion" id="observacion" class="entrada-texto">{{ultimo_envio.observacion}}</textarea>
                   </td>
                   <td>
                     <button type="submit">Enviar</button>
@@ -161,8 +92,43 @@
       </div>
     </main>
 
-    {% comment %}Mostrar esto si quien ingresa al sistema es un Coordinador{% endcomment %}
+    <!-- ✅ JS SOLO PARA FUNCIONARIO -->
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.link-excel').forEach((enlace) => {
+          const id = enlace.dataset.id
+          const subida = document.querySelector(`.subida-reemplazo[data-id="${id}"]`)
+          const inputArchivo = document.querySelector(`.archivo-subida[data-id="${id}"]`)
+      
+          // Revisamos el estado guardado en localStorage
+          const estado = localStorage.getItem('estadoExcel_' + id)
+      
+          if (estado === 'descargado') {
+            enlace.style.display = 'none'
+            subida.style.display = 'block'
+          } else {
+            enlace.style.display = 'block'
+            subida.style.display = 'none'
+          }
+      
+          // Cuando se hace clic en el enlace (DESCARGAR)
+          enlace.addEventListener('click', function () {
+            enlace.style.display = 'none'
+            subida.style.display = 'block'
+            localStorage.setItem('estadoExcel_' + id, 'descargado')
+          })
+      
+          // Cuando se sube un archivo
+          inputArchivo.addEventListener('change', function () {
+            enlace.style.display = 'block'
+            subida.style.display = 'none'
+            localStorage.setItem('estadoExcel_' + id, 'subido')
+          })
+        })
+      })
+    </script>
   {% elif rol == 2 %}
+    {% comment %}Mostrar esto solo al Coordinador{% endcomment %}
     <main class="contenido-principal">
       <!-- Título de la sección -->
       <div class="titulo-seccion">
@@ -179,7 +145,7 @@
               <th>Estado</th>
               <th>Ficha de Caracterización</th>
               <th>Fecha de Creación</th>
-              <th>obsevacion de solicitud</th>
+              <th>Observación de solicitud</th>
               <th>Compartir</th>
             </tr>
           </thead>
@@ -210,10 +176,7 @@
                     <a href="{% url 'descargar_carta' solicitud_consulta.idsolicitud rol %}" class="boton-descargar">Descargar Carta</a>
                   </td>
                   <td>
-                    <a href="{% url 'descargar_excel' solicitud_consulta.idsolicitud rol %}" class="link-excel" data-id="{{ solicitud_consulta.idsolicitud }}">Descargar Excel</a>
-                    <div class="subida-reemplazo" data-id="{{ solicitud_consulta.idsolicitud }}" style="display:none;">
-                      <input type="file" class="archivo-subida" name="actualizar_excel" id="actualizar_excel_{{ solicitud_consulta.idsolicitud }}" />
-                    </div>
+                    <a href="{% url 'descargar_excel' solicitud_consulta.idsolicitud rol %}" class="link-excel">Descargar Excel</a>
                   </td>
                   <td>{{ solicitud_consulta.fechasolicitud }}</td>
                   <td>
@@ -230,9 +193,7 @@
       </div>
     </main>
   {% else %}
-    {% comment %}Mostrar esto si quien ingresa al sistema es un Instructor-Administrador{% endcomment %}
-
-    <!-- Sección principal - Consultar Fichas -->
+    {% comment %}Mostrar esto solo al Instructor/Administrador{% endcomment %}
     <main class="contenido-principal">
       <!-- Título de la sección -->
       <div class="titulo-seccion">
@@ -247,9 +208,12 @@
             <tr>
               <th>Nombre del Programa</th>
               <th>Estado</th>
+              <th>Observación dada por el funcionario</th>
               <th>Ficha de Caracterización</th>
               <th>Documentos de Aprendices</th>
+              <th>Excel sofia plus</th>
               <th>Fecha de Creación</th>
+              <th>Opinion</th>
               <th>Compartir</th>
             </tr>
           </thead>
@@ -258,7 +222,18 @@
               <tr>
                 <td>{{ solicitud_consulta.codigoprograma.nombreprograma }}</td>
                 <td>
-                  <span class="estado-aprobado">Esto depende de la tabla ficha</span>
+                  {% if solicitud_consulta.estado_usuario %}
+                      <span class="estado-aprobado">{{ solicitud_consulta.estado_usuario }}</span>
+                  {% else %}
+                      Sin estado
+                  {% endif %}
+                </td>
+                <td>
+                  {% if solicitud_consulta.observacion_usuario %}
+                      {{ solicitud_consulta.observacion_usuario }}
+                  {% else %}
+                      Sin observación
+                  {% endif %}
                 </td>
                 <td>
                   <a href="{% url 'ficha_caracterizacion' solicitud_consulta.idsolicitud %}" class="boton-descargar">Ver ficha Caracterización</a>
@@ -270,31 +245,38 @@
                     Sin aspirantes
                   {% endif %}
                 </td>
-                <td>{{ solicitud_consulta.fechasolicitud }}</td>
                 <td>
-                  <!-- Botón para abrir su propio modal -->
+                  <a href="{% url 'sofia_plus_descarga' solicitud_consulta.idsolicitud %}" class="boton-descargar">Descargar excel</a>
+                </td> 
+                <td>{{ solicitud_consulta.fechasolicitud }}</td>
+                {% comment %}Campo adicional solo si el estado NO es 'Matriculada'{% endcomment %}
+                {% if solicitud_consulta.estado_usuario != "Matriculada" %}
+                <td>
+                    <input type="text" class="entrada-texto" name="campo_adicional_{{ solicitud_consulta.idsolicitud }}" placeholder="Campo adicional"/>
+                </td>
+                {% else %}
+                <td><button href="#" class="boton-compartir">👍</button></td>
+                {% endif %}
+                <td>
                   <button onclick="document.getElementById('modal-{{ solicitud_consulta.idsolicitud }}').style.display='block'" class="boton-compartir">Compartir</button>
                 </td>
               </tr>
 
-              <!-- Modal único para esta solicitud -->
+              <!-- Modal único para cada solicitud -->
               <div id="modal-{{ solicitud_consulta.idsolicitud }}" class="modal-compartir" style="display: none;">
                 <div class="contenido-modal">
                   <div class="encabezado-modal">
                     <h3>Compartir Ficha</h3>
-                    <!-- Botón para cerrar este modal -->
                     <button onclick="document.getElementById('modal-{{ solicitud_consulta.idsolicitud }}').style.display='none'" class="boton-cerrar-modal">&times;</button>
                   </div>
 
                   <div class="cuerpo-modal">
                     <p class="programa-seleccionado">Programa: {{ solicitud_consulta.codigoprograma.nombreprograma }}</p>
-                    {% comment %} <p class="programa-seleccionado">ID de Solicitud: {{ solicitud_consulta.idsolicitud }}</p> {% endcomment %}
 
-                    <!-- ✅ Enlace con href correcto y texto original -->
+                    <!-- ✅ Enlace con href correcto -->
                     <div class="opcion-compartir">
                       <h4>Compartir con enlace</h4>
                       <div class="grupo-link">
-                        <!-- HREF con el ID correcto, texto NO modificado -->
                         <a href="{% url 'formularioaspirantes' solicitud_consulta.idsolicitud %}">https://preinscripcion/{{ codigo }}</a>
                       </div>
                     </div>
@@ -303,34 +285,31 @@
                       <span>O</span>
                     </div>
 
-                    <!-- Opción 2: Ver aspirantes inscritos -->
+                    <!-- Lista de aspirantes -->
                     <div class="opcion-compartir">
                       <h4>Ver aspirantes Inscritos</h4>
-                      <div class="grupo-busqueda">
-                        <!-- Lista de aspirantes -->
-                        <div class="resultados-busqueda">
-                          {% for aspirante in solicitud_consulta.aspirantes %}
-                            <div class="item-aprendiz">
-                              <div class="info-aprendiz">
-                                <span class="nombre-aprendiz">{{ aspirante.nombre }} {{ aspirante.apellido }}</span>
-                                <span class="documento-aprendiz">{{ aspirante.tipoidentificacion.tipoidentificacion }} {{ aspirante.numeroidentificacion }}</span>
-                                <span class="documento-aprendiz">Teléfono: {{ aspirante.telefono }}</span>
-                                <span class="documento-aprendiz">Correo: {{ aspirante.correo }}</span>
-                              </div>
+                      <div class="resultados-busqueda">
+                        {% for aspirante in solicitud_consulta.aspirantes %}
+                          <div class="item-aprendiz">
+                            <div class="info-aprendiz">
+                              <span class="nombre-aprendiz">{{ aspirante.nombre }} {{ aspirante.apellido }}</span>
+                              <span class="documento-aprendiz">{{ aspirante.tipoidentificacion.tipoidentificacion }} {{ aspirante.numeroidentificacion }}</span>
+                              <span class="documento-aprendiz">Teléfono: {{ aspirante.telefono }}</span>
+                              <span class="documento-aprendiz">Correo: {{ aspirante.correo }}</span>
                             </div>
-                          {% empty %}
-                            <div class="item-aprendiz">
-                              <div class="info-aprendiz">
-                                <span class="nombre-aprendiz">No hay aspirantes registrados para esta ficha</span>
-                              </div>
+                          </div>
+                        {% empty %}
+                          <div class="item-aprendiz">
+                            <div class="info-aprendiz">
+                              <span class="nombre-aprendiz">No hay aspirantes registrados para esta ficha</span>
                             </div>
-                          {% endfor %}
-                        </div>
+                          </div>
+                        {% endfor %}
                       </div>
                     </div>
                   </div>
 
-                  <!-- Pie del modal -->
+                  <!-- Pie modal -->
                   <div class="pie-modal">
                     <button onclick="document.getElementById('modal-{{ solicitud_consulta.idsolicitud }}').style.display='none'" class="boton-cancelar">Cancelar</button>
                     <button class="boton-compartir-modal">Compartir</button>
@@ -343,39 +322,4 @@
       </div>
     </main>
   {% endif %}
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      // Recorremos todos los enlaces de excel
-      document.querySelectorAll('.link-excel').forEach((enlace) => {
-        const id = enlace.dataset.id
-        const subida = document.querySelector(`.subida-reemplazo[data-id="${id}"]`)
-        const inputArchivo = document.querySelector(`.archivo-subida[data-id="${id}"]`)
-    
-        // Revisamos el estado guardado en localStorage
-        const estado = localStorage.getItem('estadoExcel_' + id)
-    
-        if (estado === 'descargado') {
-          enlace.style.display = 'none'
-          subida.style.display = 'block'
-        } else {
-          enlace.style.display = 'block'
-          subida.style.display = 'none'
-        }
-    
-        // Cuando se hace clic en el enlace (DESCARGAR)
-        enlace.addEventListener('click', function () {
-          enlace.style.display = 'none'
-          subida.style.display = 'block'
-          localStorage.setItem('estadoExcel_' + id, 'descargado')
-        })
-    
-        // Cuando se sube un archivo
-        inputArchivo.addEventListener('change', function () {
-          enlace.style.display = 'block'
-          subida.style.display = 'none'
-          localStorage.setItem('estadoExcel_' + id, 'subido')
-        })
-      })
-    })
-  </script>
 {% endblock %}

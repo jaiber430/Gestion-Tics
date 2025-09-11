@@ -1,24 +1,20 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.http import HttpResponse
+from django.http import Http404, FileResponse,  HttpResponse
 from django.template.loader import render_to_string
 from Cursos.models import (
     Usuario, Solicitud, Programaformacion, Horario, Modalidad, 
     Departamentos, Municipios, Empresa, Programaespecial, Ambiente,
     Aspirantes, Caracterizacion, Tipoidentificacion, Estados, Ficha
 )
-from django.conf import settings
-import os
+# COnvertir ficha de caracterizacion a pdf
 from weasyprint import HTML, CSS
 # Sirve para Generar tokens, contraseñas y urls
 import secrets
 # Convertir todo a cadena
 import string
 import os 
-from django.http import Http404, FileResponse,  HttpResponse
-
 # Poder buscar la ruta para descargar el PDF
 from django.conf import settings
-
 # Importar las fechas
 import datetime
 # Libreria para usar el calendario
@@ -29,12 +25,16 @@ import shutil
 from django.contrib import messages
 # Create your views here.
 
+# =====================================================================
+# Consultas dependiendo del rol
+# =====================================================================
 def consultas_instructor(request):
 
-    # Codigo encargado de generar numeros y letras aleatorios
+    # Codigo encargado de generar numeros y letras aleatorios (Link)
     caracteres = string.ascii_letters + string.digits
     codigo = ''.join(secrets.choice(caracteres) for _ in range(5))
 
+    # Traer la sesión del id que se encuantra en el sistema
     user_id = request.session.get('user_id')
 
     # Obtener el usuario y su rol
@@ -60,6 +60,7 @@ def consultas_instructor(request):
     Obtener la solicitud para la consulta
     ======================================
     """
+    # SOlo si el rol es funcionario hara esto
     if id_rol == 3:
 
         # Fecha actual y rango del mes
@@ -90,19 +91,32 @@ def consultas_instructor(request):
     # Obtener estados
     estado = Estados.objects.values('idestado', 'estados')
 
+    # Obtener todas las fichas del usuario logueado
+    fichas_usuario = Ficha.objects.filter(idusuario=user_id).select_related('idestado', 'idsolicitud')
+
+    # Obtener todas las solicitudes
+    solicitudes = Solicitud.objects.all()
+
+    # Obtener todas las fichas relacionadas con el usuario y sus solicitudes
+    fichas_usuario = Ficha.objects.filter(idusuario=user_id).select_related('idestado')
+
+    for solicitud in solicitudes:
+        # Buscar la ficha relacionada con esta solicitud para el usuario
+        ficha = fichas_usuario.filter(idsolicitud=solicitud.idsolicitud).first()
+        if ficha:
+            solicitud.estado_usuario = ficha.idestado.estados  # Estado de la ficha
+            solicitud.observacion_usuario = ficha.observacion  # Observación asociada
+        else:
+            solicitud.estado_usuario = None
+            solicitud.observacion_usuario = None
+
     # Para roles de instructor (1) y administrador (4), obtener aspirantes de cada solicitud
-    solicitudes_con_aspirantes = []
-    if id_rol in [1, 4]:  # Solo para instructor y administrador
+    if id_rol in [1, 4]:
         for solicitud in solicitudes:
-            # Obtener aspirantes relacionados con esta solicitud con toda la información necesaria
             aspirantes = Aspirantes.objects.select_related(
                 'tipoidentificacion', 'idcaracterizacion'
             ).filter(solicitudinscripcion=solicitud.idsolicitud)
-            
-            # Agregar los aspirantes a la solicitud como un atributo temporal
             solicitud.aspirantes = aspirantes
-            solicitudes_con_aspirantes.append(solicitud)
-        solicitudes = solicitudes_con_aspirantes
 
     # Renderizar el template
     return render(request, "consultas/consultas_instructor.html", {
@@ -111,10 +125,12 @@ def consultas_instructor(request):
         "user": rol_name,
         'codigo': codigo,
         'solicitudes': solicitudes,
-        'estado': estado,
     })
 
 
+# ===============================================================================
+# Mostrar la ficha de caracterización
+# ===============================================================================
 def ficha_caracterizacion(request, solicitud_id):
     """
     Vista para mostrar la ficha de caracterización
@@ -177,6 +193,10 @@ def ficha_caracterizacion(request, solicitud_id):
     }
     
     return render(request, 'fichacaracterizacion/fichacaracterizacion.html', context)
+
+# ======================================================================
+# Generar la ficha de caracterización en pdf
+# ======================================================================
 
 def ficha_caracterizacion_pdf(request, solicitud_id):
     """Genera un PDF de la ficha de caracterización usando WeasyPrint.
@@ -267,6 +287,10 @@ def ficha_caracterizacion_pdf(request, solicitud_id):
         content_type='application/pdf'
     )
 
+# ========================================================================
+# Descargar el PDF combinado de los aspirantes
+# ========================================================================
+
 def descargar_pdf(request, id, idrol):
     folder_name = f"solicitud_{id}"
 
@@ -295,6 +319,10 @@ def descargar_pdf(request, id, idrol):
         content_type='application/pdf'
     )
 
+# =======================================================================
+# Descargar excel como funcionario
+# =======================================================================
+
 def descargar_excel(request, id, idrol):
     folder_name = f"solicitud_{id}"
 
@@ -321,6 +349,10 @@ def descargar_excel(request, id, idrol):
         filename='Formato_inscripcion.xlsx',
         content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     )
+
+# ========================================================================
+# Descargar la carta de solicitud de la empresa
+# ========================================================================
 
 def descargar_carta(request, id, idrol):
     # Buscar la solicitud
@@ -359,6 +391,7 @@ def descargar_carta(request, id, idrol):
         filename='Carta solicitud.pdf',
         content_type='application/pdf'
     )
+
 # ===========================================
 # Funcionario respuestas a las solicitudes
 # ===========================================
@@ -437,12 +470,12 @@ def revision_fichas(request, id):
             )
 
             # Mensaje de éxito
-            messages.success(request, 'Te has registrado exitosamente')
+            messages.success(request, 'Haz enviado respuesta a esta solicitud')
             return redirect('consultas_instructor')
 
         except Exception as e:
             # Mensaje de error en caso de excepción
-            messages.error(request, f'Error al registrarte: {e}')
+            messages.error(request, f'Error al enviar respuesta: {e}')
             return redirect('consultas_instructor')
 
     # Renderizar plantilla si no hay envío de formulario
@@ -451,5 +484,28 @@ def revision_fichas(request, id):
         'messages': messages
     })
 
+# ===============================================================
+# Descargar el formato generado por sofia plus
+# ===============================================================
+
 def descargar_excel_ficha(request, id):
-    pass
+    # Nombre del archivo esperado
+    excel_archivo = f"formato_inscripcion_{id}.xlsx"
+    
+    # Ruta completa donde debe estar almacenado el archivo
+    carpeta_excel = os.path.join(settings.MEDIA_ROOT, 'Funcionario', f"solicitud_{id}", 'Masivos_sofia_plus')
+    directorio_excel = os.path.join(carpeta_excel, excel_archivo)
+
+    # Validar si el archivo existe antes de descargar
+    if os.path.exists(directorio_excel):
+        with open(directorio_excel, 'rb') as archivo:
+            response = HttpResponse(
+                archivo.read(),
+                content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
+            response['Content-Disposition'] = f'attachment; filename={excel_archivo}'
+            return response
+    else:
+        # Si no existe, mostrar un error
+        messages.error(request, "El archivo solicitado no existe.")
+        return redirect('consultas_instructor')
