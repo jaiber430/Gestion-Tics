@@ -56,7 +56,7 @@ urlpatterns = [
     # Comentarios enviados por el funcionario
     path('revision_funcionario/<int:id>/', views_consultas.revision_fichas, name="ficha_funcionario"),
     # Descargar excel subido por el funcionario
-    path('descargar_formato_sofia_plus/<int:id>', views_consultas.descargar_excel_ficha, name='sofia_plus_descarga')
+    path('descargar_formato_sofia_plus/<int:id>', views_consultas.descargar_excel_ficha, name='sofia_plus_descarga'),
 ]
 # Poder almacenar archivos en la carpeta media
 if settings.DEBUG:

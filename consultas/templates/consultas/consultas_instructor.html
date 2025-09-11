@@ -213,7 +213,6 @@
               <th>Documentos de Aprendices</th>
               <th>Excel sofia plus</th>
               <th>Fecha de Creación</th>
-              <th>Opinion</th>
               <th>Compartir</th>
             </tr>
           </thead>
@@ -249,14 +248,6 @@
                   <a href="{% url 'sofia_plus_descarga' solicitud_consulta.idsolicitud %}" class="boton-descargar">Descargar excel</a>
                 </td> 
                 <td>{{ solicitud_consulta.fechasolicitud }}</td>
-                {% comment %}Campo adicional solo si el estado NO es 'Matriculada'{% endcomment %}
-                {% if solicitud_consulta.estado_usuario != "Matriculada" %}
-                <td>
-                    <input type="text" class="entrada-texto" name="campo_adicional_{{ solicitud_consulta.idsolicitud }}" placeholder="Campo adicional"/>
-                </td>
-                {% else %}
-                <td><button href="#" class="boton-compartir">👍</button></td>
-                {% endif %}
                 <td>
                   <button onclick="document.getElementById('modal-{{ solicitud_consulta.idsolicitud }}').style.display='block'" class="boton-compartir">Compartir</button>
                 </td>
