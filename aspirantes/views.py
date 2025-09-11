@@ -10,6 +10,9 @@ from Cursos.models import Aspirantes, Solicitud, Caracterizacion, Tipoidentifica
 
 from datetime import datetime
 
+# Libreria de Django para generar un excel
+from openpyxl import Workbook
+
 from django.contrib import messages
 # Create your views here.
 
@@ -107,6 +110,65 @@ def registro_aspirante(request):
             total_aspirantes = Aspirantes.objects.filter(solicitudinscripcion=id_solicitud_preinscripcion).count()
             if total_aspirantes >= id_solicitud_preinscripcion.cupo:
                 combinar_pdfs(pdf_aspirantes)
+
+                # ==============================================================
+                # Generar archivo Excel con base en los aspirantes
+                # ==============================================================
+
+                # Asegurarse de que el id este siendo enviado cuando se oprima el boton de descargar
+                solicitud = id_solicitud_preinscripcion
+
+                # Consulta para obtener el nombre del programa relacionado con la solicitud 
+                programa = solicitud.codigoprograma  # Ya tienes la solicitud, accedes directo al FK
+                nombre_programa = programa.nombreprograma  # Mostrar el nombre del programa
+ 
+                # Crear un nuevo archivo de excel en blanco
+                nuevo_archivo = Workbook()
+                hoja = nuevo_archivo.active  # Selceccionar la hoja del excel (Primera por defecto)
+                hoja.title = f"Aspirantes Inscritos"  # Colocar nombre a esa hoja 
+
+                # Agregar fila a la hoja de excel con los siguientes encabezados
+                hoja.append(['Tipo de identificacion', 'Numero identificacion', 'Codigo de ficha',
+                             'Tipo poblacion aspirantes', 'Codigo empresa'])
+
+                # Consulta para obtener los aspirantes relacionados con la solicitud 
+                aspirantes = Aspirantes.objects.filter(solicitudinscripcion=solicitud)
+
+                for agregar in aspirantes:
+                    # Nombre del tipo de población
+                    caracterizacion = agregar.idcaracterizacion
+                    tipo_caracterizacion = caracterizacion.caracterizacion
+
+                    # Nombre del tipo de identificacion
+                    identificacion = agregar.tipoidentificacion
+                    tipo_identificacion = identificacion.tipoidentificacion
+
+                    # Buscar el NIT de la empresa desde la solicitud
+                    empresa = agregar.solicitudinscripcion.idempresa
+                    if empresa is not None:
+                        mostrar_empresa = empresa.nitempresa
+                    else:
+                        mostrar_empresa = ''
+
+                    hoja.append([
+                        tipo_identificacion, 
+                        agregar.numeroidentificacion, 
+                        '',  # Código de ficha (no definido aún)
+                        tipo_caracterizacion, 
+                        mostrar_empresa
+                    ])
+
+                # Crear carpeta donde se van a almacenar los formatos masivos
+                nombre_archivo_excel = f"formato_inscripcion_{solicitud.idsolicitud}.xlsx"
+                carpeta_excel = os.path.join(settings.MEDIA_ROOT, 'excel')
+                os.makedirs(carpeta_excel, exist_ok=True)
+
+                # Direción donde se encuntra el directorio
+                directorio_excel = os.path.join(carpeta_excel, nombre_archivo_excel)
+
+                # Guardar directorio
+                nuevo_archivo.save(directorio_excel)
+                # -----------------------------------------------------------
 
             messages.success(request, 'Te has registrado exitosamente')
             return redirect('formularioaspirantes', idsolicitud=solicitud_inscripcion)

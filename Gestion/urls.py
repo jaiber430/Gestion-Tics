@@ -39,7 +39,6 @@ urlpatterns = [
     path('preinscripcion/<int:idsolicitud>/', views_aspirantes.formulario_aspirantes, name="formularioaspirantes"),
     path('preinscripcion/', views_aspirantes.registro_aspirante, name="Registroaspirantes"),
     path('pdf/<int:id>/<int:idrol>', views_consultas.descargar_pdf, name='descargar_pdf'),
-    path('exportar-excel/<int:idsolicitud>', views_consultas.generar_excel, name='exportar_excel'),
     path('descargar_excel/<int:id>/<int:idrol>', views_consultas.descargar_excel, name="descargar_excel"),
     path('descargar_carta/<int:id>/<int:idrol>', views_consultas.descargar_carta, name="descargar_carta"),
     path('revision_funcionario/<int:id>/', views_consultas.revision_fichas, name="ficha_funcionario")

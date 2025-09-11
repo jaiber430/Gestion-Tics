@@ -44,7 +44,7 @@
           </thead>
           <tbody>
             {% for solicitud_consulta in solicitudes %}
-              <form action="{% url 'ficha_funcionario' solicitud_consulta.idsolicitud %}" method="POST">
+              <form action="{% url 'ficha_funcionario' solicitud_consulta.idsolicitud %}" method="POST" enctype="multipart/form-data">
                  {% csrf_token %}
                 <tr>
                   <td>{{ solicitud_consulta.codigoprograma.nombreprograma }}</td>

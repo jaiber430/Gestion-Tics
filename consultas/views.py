@@ -19,8 +19,6 @@ from django.http import Http404, FileResponse,  HttpResponse
 # Poder buscar la ruta para descargar el PDF
 from django.conf import settings
 
-# Libreria de Django para generar un excel
-from openpyxl import Workbook
 # Importar las fechas
 import datetime
 # Libreria para usar el calendario
@@ -297,71 +295,6 @@ def descargar_pdf(request, id, idrol):
         content_type='application/pdf'
     )
 
-def generar_excel(request, idsolicitud):
-    # Asegurarse de que el id este siendo enviado cuando se oprima el boton de descargar
-    solicitud = get_object_or_404(Solicitud, idsolicitud=idsolicitud)
-
-    # Consulta para obtener el nombre del programa relacionado con la solicitud 
-    programa = solicitud.codigoprograma  # Ya tienes la solicitud, accedes directo al FK
-    # Mostrar el nombre del programa
-    nombre_programa = programa.nombreprograma
- 
-    # Crear un nuevo archivo de excel en blanco
-    nuevo_archivo = Workbook()
-    # Selceccionar la hoja del excel (Primera por defecto)
-    hoja = nuevo_archivo.active
-    # Colocar nombre a esa hoja 
-    hoja.title = f"Aspirantes Inscritos"
-
-    # Agregar fila a la hoja de excel con los siguientes encabezados
-    hoja.append(['Tipo de identificacion', 'Numero identificacion', 'Codigo de ficha', 'Tipo poblacion aspirantes', 'Codigo empresa'])
-
-    # Consulta para obtener los aspirantes relacionados con la solicitud 
-    aspirantes = Aspirantes.objects.filter(solicitudinscripcion=solicitud)
-
-    for agregar in aspirantes:
-        # Nombre del tipo de población
-        caracterizacion = agregar.idcaracterizacion
-        tipo_caracterizacion = caracterizacion.caracterizacion
-
-        # Nombre del tipo de identificacion
-        identificacion = agregar.tipoidentificacion
-        tipo_identificacion = identificacion.tipoidentificacion
-
-        # Buscar el NIT de la empresa desde la solicitud
-        empresa = agregar.solicitudinscripcion.idempresa
-        if empresa is not None:
-            mostrar_empresa = empresa.nitempresa
-        else:
-            mostrar_empresa = ''
-
-        hoja.append([
-            tipo_identificacion, 
-            agregar.numeroidentificacion, 
-            '',  # Código de ficha (no definido aún)
-            tipo_caracterizacion, 
-            mostrar_empresa
-        ])
-
-    # Crear carpeta donde se van a almacenar los formatos masivos
-    nombre_archivo_excel = f"formato_inscripcion_{idsolicitud}.xlsx"
-    carpeta_excel = os.path.join(settings.MEDIA_ROOT, 'excel')
-    os.makedirs(carpeta_excel, exist_ok=True)
-
-    # Direción donde se encuntra el directorio
-    directorio_excel = os.path.join(carpeta_excel, nombre_archivo_excel)
-
-    # Guardar directorio
-    nuevo_archivo.save(directorio_excel)
-
-    response = HttpResponse(
-        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    )
-    response['Content-Disposition'] = 'attachment; filename=Formato inscripcion masivo.xlsx'
-
-    nuevo_archivo.save(response)
-    return response
-
 def descargar_excel(request, id, idrol):
     folder_name = f"solicitud_{id}"
 
@@ -461,7 +394,22 @@ def revision_fichas(request, id):
             estados = request.POST.get('estado')
             numero_ficha = request.POST.get('codigo_ficha')
             observacion = request.POST.get('observacion')
-            actualizacion_excel = request.FILES.get('actualizar_excel')  # Solo si lo necesitas
+            nuevo_archivo = request.FILES.get('actualizar_excel')
+
+            # Crear carpeta donde se van a almacenar los formatos
+            carpeta_almacenar = f"solicitud_{id}"
+            excel_archivo = f"formato_inscripcion_{id}.xlsx"
+            carpeta_excel = os.path.join(settings.MEDIA_ROOT, 'Funcionario', carpeta_almacenar, 'Masivos_sofia_plus')
+            os.makedirs(carpeta_excel, exist_ok=True)
+
+            # Ruta completa
+            directorio_excel = os.path.join(carpeta_excel, excel_archivo)
+
+            # Guardar el archivo físicamente
+            if nuevo_archivo:
+                with open(directorio_excel, 'wb+') as destino:
+                    for chunk in nuevo_archivo.chunks():
+                        destino.write(chunk)
 
             # Validar duplicados correctamente y con redirect al mismo formulario
             duplicado = Ficha.objects.filter(
@@ -502,3 +450,6 @@ def revision_fichas(request, id):
         'layout': layout,
         'messages': messages
     })
+
+def descargar_excel_ficha(request, id):
+    pass
