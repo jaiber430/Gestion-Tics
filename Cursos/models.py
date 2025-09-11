@@ -149,7 +149,7 @@ class Solicitud(models.Model):
     subsectoreconomico = models.CharField(max_length=100, blank=True, null=True)
     idespecial = models.ForeignKey(Programaespecial, on_delete=models.CASCADE, db_column='idespecial')
     convenio = models.CharField(max_length=20, blank=True, null=True)
-    ambiente = models.ForeignKey(Ambiente, on_delete=models.CASCADE, db_column='ambiente', blank=True, null=True)
+    ambiente = models.CharField(max_length=255, blank=True, null=True)
     fechasolicitud = models.DateField()
 
     class Meta:

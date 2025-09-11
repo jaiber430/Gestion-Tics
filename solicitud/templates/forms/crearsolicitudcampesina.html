@@ -190,12 +190,7 @@
           </div>
           <div class="campo-entrada">
             <label for="nombreAmbiente" class="etiqueta-campo">Nombre del Ambiente*:</label>
-            <select id="nombreAmbiente" name="nombreAmbiente" class="entrada-select" required>
-              <option value="">Seleccione ambiente</option>
-              {% for amb in ambientes %}
-                <option value="{{ amb.idambiente }}">{{ amb.ambiente }}</option>
-              {% endfor %}
-            </select>
+              <input type="text" id="nombreAmbiente" name="nombreAmbiente" class="entrada-texto" placeholder="Nombre del ambiente">
           </div>
         </div>
         

@@ -201,7 +201,7 @@ def _crear_solicitud_base(request, tipo_solicitud_id, template_name, mensaje_exi
                 modalidad = Modalidad.objects.get(idmodalidad=1)  
                 municipio = Municipios.objects.get(codigomunicipio=municipio_formacion)
                 programa_especial_obj = Programaespecial.objects.get(idespecial=programa_especial)
-                ambiente_obj = Ambiente.objects.filter(idambiente=nombre_ambiente).first() if nombre_ambiente else None
+                # ambiente_obj = Ambiente.objects.filter(idambiente=nombre_ambiente).first() if nombre_ambiente else None
                 tipo_solicitud = Tiposolicitud.objects.get(idtiposolicitud=tipo_solicitud_id)
 
                 Solicitud.objects.create(
@@ -217,7 +217,7 @@ def _crear_solicitud_base(request, tipo_solicitud_id, template_name, mensaje_exi
                     subsectoreconomico=subsector_economico,
                     idespecial=programa_especial_obj,
                     convenio=convenio or None,
-                    ambiente=ambiente_obj,
+                    ambiente=nombre_ambiente,
                     fechasolicitud=timezone.now().date()
                 )
                 
