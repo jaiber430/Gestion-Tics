@@ -106,8 +106,14 @@ def registro_aspirante(request):
                 solicitudinscripcion=id_solicitud_preinscripcion,
             )
 
-            # Combinar PDFs si se completa el cupo
-            total_aspirantes = Aspirantes.objects.filter(solicitudinscripcion=id_solicitud_preinscripcion).count()
+            # Primero ordenas los aspirantes
+            aspirantes = Aspirantes.objects.filter(
+                solicitudinscripcion=id_solicitud_preinscripcion
+            ).order_by("idaspirante")
+
+            # Luego haces el conteo
+            total_aspirantes = aspirantes.count()
+
             if total_aspirantes >= id_solicitud_preinscripcion.cupo:
                 combinar_pdfs(pdf_aspirantes)
 
