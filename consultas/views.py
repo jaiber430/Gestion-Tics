@@ -60,7 +60,7 @@ def consultas_instructor(request):
     Obtener la solicitud para la consulta
     ======================================
     """
-    # SOlo si el rol es funcionario hara esto
+    # Solo si el rol es funcionario hará esto
     if id_rol == 3:
 
         # Fecha actual y rango del mes
@@ -85,7 +85,7 @@ def consultas_instructor(request):
         solicitudes = solicitudes_filtradas if solicitudes_filtradas else Solicitud.objects.none()
 
     else:
-        # Para otros roles, traer solicitudes del usuario directamente
+        # Para otros roles, traer solo solicitudes del usuario directamente
         solicitudes = Solicitud.objects.select_related('idusuario').filter(idusuario=user_id)
 
     # Obtener estados
@@ -94,12 +94,7 @@ def consultas_instructor(request):
     # Obtener todas las fichas del usuario logueado
     fichas_usuario = Ficha.objects.filter(idusuario=user_id).select_related('idestado', 'idsolicitud')
 
-    # Obtener todas las solicitudes
-    solicitudes = Solicitud.objects.all()
-
-    # Obtener todas las fichas relacionadas con el usuario y sus solicitudes
-    fichas_usuario = Ficha.objects.filter(idusuario=user_id).select_related('idestado')
-
+    # Asignar estado y observación a cada solicitud
     for solicitud in solicitudes:
         # Buscar la ficha relacionada con esta solicitud para el usuario
         ficha = fichas_usuario.filter(idsolicitud=solicitud.idsolicitud).first()
@@ -125,6 +120,7 @@ def consultas_instructor(request):
         "user": rol_name,
         'codigo': codigo,
         'solicitudes': solicitudes,
+        'estado': estado,
     })
 
 
@@ -283,7 +279,7 @@ def ficha_caracterizacion_pdf(request, solicitud_id):
     return FileResponse(
         response_file,
         as_attachment=True,
-        filename='Documentos_aspirantes.pdf',
+        filename='ficha_caracterizacion.pdf',
         content_type='application/pdf'
     )
 
@@ -507,5 +503,4 @@ def descargar_excel_ficha(request, id):
             return response
     else:
         # Si no existe, mostrar un error
-        messages.error(request, "El archivo solicitado no existe.")
-        return redirect('consultas_instructor')
+        raise Http404("Aun no se ha subido el excel.")
