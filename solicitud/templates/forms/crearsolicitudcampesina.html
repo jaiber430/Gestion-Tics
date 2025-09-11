@@ -304,6 +304,18 @@
     document.addEventListener('DOMContentLoaded', function () {
       console.log("Formulario campesino cargado correctamente");
 
+      // Limitar fechas (inicio y fin) a partir de mañana
+      const manana = new Date();
+      manana.setDate(manana.getDate() + 1);
+      const yyyy = manana.getFullYear();
+      const mm = String(manana.getMonth() + 1).padStart(2, '0');
+      const dd = String(manana.getDate()).padStart(2, '0');
+      const minISO = `${yyyy}-${mm}-${dd}`;
+      const inputFechaInicio = document.getElementById('fechaInicio');
+      const inputFechaFin = document.getElementById('fechaFinalizacion');
+      if (inputFechaInicio) inputFechaInicio.setAttribute('min', minISO);
+      if (inputFechaFin) inputFechaFin.setAttribute('min', minISO);
+
       // Guardar opciones de municipios
       const selectMunicipio = document.getElementById('municipioFormacion');
       municipiosOriginales = Array.from(selectMunicipio.querySelectorAll('option[data-dep]'));
