@@ -320,29 +320,37 @@ body {
     background-color: var(--color-secundario);
     border-radius: var(--radio-borde);
     box-shadow: var(--sombra-ligera);
+    margin: var(--espaciado-xl) 0;
 }
 
 .tabla-fichas {
     width: 100%;
     border-collapse: collapse;
     font-size: 1.4rem;
+    min-width: 1200px; /* Ancho mínimo para mejor organización */
 }
 
 .tabla-fichas th {
     background-color: var(--color-primario);
     color: var(--color-secundario);
-    padding: var(--espaciado-md);
+    padding: var(--espaciado-lg) var(--espaciado-md);
     text-align: left;
     font-weight: var(--peso-semi-negrita);
+    font-size: 1.5rem;
+    white-space: nowrap;
+    vertical-align: middle;
 }
 
 .tabla-fichas td {
-    padding: var(--espaciado-md);
+    padding: var(--espaciado-lg) var(--espaciado-md);
     border-bottom: 0.1rem solid var(--color-borde);
+    vertical-align: middle;
+    font-size: 1.3rem;
 }
 
 .tabla-fichas tr:hover {
     background-color: var(--color-fondo);
+    transition: background-color 0.2s ease;
 }
 
 .tabla-fichas a {
@@ -376,19 +384,27 @@ body {
 .estado-Matriculada {color: var(--color-Matriculada); font-weight: var(--peso-medio);}
 
 .boton-descargar {
-    background-color: var(--color-primario-claro);
-    color: var(--color-secundario);
+    background-color: var(--color-primario);
+    color: #fff;
     padding: var(--espaciado-sm) var(--espaciado-md);
     border-radius: var(--radio-borde);
     text-decoration: none;
     font-size: 1.2rem;
     font-weight: var(--peso-medio);
-    display: inline-block;
-    transition: background-color 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: background-color 0.25s ease, transform 0.15s ease;
+    box-shadow: var(--sombra-ligera);
 }
 
+/* Forzar que dentro de la tabla mantenga el color blanco y no lo sobreescriba .tabla-fichas a */
+.tabla-fichas a.boton-descargar { color:#fff; }
+.tabla-fichas a.boton-descargar:hover { color:#fff; text-decoration:none; }
+
 .boton-descargar:hover {
-    background-color: var(--color-primario);
+    background-color: var(--color-primario-hover);
+    transform: translateY(-2px);
 }
 
 .boton-descargar.deshabilitado {
@@ -425,7 +441,7 @@ body {
 
 .boton-enviar {
     background-color: var(--color-primario);
-    color: var(--color-secundario);
+    color: #fff;
     border: none;
     padding: var(--espaciado-sm) var(--espaciado-md);
     border-radius: var(--radio-borde);
@@ -433,12 +449,14 @@ body {
     font-size: 1.2rem;
     font-weight: var(--peso-medio);
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.25s ease, transform 0.15s ease;
     white-space: nowrap;
+    box-shadow: var(--sombra-ligera);
 }
 
 .boton-enviar:hover {
     background-color: var(--color-primario-hover);
+    transform: translateY(-2px);
 }
 
 /* 
@@ -737,6 +755,82 @@ body {
 }
 
 .boton-compartir-modal:hover {
+    background-color: var(--color-primario-hover);
+}
+
+/* 
+   PIE DE PÁGINA
+ */
+
+/* 
+   ESTILOS PARA SUBIDA DE EXCEL
+ */
+
+.link-excel {
+    background-color: var(--color-primario-claro);
+    color: var(--color-secundario);
+    padding: var(--espaciado-sm) var(--espaciado-md);
+    border-radius: var(--radio-borde);
+    text-decoration: none;
+    font-size: 1.2rem;
+    font-weight: var(--peso-medio);
+    display: inline-block;
+    transition: background-color 0.3s ease;
+    min-width: 120px;
+    text-align: center;
+}
+
+.link-excel:hover {
+    background-color: var(--color-primario);
+    transform: translateY(-1px);
+    box-shadow: var(--sombra-media);
+}
+
+.subida-reemplazo {
+    display: flex;
+    align-items: center;
+    gap: var(--espaciado-sm);
+}
+
+.archivo-subida {
+    padding: var(--espaciado-sm);
+    border: 0.2rem dashed var(--color-primario);
+    border-radius: var(--radio-borde);
+    background-color: var(--color-fondo);
+    font-family: var(--fuente-principal);
+    font-size: 1.2rem;
+    color: var(--color-texto-principal);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 150px;
+}
+
+.archivo-subida:hover {
+    border-color: var(--color-primario-hover);
+    background-color: rgba(76, 175, 80, 0.1);
+}
+
+.archivo-subida:focus {
+    outline: none;
+    border-color: var(--color-primario);
+    box-shadow: 0 0 0 0.3rem rgba(76, 175, 80, 0.2);
+}
+
+.archivo-subida::file-selector-button {
+    background-color: var(--color-primario);
+    color: var(--color-secundario);
+    border: none;
+    padding: var(--espaciado-xs) var(--espaciado-sm);
+    border-radius: calc(var(--radio-borde) / 2);
+    font-family: var(--fuente-principal);
+    font-size: 1.1rem;
+    font-weight: var(--peso-medio);
+    cursor: pointer;
+    margin-right: var(--espaciado-sm);
+    transition: background-color 0.3s ease;
+}
+
+.archivo-subida::file-selector-button:hover {
     background-color: var(--color-primario-hover);
 }
 

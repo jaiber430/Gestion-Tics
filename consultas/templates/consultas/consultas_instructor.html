@@ -1,6 +1,74 @@
 {% extends layout %}
 
 {% block content %}
+
+{% comment %} Mostar esto solo al funcionario {% endcomment %}
+{%  if rol == 3 %}
+<!-- Sección principal - Consultar Fichas -->
+<main class="contenido-principal">
+  <!-- Título de la sección -->
+  <div class="titulo-seccion">
+    <h2 class="titulo-pagina">Consultar solicitudes {{ user }} {{ user_name }}</h2>
+    <p class="subtitulo-pagina">
+      Aquí puede consultar el estado de las fichas solicitadas y descargar los documentos correspondientes
+    </p>
+  </div>
+
+  <!-- Contenedor de la tabla de fichas -->
+  <div class="contenedor-tabla-fichas">
+    <table class="tabla-fichas">
+      <thead>
+        <tr>
+          <th>Nombre del Programa</th>
+          <th>Estado</th>
+          <th>Codigo de la ficha</th>
+          <th>Descargar ficha de caracterización</th>
+          <th>Descargar documento de los aspirantes</th>
+          <th>Descargar carta de solicitud</th>
+          <th>Descargar formato inscripcion masivo</th>
+          <th>Fecha de Creación</th>
+          <th>observacion</th>
+          <th>Enviar</th>
+          {% comment %} <th>Compartir</th> {% endcomment %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for solicitud_consulta in solicitudes %}
+        <form action="">
+        <tr>
+          <td>{{ solicitud_consulta.codigoprograma.nombreprograma }}</td>
+            <td>        
+              <select>
+                <option value="">-- Seleccione un estado --</option>
+                {% for item in estado %}
+                <option value="{{ item.idestado }}">{{ item.estados }}</option>
+                {% endfor %}
+              </select>
+            </td>
+          <td><input type="number" id="codigo_ficha" name="codigo_ficha" class="entrada-texto" placeholder="codigo de ficha" required /></td>
+          <td><a href="{% url 'ficha_caracterizacion_pdf' solicitud_consulta.idsolicitud %}" class="boton-descargar">Descargar PDF</a></td>
+          <td><a href="{% url 'descargar_pdf' solicitud_consulta.idsolicitud rol %}" class="boton-descargar">Descargar PDF</a></td>
+          <td><a href="{% url 'descargar_carta' solicitud_consulta.idsolicitud rol %}" class="boton-descargar">Descargar Carta</a></td>
+          {% comment %} Descargar excel y si se descarga dejar el campo de subir archivo {% endcomment %}
+            <td>
+              <!-- Enlace de descarga -->
+              <a href="{% url 'descargar_excel' solicitud_consulta.idsolicitud rol %}" 
+                class="link-excel"
+                data-id="{{ solicitud_consulta.idsolicitud }}">
+                Descargar excel
+              </a>
+
+              <!-- Campo de subida -->
+              <div class="subida-reemplazo" data-id="{{ solicitud_consulta.idsolicitud }}" style="display: none;">
+                <input type="file" class="archivo-subida" data-id="{{ solicitud_consulta.idsolicitud }}">
+              </div>
+            </td>
+          <td>{{ solicitud_consulta.fechasolicitud }}</td>
+          <td><textarea name="observacion" id="observacion" class="entrada-texto" ></textarea></td>
+          <td><button type="submit" class="boton-enviar">Enviar</button></td>
+        </tr>
+        </form>
+=======
   {% comment %}Mostar esto solo al funcionario{% endcomment %}
   {% if rol == 3 %}
     <!-- Sección principal - Consultar Fichas -->
