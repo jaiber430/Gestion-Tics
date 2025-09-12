@@ -144,7 +144,7 @@ def ficha_caracterizacion(request, solicitud_id):
             'idusuario',
             'idempresa',
             'idespecial',
-            'ambiente'
+            # 'ambiente'
         ), 
         idsolicitud=solicitud_id
     )

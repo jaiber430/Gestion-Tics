@@ -5,6 +5,10 @@ import os
 from django.conf import settings
 from aspirantes.utils import eliminar_carpetas_vencidas, combinar_pdfs
 
+from django.core.files.base import ContentFile
+
+# from .pdf_processor import process_pdf_image
+
 # Importar datos de los modulos requeridos
 from Cursos.models import Aspirantes, Solicitud, Caracterizacion, Tipoidentificacion
 
@@ -39,13 +43,13 @@ def registro_aspirante(request):
     if request.method == "POST":
         
         try:
-            nombres = request.POST.get('nombres')
-            apellidos = request.POST.get('apellidos')
+            # nombres = request.POST.get('nombres')
+            # apellidos = request.POST.get('apellidos')
             caracterizacion_id = request.POST.get('tipo_caracterizacion')
             telefono = request.POST.get('telefono')
             pdf = request.FILES.get('pdf_documento')
             tipo_documento_id = request.POST.get('tipo_documento')
-            identificacion = request.POST.get('numero_identificacion')
+            # identificacion = request.POST.get('numero_identificacion')
             correo = request.POST.get('correo')
             solicitud_inscripcion = request.POST.get('idsolicitud')
 
@@ -138,7 +142,7 @@ def registro_aspirante(request):
                              'Tipo poblacion aspirantes', 'Codigo empresa'])
 
                 # Consulta para obtener los aspirantes relacionados con la solicitud 
-                aspirantes = Aspirantes.objects.filter(solicitudinscripcion=solicitud)
+                aspirantes = Aspirantes.objects.filter(solicitudinscripcion=solicitud).order_by("idaspirante")
 
                 for agregar in aspirantes:
                     # Nombre del tipo de población
