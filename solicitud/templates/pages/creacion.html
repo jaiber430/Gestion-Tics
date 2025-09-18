@@ -15,6 +15,15 @@
         </p>
       </div>
     </div>
+    {% if messages %}
+      <div class="alertas" style="max-width:800px;margin:0 auto 2.4rem;">
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }}" style="padding:1rem 1.4rem;border-radius:0.6rem;margin-bottom:0.8rem;font-size:1.4rem;line-height:1.4; background:#f1f1f1; border-left:4px solid {% if 'success' in message.tags %}#2E7D32{% elif 'error' in message.tags or 'danger' in message.tags %}#D32F2F{% elif 'warning' in message.tags %}#F9A825{% else %}#1976D2{% endif %};">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
     {% if fechas == 'Creaciones_abiertas' %}
     {% comment %} Habilita la creación de un curso si aun se encuentra en las fechas {% endcomment %}
       <!-- Contenedor de opciones -->
@@ -30,9 +39,9 @@
         <!-- Opción Ficha Campesina -->
         <div class="opcion-ficha">
           <div class="icono-opcion">🌾</div>
-          <h3 class="titulo-opcion">CAMPESINA</h3>
+          <h3 class="titulo-opcion">CAMPESENA</h3>
           <p class="descripcion-opcion">Seleccione esta opción si desea solicitar la CREACIÓN de una ficha complementaria</p>
-          <a href="{% url "crearcampesina" %}" class="boton-opcion">Crear Ficha Campesina</a>
+          <a href="{% url "crearcampesina" %}" class="boton-opcion">Crear Ficha Campesena</a>
         </div>
       </div>
     {% else %}
@@ -50,16 +59,9 @@
         <!-- Opción Ficha Campesina -->
         <div class="opcion-ficha">
           <div class="icono-opcion">🌾</div>
-          <h3 class="titulo-opcion">CAMPESINA</h3>
+          <h3 class="titulo-opcion">CAMPESENA</h3>
           <p class="descripcion-opcion">Seleccione esta opción si desea solicitar la CREACIÓN de una ficha complementaria</p>
-          <a href="#" class="boton-opcion">Crear Ficha Campesina</a>
-        </div>
-      </div>
-        <div class="opcion-ficha">
-          <div class="icono-opcion">🌾</div>
-          <h3 class="titulo-opcion">CAMPESINA</h3>
-          <p class="descripcion-opcion">Seleccione esta opción si desea solicitar la CREACIÓN de una ficha complementaria</p>
-          <a href="#" class="boton-opcion">Crear Ficha Campesina</a>
+          <a href="#" class="boton-opcion">Crear Ficha Campesena</a>
         </div>
       </div>
     {% endif %}

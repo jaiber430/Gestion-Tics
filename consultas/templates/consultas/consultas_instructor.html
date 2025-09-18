@@ -28,26 +28,26 @@
 
       <!-- busqueda y filtro -->
       <!-- filtro por nombre de programa -->
-      <div class="filtro-nombre-programa">
-        <label for="filtro-programa-funcionario">Filtrar por Nombre de Programa:</label>
-        <input type="text" id="filtro-programa-funcionario" placeholder="Ingrese el nombre del programa" onkeyup="filtrarPorProgramaFuncionario()" />
+      <div class="filtros-busqueda">
+        <div class="filtro-nombre-programa">
+          <label for="filtro-programa-funcionario">Filtrar por Nombre de Programa:</label>
+          <input type="text" id="filtro-programa-funcionario" placeholder="Ingrese el nombre del programa" onkeyup="filtrarPorProgramaFuncionario()" />
+        </div>
+        <!-- filtro si es regular o campesena -->
+        <div class="filtro-tipo-ficha">
+          <label for="filtro-tipo-funcionario">Filtrar por Tipo de Ficha:</label>
+          <select id="filtro-tipo-funcionario" onchange="filtrarPorTipoFuncionario()">
+            <option value="">-- Todos --</option>
+            <option value="Regular">Regular</option>
+            <option value="Campesina">Campesina</option>
+          </select>
+        </div>
+        <!-- filtro por fecha -->
+        <div class="filtro-fecha">
+          <label for="filtro-fecha">Filtrar por Fecha:</label>
+          <input type="date" id="filtro-fecha" />
+        </div>
       </div>
-       
-      <!-- filtro si es regular o campesena -->
-      <div class="filtro-tipo-ficha">
-        <label for="filtro-tipo-funcionario">Filtrar por Tipo de Ficha:</label>
-        <select id="filtro-tipo-funcionario" onchange="filtrarPorTipoFuncionario()">
-          <option value="">-- Todos --</option>
-          <option value="Regular">Regular</option>
-          <option value="Campesina">Campesina</option>
-        </select>
-      </div>
-       
-      {% comment %}
-      <div class="filtro-fecha">
-        <label for="filtro-fecha">Filtrar por Fecha:</label>
-        <input type="date" id="filtro-fecha" />
-      </div> {% endcomment %}
 
       <!-- Contenedor de la tabla de fichas -->
       <div class="contenedor-tabla-fichas">
@@ -70,7 +70,7 @@
             {% for solicitud_consulta in solicitudes %}
               <form action="{% url 'ficha_funcionario' solicitud_consulta.idsolicitud %}" method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
-                <tr>
+                <tr data-fecha="{{ solicitud_consulta.fechasolicitud|date:'Y-m-d' }}">
                   <td>{{ solicitud_consulta.codigoprograma.nombreprograma }}</td>
                   <td>
                     <select name="estado" id="estado">
@@ -152,37 +152,35 @@
       })
       
       // Funciones de filtrado para funcionarios
-      function filtrarPorProgramaFuncionario() {
-        const filtro = document.getElementById('filtro-programa-funcionario').value.toLowerCase()
+      function aplicarFiltrosFuncionario() {
+        const filtroPrograma = document.getElementById('filtro-programa-funcionario').value.toLowerCase()
+        const filtroTipo = document.getElementById('filtro-tipo-funcionario').value
+        const filtroFecha = document.getElementById('filtro-fecha').value // formato yyyy-mm-dd
         const filas = document.querySelectorAll('.tabla-fichas tbody tr')
         
         filas.forEach(fila => {
           const programa = fila.cells[0].textContent.toLowerCase()
-          if (programa.includes(filtro)) {
-            fila.style.display = ''
-          } else {
-            fila.style.display = 'none'
+          const fecha = fila.getAttribute('data-fecha')
+          let mostrar = true
+
+          // Programa
+            if (filtroPrograma && !programa.includes(filtroPrograma)) mostrar = false
+          // Tipo Regular/Campesina (se infiere del nombre del programa)
+          if (filtroTipo) {
+            const esCampesina = programa.includes('campesina')
+            if (filtroTipo === 'Regular' && esCampesina) mostrar = false
+            if (filtroTipo === 'Campesina' && !esCampesina) mostrar = false
           }
+          // Fecha exacta
+          if (filtroFecha && fecha !== filtroFecha) mostrar = false
+
+          fila.style.display = mostrar ? '' : 'none'
         })
       }
-      
-      function filtrarPorTipoFuncionario() {
-        const filtro = document.getElementById('filtro-tipo-funcionario').value
-        const filas = document.querySelectorAll('.tabla-fichas tbody tr')
-        
-        filas.forEach(fila => {
-          const programa = fila.cells[0].textContent
-          if (filtro === '') {
-            fila.style.display = ''
-          } else if (filtro === 'Regular' && !programa.toLowerCase().includes('campesina')) {
-            fila.style.display = ''
-          } else if (filtro === 'Campesina' && programa.toLowerCase().includes('campesina')) {
-            fila.style.display = ''
-          } else {
-            fila.style.display = 'none'
-          }
-        })
-      }
+
+      function filtrarPorProgramaFuncionario(){aplicarFiltrosFuncionario()}
+      function filtrarPorTipoFuncionario(){aplicarFiltrosFuncionario()}
+      document.getElementById('filtro-fecha').addEventListener('change', aplicarFiltrosFuncionario)
     </script>
   {% elif rol == 2 %}
     {% comment %}Mostrar esto solo al Coordinador{% endcomment %}
@@ -195,19 +193,23 @@
 
       <!-- busqueda y filtro -->
       <!-- filtro por nombre de programa -->
-      <div class="filtro-nombre-programa">
-        <label for="filtro-programa-coordinador">Filtrar por Nombre de Programa:</label>
-        <input type="text" id="filtro-programa-coordinador" placeholder="Ingrese el nombre del programa" onkeyup="filtrarPorProgramaCoordinador()" />
-      </div>
-       
-      <!-- filtro si es regular o campesena -->
-      <div class="filtro-tipo-ficha">
-        <label for="filtro-tipo-coordinador">Filtrar por Tipo de Ficha:</label>
-        <select id="filtro-tipo-coordinador" onchange="filtrarPorTipoCoordinador()">
-          <option value="">-- Todos --</option>
-          <option value="Regular">Regular</option>
-          <option value="Campesina">Campesina</option>
-        </select>
+      <div class="filtros-busqueda">
+        <div class="filtro-nombre-programa">
+          <label for="filtro-programa-coordinador">Filtrar por Nombre de Programa:</label>
+          <input type="text" id="filtro-programa-coordinador" placeholder="Ingrese el nombre del programa" onkeyup="filtrarPorProgramaCoordinador()" />
+        </div>
+        <div class="filtro-tipo-ficha">
+          <label for="filtro-tipo-coordinador">Filtrar por Tipo de Ficha:</label>
+          <select id="filtro-tipo-coordinador" onchange="filtrarPorTipoCoordinador()">
+            <option value="">-- Todos --</option>
+            <option value="Regular">Regular</option>
+            <option value="Campesina">Campesina</option>
+          </select>
+        </div>
+        <div class="filtro-fecha">
+          <label for="filtro-fecha-coord">Filtrar por Fecha:</label>
+          <input type="date" id="filtro-fecha-coord" />
+        </div>
       </div>
        
       <!-- filtro por Instructor (para funcionario, administrador y Coordinador) -->
@@ -227,7 +229,7 @@
           </thead>
           <tbody>
             {% for solicitud_consulta in solicitudes %}
-              <tr>
+              <tr data-fecha="{{ solicitud_consulta.fechasolicitud|date:'Y-m-d' }}">
                 <form action="{% url 'ficha_funcionario' solicitud_consulta.idsolicitud %}" method="POST">
                   {% csrf_token %}
                   <td>{{ solicitud_consulta.codigoprograma.nombreprograma }}</td>
@@ -271,37 +273,29 @@
     
     <script>
       // Funciones de filtrado para coordinadores
-      function filtrarPorProgramaCoordinador() {
-        const filtro = document.getElementById('filtro-programa-coordinador').value.toLowerCase()
+      function aplicarFiltrosCoordinador(){
+        const filtroPrograma = document.getElementById('filtro-programa-coordinador').value.toLowerCase()
+        const filtroTipo = document.getElementById('filtro-tipo-coordinador').value
+        const filtroFecha = document.getElementById('filtro-fecha-coord').value
         const filas = document.querySelectorAll('.tabla-fichas tbody tr')
-        
+
         filas.forEach(fila => {
           const programa = fila.cells[0].textContent.toLowerCase()
-          if (programa.includes(filtro)) {
-            fila.style.display = ''
-          } else {
-            fila.style.display = 'none'
+          const fecha = fila.getAttribute('data-fecha')
+          let mostrar = true
+          if (filtroPrograma && !programa.includes(filtroPrograma)) mostrar = false
+          if (filtroTipo){
+            const esCampesina = programa.includes('campesina')
+            if (filtroTipo === 'Regular' && esCampesina) mostrar = false
+            if (filtroTipo === 'Campesina' && !esCampesina) mostrar = false
           }
+            if (filtroFecha && fecha !== filtroFecha) mostrar = false
+          fila.style.display = mostrar ? '' : 'none'
         })
       }
-      
-      function filtrarPorTipoCoordinador() {
-        const filtro = document.getElementById('filtro-tipo-coordinador').value
-        const filas = document.querySelectorAll('.tabla-fichas tbody tr')
-        
-        filas.forEach(fila => {
-          const programa = fila.cells[0].textContent
-          if (filtro === '') {
-            fila.style.display = ''
-          } else if (filtro === 'Regular' && !programa.toLowerCase().includes('campesina')) {
-            fila.style.display = ''
-          } else if (filtro === 'Campesina' && programa.toLowerCase().includes('campesina')) {
-            fila.style.display = ''
-          } else {
-            fila.style.display = 'none'
-          }
-        })
-      }
+      function filtrarPorProgramaCoordinador(){aplicarFiltrosCoordinador()}
+      function filtrarPorTipoCoordinador(){aplicarFiltrosCoordinador()}
+      document.getElementById('filtro-fecha-coord').addEventListener('change', aplicarFiltrosCoordinador)
     </script>
   {% else %}
     {% comment %}Mostrar esto solo al Instructor/Administrador{% endcomment %}
@@ -314,20 +308,23 @@
 
       <!-- busqueda y filtro -->
       <!-- filtro por nombre de programa -->
-      <div class="filtro-nombre-programa">
-        <label for="filtro-programa">Filtrar por Nombre de Programa:</label>
-        <input type="text" id="filtro-programa" placeholder="Ingrese el nombre del programa" onkeyup="filtrarPorPrograma()" />
-      </div>
-       
-      <!-- filtro si es regular o campesena -->
-       
-      <div class="filtro-tipo-ficha">
-        <label for="filtro-tipo">Filtrar por Tipo de Ficha:</label>
-        <select id="filtro-tipo" onchange="filtrarPorTipo()">
-          <option value="">-- Todos --</option>
-          <option value="Regular">Regular</option>
-          <option value="Campesina">Campesina</option>
-        </select>
+      <div class="filtros-busqueda">
+        <div class="filtro-nombre-programa">
+          <label for="filtro-programa">Filtrar por Nombre de Programa:</label>
+          <input type="text" id="filtro-programa" placeholder="Ingrese el nombre del programa" onkeyup="filtrarPorPrograma()" />
+        </div>
+        <div class="filtro-tipo-ficha">
+          <label for="filtro-tipo">Filtrar por Tipo de Ficha:</label>
+          <select id="filtro-tipo" onchange="filtrarPorTipo()">
+            <option value="">-- Todos --</option>
+            <option value="Regular">Regular</option>
+            <option value="Campesina">Campesina</option>
+          </select>
+        </div>
+        <div class="filtro-fecha">
+          <label for="filtro-fecha-general">Filtrar por Fecha:</label>
+          <input type="date" id="filtro-fecha-general" />
+        </div>
       </div>
 
       <!-- Contenedor de la tabla de fichas -->
@@ -347,7 +344,7 @@
           </thead>
           <tbody>
             {% for solicitud_consulta in solicitudes %}
-              <tr>
+              <tr data-fecha="{{ solicitud_consulta.fechasolicitud|date:'Y-m-d' }}">
                 <td>{{ solicitud_consulta.codigoprograma.nombreprograma }}</td>
                 <td>
                   {% if solicitud_consulta.estado_usuario %}
@@ -480,26 +477,21 @@
       function aplicarFiltros() {
         const filtroPrograma = document.getElementById('filtro-programa').value.toLowerCase()
         const filtroTipo = document.getElementById('filtro-tipo').value
+        const filtroFecha = document.getElementById('filtro-fecha-general').value
         const filas = document.querySelectorAll('.tabla-fichas tbody tr')
         
         filas.forEach(fila => {
           const programa = fila.cells[0].textContent.toLowerCase()
+          const fecha = fila.getAttribute('data-fecha')
           let mostrarFila = true
           
-          // Filtro por programa
-          if (filtroPrograma && !programa.includes(filtroPrograma)) {
-            mostrarFila = false
-          }
-          
-          // Filtro por tipo
+          if (filtroPrograma && !programa.includes(filtroPrograma)) mostrarFila = false
           if (filtroTipo) {
-            if (filtroTipo === 'Regular' && programa.includes('campesina')) {
-              mostrarFila = false
-            } else if (filtroTipo === 'Campesina' && !programa.includes('campesina')) {
-              mostrarFila = false
-            }
+            const esCampesina = programa.includes('campesina')
+            if (filtroTipo === 'Regular' && esCampesina) mostrarFila = false
+            if (filtroTipo === 'Campesina' && !esCampesina) mostrarFila = false
           }
-          
+          if (filtroFecha && fecha !== filtroFecha) mostrarFila = false
           fila.style.display = mostrarFila ? '' : 'none'
         })
       }
@@ -512,6 +504,7 @@
       function filtrarPorTipo() {
         aplicarFiltros()
       }
+      document.getElementById('filtro-fecha-general').addEventListener('change', aplicarFiltros)
     </script>
   {% endif %}
 {% endblock %}
