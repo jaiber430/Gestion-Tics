@@ -147,6 +147,7 @@ body {
     padding: var(--espaciado-sm) var(--espaciado-md);
     border-radius: var(--radio-borde);
     font-weight: var(--peso-medio);
+    font-size: 1.5rem;
     display: block;
 }
 
@@ -165,6 +166,7 @@ body {
     padding: var(--espaciado-sm) var(--espaciado-md);
     border-radius: var(--radio-borde);
     font-weight: var(--peso-medio);
+    font-size: 1.2rem;
     background-color: var(--color-error);
     display: block;
 }
