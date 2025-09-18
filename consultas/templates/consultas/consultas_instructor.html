@@ -25,6 +25,30 @@
         <p class="subtitulo-pagina">Aquí puede consultar el estado de las fichas solicitadas y descargar los documentos correspondientes</p>
       </div>
 
+
+      <!-- busqueda y filtro -->
+      <!-- filtro por nombre de programa -->
+      <div class="filtro-nombre-programa">
+        <label for="filtro-programa-funcionario">Filtrar por Nombre de Programa:</label>
+        <input type="text" id="filtro-programa-funcionario" placeholder="Ingrese el nombre del programa" onkeyup="filtrarPorProgramaFuncionario()" />
+      </div>
+       
+      <!-- filtro si es regular o campesena -->
+      <div class="filtro-tipo-ficha">
+        <label for="filtro-tipo-funcionario">Filtrar por Tipo de Ficha:</label>
+        <select id="filtro-tipo-funcionario" onchange="filtrarPorTipoFuncionario()">
+          <option value="">-- Todos --</option>
+          <option value="Regular">Regular</option>
+          <option value="Campesina">Campesina</option>
+        </select>
+      </div>
+       
+      {% comment %}
+      <div class="filtro-fecha">
+        <label for="filtro-fecha">Filtrar por Fecha:</label>
+        <input type="date" id="filtro-fecha" />
+      </div> {% endcomment %}
+
       <!-- Contenedor de la tabla de fichas -->
       <div class="contenedor-tabla-fichas">
         <table class="tabla-fichas">
@@ -126,6 +150,39 @@
           })
         })
       })
+      
+      // Funciones de filtrado para funcionarios
+      function filtrarPorProgramaFuncionario() {
+        const filtro = document.getElementById('filtro-programa-funcionario').value.toLowerCase()
+        const filas = document.querySelectorAll('.tabla-fichas tbody tr')
+        
+        filas.forEach(fila => {
+          const programa = fila.cells[0].textContent.toLowerCase()
+          if (programa.includes(filtro)) {
+            fila.style.display = ''
+          } else {
+            fila.style.display = 'none'
+          }
+        })
+      }
+      
+      function filtrarPorTipoFuncionario() {
+        const filtro = document.getElementById('filtro-tipo-funcionario').value
+        const filas = document.querySelectorAll('.tabla-fichas tbody tr')
+        
+        filas.forEach(fila => {
+          const programa = fila.cells[0].textContent
+          if (filtro === '') {
+            fila.style.display = ''
+          } else if (filtro === 'Regular' && !programa.toLowerCase().includes('campesina')) {
+            fila.style.display = ''
+          } else if (filtro === 'Campesina' && programa.toLowerCase().includes('campesina')) {
+            fila.style.display = ''
+          } else {
+            fila.style.display = 'none'
+          }
+        })
+      }
     </script>
   {% elif rol == 2 %}
     {% comment %}Mostrar esto solo al Coordinador{% endcomment %}
@@ -135,6 +192,25 @@
         <h2 class="titulo-pagina">Consultar solicitudes {{ user }} {{ user_name }}</h2>
         <p class="subtitulo-pagina">Aquí puede consultar el estado de las fichas solicitadas y descargar los documentos correspondientes</p>
       </div>
+
+      <!-- busqueda y filtro -->
+      <!-- filtro por nombre de programa -->
+      <div class="filtro-nombre-programa">
+        <label for="filtro-programa-coordinador">Filtrar por Nombre de Programa:</label>
+        <input type="text" id="filtro-programa-coordinador" placeholder="Ingrese el nombre del programa" onkeyup="filtrarPorProgramaCoordinador()" />
+      </div>
+       
+      <!-- filtro si es regular o campesena -->
+      <div class="filtro-tipo-ficha">
+        <label for="filtro-tipo-coordinador">Filtrar por Tipo de Ficha:</label>
+        <select id="filtro-tipo-coordinador" onchange="filtrarPorTipoCoordinador()">
+          <option value="">-- Todos --</option>
+          <option value="Regular">Regular</option>
+          <option value="Campesina">Campesina</option>
+        </select>
+      </div>
+       
+      <!-- filtro por Instructor (para funcionario, administrador y Coordinador) -->
 
       <!-- Contenedor de la tabla de fichas -->
       <div class="contenedor-tabla-fichas">
@@ -192,6 +268,41 @@
         </table>
       </div>
     </main>
+    
+    <script>
+      // Funciones de filtrado para coordinadores
+      function filtrarPorProgramaCoordinador() {
+        const filtro = document.getElementById('filtro-programa-coordinador').value.toLowerCase()
+        const filas = document.querySelectorAll('.tabla-fichas tbody tr')
+        
+        filas.forEach(fila => {
+          const programa = fila.cells[0].textContent.toLowerCase()
+          if (programa.includes(filtro)) {
+            fila.style.display = ''
+          } else {
+            fila.style.display = 'none'
+          }
+        })
+      }
+      
+      function filtrarPorTipoCoordinador() {
+        const filtro = document.getElementById('filtro-tipo-coordinador').value
+        const filas = document.querySelectorAll('.tabla-fichas tbody tr')
+        
+        filas.forEach(fila => {
+          const programa = fila.cells[0].textContent
+          if (filtro === '') {
+            fila.style.display = ''
+          } else if (filtro === 'Regular' && !programa.toLowerCase().includes('campesina')) {
+            fila.style.display = ''
+          } else if (filtro === 'Campesina' && programa.toLowerCase().includes('campesina')) {
+            fila.style.display = ''
+          } else {
+            fila.style.display = 'none'
+          }
+        })
+      }
+    </script>
   {% else %}
     {% comment %}Mostrar esto solo al Instructor/Administrador{% endcomment %}
     <main class="contenido-principal">
@@ -199,6 +310,24 @@
       <div class="titulo-seccion">
         <h2 class="titulo-pagina">Consultar solicitudes {{ user }} {{ user_name }}</h2>
         <p class="subtitulo-pagina">Aquí puede consultar el estado de las fichas solicitadas y descargar los documentos correspondientes</p>
+      </div>
+
+      <!-- busqueda y filtro -->
+      <!-- filtro por nombre de programa -->
+      <div class="filtro-nombre-programa">
+        <label for="filtro-programa">Filtrar por Nombre de Programa:</label>
+        <input type="text" id="filtro-programa" placeholder="Ingrese el nombre del programa" onkeyup="filtrarPorPrograma()" />
+      </div>
+       
+      <!-- filtro si es regular o campesena -->
+       
+      <div class="filtro-tipo-ficha">
+        <label for="filtro-tipo">Filtrar por Tipo de Ficha:</label>
+        <select id="filtro-tipo" onchange="filtrarPorTipo()">
+          <option value="">-- Todos --</option>
+          <option value="Regular">Regular</option>
+          <option value="Campesina">Campesina</option>
+        </select>
       </div>
 
       <!-- Contenedor de la tabla de fichas -->
@@ -312,5 +441,77 @@
         </table>
       </div>
     </main>
+    
+    <script>
+      // Funciones de filtrado para instructores/administradores
+      function filtrarPorPrograma() {
+        const filtro = document.getElementById('filtro-programa').value.toLowerCase()
+        const filas = document.querySelectorAll('.tabla-fichas tbody tr')
+        
+        filas.forEach(fila => {
+          const programa = fila.cells[0].textContent.toLowerCase()
+          if (programa.includes(filtro)) {
+            fila.style.display = ''
+          } else {
+            fila.style.display = 'none'
+          }
+        })
+      }
+      
+      function filtrarPorTipo() {
+        const filtro = document.getElementById('filtro-tipo').value
+        const filas = document.querySelectorAll('.tabla-fichas tbody tr')
+        
+        filas.forEach(fila => {
+          const programa = fila.cells[0].textContent
+          if (filtro === '') {
+            fila.style.display = ''
+          } else if (filtro === 'Regular' && !programa.toLowerCase().includes('campesina')) {
+            fila.style.display = ''
+          } else if (filtro === 'Campesina' && programa.toLowerCase().includes('campesina')) {
+            fila.style.display = ''
+          } else {
+            fila.style.display = 'none'
+          }
+        })
+      }
+      
+      // Función combinada que aplica ambos filtros
+      function aplicarFiltros() {
+        const filtroPrograma = document.getElementById('filtro-programa').value.toLowerCase()
+        const filtroTipo = document.getElementById('filtro-tipo').value
+        const filas = document.querySelectorAll('.tabla-fichas tbody tr')
+        
+        filas.forEach(fila => {
+          const programa = fila.cells[0].textContent.toLowerCase()
+          let mostrarFila = true
+          
+          // Filtro por programa
+          if (filtroPrograma && !programa.includes(filtroPrograma)) {
+            mostrarFila = false
+          }
+          
+          // Filtro por tipo
+          if (filtroTipo) {
+            if (filtroTipo === 'Regular' && programa.includes('campesina')) {
+              mostrarFila = false
+            } else if (filtroTipo === 'Campesina' && !programa.includes('campesina')) {
+              mostrarFila = false
+            }
+          }
+          
+          fila.style.display = mostrarFila ? '' : 'none'
+        })
+      }
+      
+      // Actualizar las funciones individuales para usar la función combinada
+      function filtrarPorPrograma() {
+        aplicarFiltros()
+      }
+      
+      function filtrarPorTipo() {
+        aplicarFiltros()
+      }
+    </script>
   {% endif %}
 {% endblock %}
