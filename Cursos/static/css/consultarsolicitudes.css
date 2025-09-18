@@ -311,6 +311,65 @@ body {
     background-color: var(--color-primario-hover);
 }
 
+/* FILTROS EN CONSULTAS */
+.filtro-nombre-programa,
+.filtro-tipo-ficha,
+.filtro-fecha {
+    display: inline-flex;
+    flex-direction: column; 
+    gap: var(--espaciado-xs);
+    margin-right: var(--espaciado-lg);
+    margin-bottom: var(--espaciado-md);
+    vertical-align: top;
+    min-width: 220px;                
+}
+
+/* Contenedor que agrupa los filtros para centrar */
+.filtros-busqueda {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    margin-top: var(--espaciado-md);
+    margin-bottom: var(--espaciado-lg);
+}
+
+.filtro-fecha { margin-right: 0; }
+
+.filtro-nombre-programa label,
+.filtro-tipo-ficha label,
+.filtro-fecha label {
+    font-size: 1.3rem;
+    font-weight: var(--peso-medio);
+    color: var(--color-texto-principal);
+}
+
+.filtro-nombre-programa input[type="text"],
+.filtro-fecha input[type="date"],
+.filtro-tipo-ficha select {
+    padding: var(--espaciado-sm) var(--espaciado-md);
+    border: 0.1rem solid var(--color-borde);
+    border-radius: var(--radio-borde);
+    background: var(--color-secundario);
+    font-size: 1.3rem;
+    font-family: var(--fuente-principal);
+    transition: border-color .25s ease, box-shadow .25s ease;
+}
+
+.filtro-nombre-programa input[type="text"]:focus,
+.filtro-fecha input[type="date"]:focus,
+.filtro-tipo-ficha select:focus {
+    outline: none;
+    border-color: var(--color-primario);
+    box-shadow: 0 0 0 0.25rem rgba(76,175,80,0.18);
+}
+
+@media (max-width: 640px) {
+    .filtro-nombre-programa,
+    .filtro-tipo-ficha,
+    .filtro-fecha { display: flex; min-width: 100%; margin-right: 0; }
+}
+
 /* 
    TABLA DE FICHAS
  */
