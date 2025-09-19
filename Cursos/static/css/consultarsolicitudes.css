@@ -334,6 +334,7 @@ body {
     margin-bottom: var(--espaciado-lg);
 }
 
+
 .filtro-fecha { margin-right: 0; }
 
 .filtro-nombre-programa label,
@@ -455,6 +456,18 @@ body {
     gap: 0.4rem;
     transition: background-color 0.25s ease, transform 0.15s ease;
     box-shadow: var(--sombra-ligera);
+}
+
+.boton-deshabilitado {
+    background-color: #cccccc !important;
+    color: #666666 !important;
+    cursor: not-allowed !important;
+    opacity: 0.6 !important;
+}
+
+.boton-deshabilitado:hover {
+    background-color: #cccccc !important;
+    color: #666666 !important;
 }
 
 /* Forzar que dentro de la tabla mantenga el color blanco y no lo sobreescriba .tabla-fichas a */

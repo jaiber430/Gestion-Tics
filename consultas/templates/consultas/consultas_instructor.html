@@ -1,6 +1,7 @@
 {% extends layout %}
 
 {% block content %}
+
   {% comment %}Mostar esto solo al funcionario{% endcomment %}
   {% if rol == 3 %}
     <!-- Sección principal - Consultar Fichas -->
@@ -39,7 +40,7 @@
           <select id="filtro-tipo-funcionario" onchange="filtrarPorTipoFuncionario()">
             <option value="">-- Todos --</option>
             <option value="Regular">Regular</option>
-            <option value="Campesina">Campesina</option>
+            <option value="Campesina">CampeSENA</option>
           </select>
         </div>
         <!-- filtro por fecha -->
@@ -70,7 +71,7 @@
             {% for solicitud_consulta in solicitudes %}
               <form action="{% url 'ficha_funcionario' solicitud_consulta.idsolicitud %}" method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
-                <tr data-fecha="{{ solicitud_consulta.fechasolicitud|date:'Y-m-d' }}">
+                <tr data-fecha="{{ solicitud_consulta.fechasolicitud|date:'Y-m-d' }}" data-tipoid="{{ solicitud_consulta.idtiposolicitud.idtiposolicitud }}" data-tiponombre="{{ solicitud_consulta.idtiposolicitud.tiposolicitud }}">
                   <td>{{ solicitud_consulta.codigoprograma.nombreprograma }}</td>
                   <td>
                     <select name="estado" id="estado">
@@ -116,17 +117,21 @@
       </div>
     </main>
 
-    <!-- ✅ JS SOLO PARA FUNCIONARIO -->
+    <!-- JS SOLO PARA FUNCIONARIO -->
     <script>
+      // Función para mostrar alerta si el Excel no está disponible
       document.addEventListener('DOMContentLoaded', function () {
         document.querySelectorAll('.link-excel').forEach((enlace) => {
+          // Obtener el ID único del enlace
           const id = enlace.dataset.id
+          // Seleccionar los elementos relacionados
           const subida = document.querySelector(`.subida-reemplazo[data-id="${id}"]`)
           const inputArchivo = document.querySelector(`.archivo-subida[data-id="${id}"]`)
       
           // Revisamos el estado guardado en localStorage
           const estado = localStorage.getItem('estadoExcel_' + id)
-      
+          
+          // Mostrar/ocultar elementos según el estado
           if (estado === 'descargado') {
             enlace.style.display = 'none'
             subida.style.display = 'block'
@@ -142,7 +147,7 @@
             localStorage.setItem('estadoExcel_' + id, 'descargado')
           })
       
-          // Cuando se sube un archivo
+          // Cuando se sube un archivo (CAMBIAR) 
           inputArchivo.addEventListener('change', function () {
             enlace.style.display = 'block'
             subida.style.display = 'none'
@@ -153,22 +158,31 @@
       
       // Funciones de filtrado para funcionarios
       function aplicarFiltrosFuncionario() {
+        // Obtener los valores de los filtros
         const filtroPrograma = document.getElementById('filtro-programa-funcionario').value.toLowerCase()
         const filtroTipo = document.getElementById('filtro-tipo-funcionario').value
         const filtroFecha = document.getElementById('filtro-fecha').value // formato yyyy-mm-dd
         const filas = document.querySelectorAll('.tabla-fichas tbody tr')
         
+        // Recorrer cada fila y decidir si mostrarla u ocultarla
         filas.forEach(fila => {
+          // Obtener los datos de la fila
           const programa = fila.cells[0].textContent.toLowerCase()
+          // Obtener la fecha desde el atributo data-fecha
           const fecha = fila.getAttribute('data-fecha')
+          // Obtener el tipo de solicitud desde los atributos data
+          const tipoNombre = (fila.dataset.tiponombre || '').toLowerCase()
+          const tipoId = fila.dataset.tipoid || ''
+          // Determinar si es campesina o regular
+          const esCampesina = tipoNombre === 'campesina' || tipoId === '2'
+          const esRegular = tipoNombre === 'regular' || tipoId === '1'
           let mostrar = true
 
           // Programa
             if (filtroPrograma && !programa.includes(filtroPrograma)) mostrar = false
-          // Tipo Regular/Campesina (se infiere del nombre del programa)
+          // Tipo Regular/Campesina basado en el tipo real de la solicitud
           if (filtroTipo) {
-            const esCampesina = programa.includes('campesina')
-            if (filtroTipo === 'Regular' && esCampesina) mostrar = false
+            if (filtroTipo === 'Regular' && !esRegular) mostrar = false
             if (filtroTipo === 'Campesina' && !esCampesina) mostrar = false
           }
           // Fecha exacta
@@ -177,7 +191,7 @@
           fila.style.display = mostrar ? '' : 'none'
         })
       }
-
+      // Actualizar las funciones individuales para usar la función combinada de filtros
       function filtrarPorProgramaFuncionario(){aplicarFiltrosFuncionario()}
       function filtrarPorTipoFuncionario(){aplicarFiltrosFuncionario()}
       document.getElementById('filtro-fecha').addEventListener('change', aplicarFiltrosFuncionario)
@@ -203,7 +217,7 @@
           <select id="filtro-tipo-coordinador" onchange="filtrarPorTipoCoordinador()">
             <option value="">-- Todos --</option>
             <option value="Regular">Regular</option>
-            <option value="Campesina">Campesina</option>
+            <option value="Campesina">CampeSENA</option>
           </select>
         </div>
         <div class="filtro-fecha">
@@ -229,7 +243,7 @@
           </thead>
           <tbody>
             {% for solicitud_consulta in solicitudes %}
-              <tr data-fecha="{{ solicitud_consulta.fechasolicitud|date:'Y-m-d' }}">
+              <tr data-fecha="{{ solicitud_consulta.fechasolicitud|date:'Y-m-d' }}" data-tipoid="{{ solicitud_consulta.idtiposolicitud.idtiposolicitud }}" data-tiponombre="{{ solicitud_consulta.idtiposolicitud.tiposolicitud }}">
                 <form action="{% url 'ficha_funcionario' solicitud_consulta.idsolicitud %}" method="POST">
                   {% csrf_token %}
                   <td>{{ solicitud_consulta.codigoprograma.nombreprograma }}</td>
@@ -274,25 +288,34 @@
     <script>
       // Funciones de filtrado para coordinadores
       function aplicarFiltrosCoordinador(){
+        // Obtener los valores de los filtros
         const filtroPrograma = document.getElementById('filtro-programa-coordinador').value.toLowerCase()
         const filtroTipo = document.getElementById('filtro-tipo-coordinador').value
         const filtroFecha = document.getElementById('filtro-fecha-coord').value
         const filas = document.querySelectorAll('.tabla-fichas tbody tr')
 
         filas.forEach(fila => {
+          // Obtener los datos de la fila 
           const programa = fila.cells[0].textContent.toLowerCase()
           const fecha = fila.getAttribute('data-fecha')
+          const tipoNombre = (fila.dataset.tiponombre || '').toLowerCase()
+          const tipoId = fila.dataset.tipoid || ''
+          const esCampesina = tipoNombre === 'campesina' || tipoId === '2'
+          const esRegular = tipoNombre === 'regular' || tipoId === '1'
           let mostrar = true
+          // Aplicar los filtros: si filtroPrograma no está vacío y no coincide, ocultar
           if (filtroPrograma && !programa.includes(filtroPrograma)) mostrar = false
           if (filtroTipo){
-            const esCampesina = programa.includes('campesina')
-            if (filtroTipo === 'Regular' && esCampesina) mostrar = false
+            // Si filtroTipo es 'Regular' y la fila no es regular, ocultar
+            if (filtroTipo === 'Regular' && !esRegular) mostrar = false
             if (filtroTipo === 'Campesina' && !esCampesina) mostrar = false
           }
+          // Si filtroFecha no está vacío y no coincide, ocultar
             if (filtroFecha && fecha !== filtroFecha) mostrar = false
           fila.style.display = mostrar ? '' : 'none'
         })
       }
+      // Actualizar las funciones individuales para usar la función combinada de filtros
       function filtrarPorProgramaCoordinador(){aplicarFiltrosCoordinador()}
       function filtrarPorTipoCoordinador(){aplicarFiltrosCoordinador()}
       document.getElementById('filtro-fecha-coord').addEventListener('change', aplicarFiltrosCoordinador)
@@ -318,7 +341,7 @@
           <select id="filtro-tipo" onchange="filtrarPorTipo()">
             <option value="">-- Todos --</option>
             <option value="Regular">Regular</option>
-            <option value="Campesina">Campesina</option>
+            <option value="Campesina">CampeSENA</option>
           </select>
         </div>
         <div class="filtro-fecha">
@@ -344,7 +367,7 @@
           </thead>
           <tbody>
             {% for solicitud_consulta in solicitudes %}
-              <tr data-fecha="{{ solicitud_consulta.fechasolicitud|date:'Y-m-d' }}">
+              <tr data-fecha="{{ solicitud_consulta.fechasolicitud|date:'Y-m-d' }}" data-tipoid="{{ solicitud_consulta.idtiposolicitud.idtiposolicitud }}" data-tiponombre="{{ solicitud_consulta.idtiposolicitud.tiposolicitud }}">
                 <td>{{ solicitud_consulta.codigoprograma.nombreprograma }}</td>
                 <td>
                   {% if solicitud_consulta.estado_usuario %}
@@ -379,7 +402,11 @@
                   {% endif %}
                 </td>
                 <td>
-                  <a href="{% url 'sofia_plus_descarga' solicitud_consulta.idsolicitud %}" class="boton-descargar">Descargar excel</a>
+                  {% if solicitud_consulta.excel_disponible %}
+                    <a href="{% url 'sofia_plus_descarga' solicitud_consulta.idsolicitud %}" class="boton-descargar">Descargar excel</a>
+                  {% else %}
+                    <button onclick="mostrarAlertaExcel()" class="boton-descargar boton-deshabilitado" disabled>Excel no disponible</button>
+                  {% endif %}
                 </td> 
                 <td>{{ solicitud_consulta.fechasolicitud }}</td>
                 <td>
@@ -450,9 +477,11 @@
     <script>
       // Funciones de filtrado para instructores/administradores
       function filtrarPorPrograma() {
+        // Obtener el valor del filtro y las filas de la tabla
         const filtro = document.getElementById('filtro-programa').value.toLowerCase()
         const filas = document.querySelectorAll('.tabla-fichas tbody tr')
         
+        // Recorrer cada fila y mostrar/ocultar según el filtro
         filas.forEach(fila => {
           const programa = fila.cells[0].textContent.toLowerCase()
           if (programa.includes(filtro)) {
@@ -463,17 +492,25 @@
         })
       }
       
+      // Filtrar por tipo de ficha (Regular o Campesina)
       function filtrarPorTipo() {
         const filtro = document.getElementById('filtro-tipo').value
         const filas = document.querySelectorAll('.tabla-fichas tbody tr')
         
+        // Recorrer cada fila y mostrar/ocultar según el filtro
         filas.forEach(fila => {
-          const programa = fila.cells[0].textContent
+          const tipoNombre = (fila.dataset.tiponombre || '').toLowerCase()
+          const tipoId = fila.dataset.tipoid || ''
+          const esCampesina = tipoNombre === 'campesina' || tipoId === '2'
+          const esRegular = tipoNombre === 'regular' || tipoId === '1'
+          // si filtro está vacío, mostrar todo
           if (filtro === '') {
             fila.style.display = ''
-          } else if (filtro === 'Regular' && !programa.toLowerCase().includes('campesina')) {
+          } else if (filtro === 'Regular' && esRegular) {
+            // si filtro es Regular y la fila es Regular, mostrar
             fila.style.display = ''
-          } else if (filtro === 'Campesina' && programa.toLowerCase().includes('campesina')) {
+          } else if (filtro === 'Campesina' && esCampesina) {
+            // si filtro es Campesina y la fila es Campesina, mostrar
             fila.style.display = ''
           } else {
             fila.style.display = 'none'
@@ -483,22 +520,30 @@
       
       // Función combinada que aplica ambos filtros
       function aplicarFiltros() {
+        // Obtener los valores de los filtros
         const filtroPrograma = document.getElementById('filtro-programa').value.toLowerCase()
         const filtroTipo = document.getElementById('filtro-tipo').value
         const filtroFecha = document.getElementById('filtro-fecha-general').value
         const filas = document.querySelectorAll('.tabla-fichas tbody tr')
         
+        // Recorrer cada fila y decidir si mostrarla u ocultarla
         filas.forEach(fila => {
+          // Obtener los datos de la fila 
           const programa = fila.cells[0].textContent.toLowerCase()
           const fecha = fila.getAttribute('data-fecha')
+          const tipoNombre = (fila.dataset.tiponombre || '').toLowerCase()
+          const tipoId = fila.dataset.tipoid || ''
+          const esCampesina = tipoNombre === 'campesina' || tipoId === '2'
+          const esRegular = tipoNombre === 'regular' || tipoId === '1'
           let mostrarFila = true
           
+          // Aplicar los filtros
           if (filtroPrograma && !programa.includes(filtroPrograma)) mostrarFila = false
           if (filtroTipo) {
-            const esCampesina = programa.includes('campesina')
-            if (filtroTipo === 'Regular' && esCampesina) mostrarFila = false
+            if (filtroTipo === 'Regular' && !esRegular) mostrarFila = false
             if (filtroTipo === 'Campesina' && !esCampesina) mostrarFila = false
           }
+          // Fecha exacta
           if (filtroFecha && fecha !== filtroFecha) mostrarFila = false
           fila.style.display = mostrarFila ? '' : 'none'
         })
@@ -509,9 +554,12 @@
         aplicarFiltros()
       }
       
+      // Actualizar la función de filtro por tipo para usar la función combinada
       function filtrarPorTipo() {
         aplicarFiltros()
       }
+
+      // Función para mostrar alerta si el Excel no está disponible
       document.getElementById('filtro-fecha-general').addEventListener('change', aplicarFiltros)
     </script>
   {% endif %}
