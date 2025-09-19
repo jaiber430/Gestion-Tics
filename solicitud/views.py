@@ -220,7 +220,8 @@ def _crear_solicitud_base(request, tipo_solicitud_id, template_name, mensaje_exi
                     ambiente=nombre_ambiente,
                     fechasolicitud=timezone.now().date()
                 )
-                
+
+                mensaje_exito='Solicitud de ficha creada exitosamente.'
                 messages.success(request, mensaje_exito)
                 return redirect('Crearsolicitud')
 
@@ -228,7 +229,6 @@ def _crear_solicitud_base(request, tipo_solicitud_id, template_name, mensaje_exi
             messages.error(request, f'Error al crear la solicitud: {str(e)}')
 
     return render(request, template_name, context)
-
 
 def solicitud_regular(request):
     return _crear_solicitud_base(

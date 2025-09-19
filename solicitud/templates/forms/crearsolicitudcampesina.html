@@ -7,18 +7,11 @@
   <main class="contenido-principal">
     <!-- Título -->
     <div class="titulo-seccion">
-      <h2 class="titulo-pagina">FORMULARIO FICHA CAMPESINA</h2>
-      <p class="subtitulo-pagina">Complete todos los campos requeridos para crear la solicitud de ficha campesina</p>
+      <h2 class="titulo-pagina">FORMULARIO FICHA CAMPESENA</h2>
+      <p class="subtitulo-pagina">Complete todos los campos requeridos para crear la solicitud de ficha campesena</p>
     </div>
 
-    <!-- Mensajes de Django -->
-    {% if messages %}
-      {% for message in messages %}
-        <div class="alert {% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% else %}info{% endif %}">
-          {{ message }}
-        </div>
-      {% endfor %}
-    {% endif %}
+    {# Mensajes movidos a pages/creacion.html #}
 
     <!-- Formulario Principal -->
     <form class="formulario-ficha" action="{% url 'crearcampesina' %}" method="post" enctype="multipart/form-data">

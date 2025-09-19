@@ -11,14 +11,7 @@
       <p class="subtitulo-pagina">Complete todos los campos requeridos para crear la solicitud de ficha</p>
     </div>
 
-    <!-- Mensajes de Django -->
-    {% if messages %}
-      {% for message in messages %}
-        <div class="alert {% if message.tags == 'success' %}success{% elif message.tags == 'error' %}error{% else %}info{% endif %}">
-          {{ message }}
-        </div>
-      {% endfor %}
-    {% endif %}
+    {# Mensajes movidos a pages/creacion.html #}
 
     <!-- Formulario Principal -->
     <form class="formulario-ficha" action="{% url 'crearregular' %}" method="post" enctype="multipart/form-data">

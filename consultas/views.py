@@ -73,7 +73,7 @@ def consultas_instructor(request):
         # Traer todas las solicitudes dentro del mes actual (sin limitar al funcionario logueado)
         solicitudes_mes = Solicitud.objects.filter(
             fechasolicitud__range=(primer_dia, ultimo_dia)
-        )
+        ).order_by('-fechasolicitud')  # Ordenar de más reciente a más antigua
 
         # Filtrar solo las solicitudes que cumplan la condición de cupo
         solicitudes_filtradas = []
@@ -86,7 +86,9 @@ def consultas_instructor(request):
 
     else:
         # Para otros roles, traer solo solicitudes del usuario directamente
-        solicitudes = Solicitud.objects.select_related('idusuario').filter(idusuario=user_id)
+        solicitudes = Solicitud.objects.select_related('idusuario') \
+            .filter(idusuario=user_id) \
+            .order_by('-fechasolicitud')  # Ordenar de más reciente a más antigua
 
     # Obtener estados
     estado = Estados.objects.values('idestado', 'estados')
@@ -123,7 +125,6 @@ def consultas_instructor(request):
         'estado': estado,
     })
 
-
 # ===============================================================================
 # Mostrar la ficha de caracterización
 # ===============================================================================
@@ -131,10 +132,12 @@ def ficha_caracterizacion(request, solicitud_id):
     """
     Vista para mostrar la ficha de caracterización
     """
+    # Obtener el usuario actual desde la sesión
     user_id = request.session.get('user_id')
     usuario_actual = get_object_or_404(Usuario.objects.select_related('rol'), idusuario=user_id)
     
     # Obtener la solicitud con todas las relaciones necesarias
+    # 🔹 select_related solo con ForeignKey / OneToOne
     solicitud = get_object_or_404(
         Solicitud.objects.select_related(
             'codigoprograma',
@@ -144,8 +147,7 @@ def ficha_caracterizacion(request, solicitud_id):
             'idusuario',
             'idempresa',
             'idespecial',
-            # 'ambiente'
-        ), 
+        ),
         idsolicitud=solicitud_id
     )
     
@@ -158,7 +160,7 @@ def ficha_caracterizacion(request, solicitud_id):
     usuario = solicitud.idusuario
     empresa = solicitud.idempresa
     programa_especial = solicitud.idespecial
-    ambiente = solicitud.ambiente
+    ambiente = solicitud.ambiente  # ✅ Campo de texto, se usa directo
     
     # Definir layout según rol del usuario actual
     id_rol = usuario_actual.rol.idrol
@@ -173,6 +175,7 @@ def ficha_caracterizacion(request, solicitud_id):
     else:
         layout = 'layout/layout_admin.html'
     
+    # Contexto que se envía al template
     context = {
         'layout': layout,
         'rol': id_rol,
@@ -185,9 +188,10 @@ def ficha_caracterizacion(request, solicitud_id):
         'usuario': usuario,
         'empresa': empresa,
         'programa_especial': programa_especial,
-        'ambiente': ambiente,
+        'ambiente': ambiente,  # Se pasa al template como texto
     }
     
+    # Renderizar template con datos
     return render(request, 'fichacaracterizacion/fichacaracterizacion.html', context)
 
 # ======================================================================
@@ -201,13 +205,26 @@ def ficha_caracterizacion_pdf(request, solicitud_id):
 
     # Reutilizar la lógica de la vista HTML
     user_id = request.session.get('user_id')
-    usuario_actual = get_object_or_404(Usuario.objects.select_related('rol'), idusuario=user_id)
+    usuario_actual = get_object_or_404(
+        Usuario.objects.select_related('rol'),
+        idusuario=user_id
+    )
+
+    # 🔹 Quitar 'ambiente' porque es CharField (no relacional)
     solicitud = get_object_or_404(
         Solicitud.objects.select_related(
-            'codigoprograma', 'idhorario', 'idmodalidad', 'codigomunicipio__codigodepartamento',
-            'idusuario', 'idempresa', 'idespecial', 'ambiente'
-        ), idsolicitud=solicitud_id
+            'codigoprograma',
+            'idhorario',
+            'idmodalidad',
+            'codigomunicipio__codigodepartamento',
+            'idusuario',
+            'idempresa',
+            'idespecial',
+        ),
+        idsolicitud=solicitud_id
     )
+
+    # Obtener variables necesarias para el template
     programa = solicitud.codigoprograma
     horario = solicitud.idhorario
     modalidad = solicitud.idmodalidad
@@ -216,8 +233,9 @@ def ficha_caracterizacion_pdf(request, solicitud_id):
     usuario = solicitud.idusuario
     empresa = solicitud.idempresa
     programa_especial = solicitud.idespecial
-    ambiente = solicitud.ambiente
+    ambiente = solicitud.ambiente  # ✅ Se accede directo porque es CharField
 
+    # Definir layout según rol
     id_rol = usuario_actual.rol.idrol
     if id_rol == 1:
         layout = 'layout/layoutinstructor.html'
@@ -230,6 +248,7 @@ def ficha_caracterizacion_pdf(request, solicitud_id):
     else:
         layout = 'layout/layout_admin.html'
 
+    # Contexto enviado al template
     context = {
         'layout': layout,
         'rol': id_rol,
@@ -242,10 +261,11 @@ def ficha_caracterizacion_pdf(request, solicitud_id):
         'usuario': usuario,
         'empresa': empresa,
         'programa_especial': programa_especial,
-        'ambiente': ambiente,
+        'ambiente': ambiente,  # Se pasa como texto
         'pdf_mode': True,
     }
 
+    # Renderizar HTML con contexto
     html_string = render_to_string('fichacaracterizacion/fichacaracterizacion.html', context)
 
     # Ruta al CSS
@@ -265,7 +285,7 @@ def ficha_caracterizacion_pdf(request, solicitud_id):
         filename_pdf = f"ficha_caracterizacion_{solicitud.idsolicitud}.pdf"
         ruta_guardado = os.path.join(carpeta_destino, filename_pdf)
 
-        # Guardar el archivo en disco
+        # Guardar archivo en disco
         with open(ruta_guardado, 'wb') as f:
             f.write(pdf_bytes)
 
@@ -273,9 +293,9 @@ def ficha_caracterizacion_pdf(request, solicitud_id):
         response_file = open(ruta_guardado, 'rb')
     else:
         # Para otros roles: no guardar en disco, usar los bytes directamente
-        response_file = pdf_bytes
+        response_file = BytesIO(pdf_bytes)  # 🔹 Usar BytesIO para respuesta directa
 
-    # Descargar el archivo (desde disco si rol=3, desde bytes si otro rol)
+    # Descargar el archivo
     return FileResponse(
         response_file,
         as_attachment=True,
