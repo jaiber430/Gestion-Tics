@@ -370,7 +370,7 @@ def descargar_excel(request, id, idrol):
 # Descargar la carta de solicitud de la empresa
 # ========================================================================
 
-def descargar_carta(request, id, idrol):
+def descargar_carta(request, id, idrol): 
     # Buscar la solicitud
     buscar_nit = Solicitud.objects.get(idsolicitud=id)
 

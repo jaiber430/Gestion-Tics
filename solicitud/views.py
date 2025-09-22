@@ -227,6 +227,7 @@ def _crear_solicitud_base(request, tipo_solicitud_id, template_name, mensaje_exi
 
         except Exception as e:
             messages.error(request, f'Error al crear la solicitud: {str(e)}')
+            return redirect('Crearsolicitud')
 
     return render(request, template_name, context)
 
