@@ -71,7 +71,7 @@ def consultas_instructor(request):
         ultimo_dia = datetime.date(anio, mes, calendar.monthrange(anio, mes)[1])
 
         # Traer todas las solicitudes dentro del mes actual (sin limitar al funcionario logueado)
-        solicitudes_mes = Solicitud.objects.filter(
+        solicitudes_mes = Solicitud.objects.select_related('idtiposolicitud').filter(
             fechasolicitud__range=(primer_dia, ultimo_dia)
         ).order_by('-fechasolicitud')  # Ordenar de más reciente a más antigua
 
@@ -86,7 +86,7 @@ def consultas_instructor(request):
 
     else:
         # Para otros roles, traer solo solicitudes del usuario directamente
-        solicitudes = Solicitud.objects.select_related('idusuario') \
+        solicitudes = Solicitud.objects.select_related('idusuario', 'idtiposolicitud') \
             .filter(idusuario=user_id) \
             .order_by('-fechasolicitud')  # Ordenar de más reciente a más antigua
 
