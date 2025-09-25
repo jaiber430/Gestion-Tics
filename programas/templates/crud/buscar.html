@@ -19,15 +19,16 @@
 
     <!-- Formulario de búsqueda -->
     <div class="seccion-formulario">
-      <form method="POST" action="{% url 'buscar_programa' %}">
+      <form method="POST" action="{% url 'buscar_programa' %}" class="programa-busqueda-form">
         {% csrf_token %}
-        <input type="text" name="programa" id="programa" placeholder="Buscar programa" />
-        <button type="submit">Buscar</button>
+        <input type="text" name="programa" id="programa" placeholder="Buscar programa" class="programa-input" />
+        <button type="submit" class="programa-boton">Buscar</button>
       </form>
 
       <!-- Tabla de resultados -->
       {% if buscar %}
-        <table class="table table-bordered table-striped text-center align-middle">
+      <div class="contenedor-tabla-programas">
+        <table class="tabla-programas tabla-scroll">
           <thead class="table-dark">
             <tr>
               <th>Código</th>
@@ -79,6 +80,7 @@
             {% endfor %}
           </tbody>
         </table>
+      </div>
       {% endif %}
     </div>
   </main>
@@ -86,18 +88,18 @@
   <!-- Modal de edición -->
   <div class="modal fade" id="editarModal" tabindex="-1" aria-labelledby="editarModalLabel" aria-hidden="true">
     <div class="modal-dialog">
-      <div class="modal-content">
+      <div class="modal-content modal-programa">
         <form method="POST" action="{% url 'actualizar_programa' %}">
           {% csrf_token %}
           <!-- Campo oculto para enviar el código -->
           <input type="hidden" name="codigo" id="modal-codigo-hidden" />
 
-          <div class="modal-header">
+          <div class="modal-header modal-programa-header">
             <h5 class="modal-title" id="editarModalLabel">Editar Programa</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            <button type="button" class="btn-cerrar-modal" data-bs-dismiss="modal" aria-label="Cerrar">&times;</button>
           </div>
 
-          <div class="modal-body">
+          <div class="modal-body modal-programa-body">
             <div class="mb-3">
               <label for="codigo" class="form-label">Código</label>
               <input type="text" id="modal-codigo" class="form-control" readonly />
@@ -132,9 +134,9 @@
             </div>
           </div>
 
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-            <button type="submit" class="btn btn-primary">Guardar cambios</button>
+          <div class="modal-footer modal-programa-footer">
+            <button type="button" class="boton-cancelar-modal" data-bs-dismiss="modal">Cerrar</button>
+            <button type="submit" class="boton-guardar-modal">Guardar cambios</button>
           </div>
         </form>
       </div>
