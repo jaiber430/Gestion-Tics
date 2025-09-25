@@ -1,0 +1,200 @@
+/* Estilos específicos para la vista de búsqueda y edición de programas */
+
+/* Reutiliza variables ya declaradas en otros css (se cargan antes en layout) */
+
+/* FORMULARIO DE BÚSQUEDA */
+.programa-busqueda-form {
+	display: flex;
+	gap: var(--espaciado-md, 1rem);
+	align-items: center;
+	flex-wrap: wrap;
+	margin-bottom: var(--espaciado-xl, 3rem);
+}
+
+.programa-input {
+	padding: var(--espaciado-md, 1rem);
+	border: 0.1rem solid var(--color-borde, #E0E0E0);
+	border-radius: var(--radio-borde, .6rem);
+	font-size: 1.4rem;
+	flex: 1;
+	min-width: 220px;
+	background: var(--color-secundario, #fff);
+	font-family: var(--fuente-principal, Arial, sans-serif);
+}
+
+.programa-input:focus {
+	outline: none;
+	border-color: var(--color-primario, #2E7D32);
+	box-shadow: 0 0 0 0.25rem rgba(46,125,50,.25);
+}
+
+.programa-boton {
+	background: var(--color-primario, #2E7D32);
+	color: var(--color-secundario, #fff);
+	border: none;
+	padding: var(--espaciado-md, 1rem) var(--espaciado-xl, 2.4rem);
+	border-radius: var(--radio-borde, .6rem);
+	font-size: 1.4rem;
+	cursor: pointer;
+	font-weight: var(--peso-medio, 500);
+	transition: background .25s ease;
+	font-family: var(--fuente-principal, Arial, sans-serif);
+}
+
+.programa-boton:hover {
+	background: var(--color-primario-hover, #1B5E20);
+}
+
+/* TABLA CON SCROLL VERTICAL */
+.contenedor-tabla-programas {
+	max-height: 500px; /* altura fija para mostrar scroll */
+	overflow-y: auto;
+	overflow-x: hidden;
+	background: var(--color-secundario, #fff);
+	border: 0.1rem solid var(--color-borde, #E0E0E0);
+	border-radius: var(--radio-borde, .6rem);
+	box-shadow: var(--sombra-ligera, 0 2px 4px rgba(0,0,0,.1));
+}
+
+.tabla-programas {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 1.3rem;
+}
+
+.tabla-programas thead th {
+	position: sticky;
+	top: 0;
+	background: var(--color-primario, #2E7D32);
+	color: var(--color-secundario, #fff);
+	padding: .9rem .8rem;
+	font-weight: var(--peso-semi-negrita, 600);
+	z-index: 2;
+	white-space: nowrap;
+}
+
+.tabla-programas tbody td {
+	padding: .8rem .8rem;
+	border-bottom: 0.1rem solid var(--color-borde, #E0E0E0);
+	vertical-align: middle;
+}
+
+.tabla-programas tbody tr:hover {
+	background: var(--color-fondo, #F5F5F5);
+}
+
+/* Ajuste para botones dentro de celdas */
+.tabla-programas .btn {
+	font-size: 1.2rem;
+	padding: .4rem .8rem;
+}
+
+/* MODAL PERSONALIZADO */
+.modal-programa {
+	border: none;
+	border-radius: var(--radio-borde, .8rem);
+	box-shadow: var(--sombra-media, 0 4px 12px rgba(0,0,0,.15));
+	overflow: hidden;
+	font-family: var(--fuente-principal, Arial, sans-serif);
+}
+
+.modal-programa-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	background: var(--color-fondo, #F5F5F5);
+	padding: 1.4rem 1.8rem;
+	border-bottom: 0.1rem solid var(--color-borde, #E0E0E0);
+}
+
+.modal-programa-header .modal-title {
+	margin: 0;
+	font-size: 1.8rem;
+	font-weight: var(--peso-semi-negrita, 600);
+	color: var(--color-primario, #2E7D32);
+}
+
+.btn-cerrar-modal {
+	background: none;
+	border: none;
+	font-size: 2.4rem;
+	line-height: 1;
+	color: var(--color-texto-secundario, #757575);
+	cursor: pointer;
+	padding: 0 .4rem;
+	transition: color .25s ease;
+}
+
+.btn-cerrar-modal:hover {
+	color: var(--color-error, #D32F2F);
+}
+
+.modal-programa-body {
+	padding: 1.6rem 1.8rem 1rem;
+	background: var(--color-secundario, #fff);
+}
+
+.modal-programa-body .form-label {
+	font-size: 1.3rem;
+	font-weight: var(--peso-medio, 500);
+	color: var(--color-texto-principal, #212121);
+}
+
+.modal-programa-body .form-control, .modal-programa-body select {
+	font-size: 1.3rem;
+	padding: .7rem .9rem;
+	border-radius: .6rem;
+	border: 0.1rem solid var(--color-borde, #E0E0E0);
+	font-family: var(--fuente-principal, Arial, sans-serif);
+}
+
+.modal-programa-body .form-control:focus, .modal-programa-body select:focus {
+	outline: none;
+	border-color: var(--color-primario, #2E7D32);
+	box-shadow: 0 0 0 0.25rem rgba(46,125,50,.25);
+}
+
+.modal-programa-footer {
+	display: flex;
+	justify-content: flex-end;
+	gap: 1rem;
+	padding: 1.2rem 1.8rem 1.6rem;
+	background: var(--color-fondo, #F5F5F5);
+	border-top: 0.1rem solid var(--color-borde, #E0E0E0);
+}
+
+.boton-cancelar-modal {
+	background: var(--color-borde, #E0E0E0);
+	color: var(--color-texto-principal, #212121);
+	border: none;
+	padding: .8rem 1.6rem;
+	border-radius: var(--radio-borde, .6rem);
+	font-size: 1.3rem;
+	cursor: pointer;
+	font-family: var(--fuente-principal, Arial, sans-serif);
+	transition: background .25s ease;
+}
+
+.boton-cancelar-modal:hover { background: #bdbdbd; }
+
+.boton-guardar-modal {
+	background: var(--color-primario, #2E7D32);
+	color: var(--color-secundario, #fff);
+	border: none;
+	padding: .8rem 1.8rem;
+	border-radius: var(--radio-borde, .6rem);
+	font-size: 1.3rem;
+	cursor: pointer;
+	font-weight: var(--peso-medio, 500);
+	font-family: var(--fuente-principal, Arial, sans-serif);
+	transition: background .25s ease;
+}
+
+.boton-guardar-modal:hover { background: var(--color-primario-hover, #1B5E20); }
+
+/* Scrollbar ligero sólo dentro de la tabla */
+.contenedor-tabla-programas::-webkit-scrollbar { width: 8px; }
+.contenedor-tabla-programas::-webkit-scrollbar-track { background: transparent; }
+.contenedor-tabla-programas::-webkit-scrollbar-thumb { background: #c2c2c2; border-radius: 4px; }
+.contenedor-tabla-programas::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
+
