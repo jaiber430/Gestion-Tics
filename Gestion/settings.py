@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'solicitud',
     'consultas',
     'aspirantes',
+    'programas',
 ]
 
 MIDDLEWARE = [

@@ -24,6 +24,8 @@ from solicitud import views as views_solicitud
 from consultas import views as views_consultas
 # vista de las consultas del aspirante
 from aspirantes import views as views_aspirantes
+
+from programas import views as views_programas
 # Importar la configuarción para usar la media y los statics
 from django.conf import settings
 from django.conf.urls.static import static
@@ -57,6 +59,22 @@ urlpatterns = [
     path('revision_funcionario/<int:id>/', views_consultas.revision_fichas, name="ficha_funcionario"),
     # Descargar excel subido por el funcionario
     path('descargar_formato_sofia_plus/<int:id>', views_consultas.descargar_excel_ficha, name='sofia_plus_descarga'),
+    # Enviar esatdo y observación del coordinador
+    path('revision_coordinador/<int:id_solicitud>/', views_consultas.revision_coordinador, name='revision_coordinador'),
+    # Ver excel 
+    path('ver_formato/<int:id_solicitud>/', views_consultas.ver_formato_inscripcion, name='ver_formato'),
+    # Ver PDF aspirantes
+    path('ver_pdf_aspirantes/<int:id_solicitud>/', views_consultas.ver_pdf_aspirantes, name="ver_pdf_aspirantes"),
+    # Ver carta
+    path('ver_pdf_carta/<int:id_solicitud>/', views_consultas.ver_pdf_carta, name='ver_pdf_carta'),
+    # Cerrar sesión    
+    path('cerrar_sesion/', views.cerrar_sesion, name='salir'),
+    # Buscar programa
+    path('buscar_programa/', views_programas.buscar_programas, name='buscar_programa'),
+    # Editar programa 
+    path('editar_programa', views_programas.editar_programa, name="actualizar_programa"),
+    #Borrar programa
+    path("borrar/<str:codigo>/", views_programas.borrar_programa, name="borrar_programa"),
 ]
 # Poder almacenar archivos en la carpeta media
 if settings.DEBUG:

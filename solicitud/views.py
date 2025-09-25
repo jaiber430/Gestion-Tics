@@ -17,7 +17,12 @@ from Cursos.models import (Ambiente, Area, Departamentos,
 import os 
 from django.conf import settings
 
+# Importar decorador personalizado
+from Cursos.views import login_required_custom
 
+# ===============================
+# Función auxiliar para obtener datos comunes
+# ===============================
 def _get_common_context():
     """
     Devuelve un diccionario con todos los objetos de DB necesarios para el formulario.
@@ -34,6 +39,11 @@ def _get_common_context():
         'programas_formacion': Programaformacion.objects.select_related('idarea').all(),
     }
 
+
+# ===============================
+# Vista: Crear Solicitud
+# ===============================
+@login_required_custom
 def crear_solicitud(request):
     """
     Página para decidir qué ficha crear: regular o campesina
@@ -48,6 +58,7 @@ def crear_solicitud(request):
         usuario = Usuario.objects.select_related('rol').get(idusuario=user_id)
         id_rol = usuario.rol.idrol
 
+        # Definir layout según el rol
         if id_rol == 1:
             layout = 'layout/layoutinstructor.html'
             rol_name = 'Instructor'
@@ -72,16 +83,22 @@ def crear_solicitud(request):
         messages.error(request, "Usuario no encontrado.")
         return redirect('login')
 
+    # Llamar contexto común
     context = _get_common_context()
     context.update({'layout': layout, 'user': rol_name, 'rol': id_rol, 'fechas': dato})
     return render(request, 'pages/creacion.html', context)
 
 
+# ===============================
+# Función base para crear solicitudes
+# ===============================
+@login_required_custom
 def _crear_solicitud_base(request, tipo_solicitud_id, template_name, mensaje_exito):
     """
     Función base para crear solicitudes (regular o campesina)
     """
 
+    # Verificar usuario en sesión
     user_id = request.session.get('user_id')
     if not user_id:
         messages.error(request, "Debes iniciar sesión para acceder.")
@@ -91,6 +108,7 @@ def _crear_solicitud_base(request, tipo_solicitud_id, template_name, mensaje_exi
         usuario = Usuario.objects.select_related('rol').get(idusuario=user_id)
         id_rol = usuario.rol.idrol
 
+        # Definir layout según el rol
         if id_rol == 1:
             layout = 'layout/layoutinstructor.html'
             rol_name = 'Instructor'
@@ -108,13 +126,16 @@ def _crear_solicitud_base(request, tipo_solicitud_id, template_name, mensaje_exi
         messages.error(request, "Usuario no encontrado.")
         return redirect('login')
 
+    # Llamar contexto común
     context = _get_common_context()
     context.update({'layout': layout, 'user': rol_name, 'rol': id_rol})
 
     if request.method == 'POST':
         try:
             with transaction.atomic():
-                # Datos principales
+                # ===============================
+                # Datos principales recibidos del formulario
+                # ===============================
                 tiene_empresa = request.POST.get('tieneEmpresa')
                 nombre_programa_codigo = request.POST.get('nombrePrograma_codigo')
                 version_programa = request.POST.get('versionPrograma') 
@@ -128,12 +149,15 @@ def _crear_solicitud_base(request, tipo_solicitud_id, template_name, mensaje_exi
                 hora_inicio = request.POST.get('horario_inicio') or request.POST.get('horarioInicio')
                 hora_fin = request.POST.get('horario_fin') or request.POST.get('horarioFin')
                 fechas_calendario_raw = request.POST.get('fechas_calendario')  
+
                 try:
                     fechas_calendario = json.loads(fechas_calendario_raw) if fechas_calendario_raw else []
                 except json.JSONDecodeError:
                     fechas_calendario = []
 
+                # ===============================
                 # Campos de empresa
+                # ===============================
                 empresa_solicitante = request.POST.get('empresaSolicitante', '')
                 tipo_empresa = request.POST.get('tipoEmpresa', '')
                 nombre_responsable = request.POST.get('nombreResponsable', '')
@@ -141,22 +165,9 @@ def _crear_solicitud_base(request, tipo_solicitud_id, template_name, mensaje_exi
                 nit_empresa = request.POST.get('nitEmpresa', '')
                 carta_solicitud = request.FILES.get('cartaSolicitud', '')
 
-                if carta_solicitud:
-                    # Usamos el NIT recibido del formulario
-                    folder_name = f"carta_{nit_empresa}"
-                    carpeta_destino = os.path.join(settings.MEDIA_ROOT, 'Cartas_de_solicitud', folder_name)
-                    os.makedirs(carpeta_destino, exist_ok=True)
-
-                    filename_pdf = f"carta_{nit_empresa}.pdf"
-                    ruta_guardado = os.path.join(carpeta_destino, filename_pdf)
-
-                    # Guardar el archivo en disco
-                    with open(ruta_guardado, 'wb') as f:
-                         # importante para archivos grandes
-                        for chunk in carta_solicitud.chunks(): 
-                            f.write(chunk)
-
+                # ===============================
                 # Campos opcionales
+                # ===============================
                 programa_especial = request.POST.get('programaEspecial')
                 convenio = request.POST.get('convenio', '')
                 nombre_ambiente = request.POST.get('nombreAmbiente')
@@ -172,7 +183,9 @@ def _crear_solicitud_base(request, tipo_solicitud_id, template_name, mensaje_exi
                     else:
                         mes1_fechas = ', '.join(dias)
 
-                # Crear el horario con los campos separados correctamente
+                # ===============================
+                # Crear horario
+                # ===============================
                 horario = Horario.objects.create(
                     fechainicio=datetime.strptime(fecha_inicio, '%Y-%m-%d').date(),
                     fechafin=datetime.strptime(fecha_finalizacion, '%Y-%m-%d').date(),
@@ -182,7 +195,9 @@ def _crear_solicitud_base(request, tipo_solicitud_id, template_name, mensaje_exi
                     diassemana=', '.join(dias_semana)
                 )
 
+                # ===============================
                 # Empresa opcional
+                # ===============================
                 empresa_obj = None
                 if tiene_empresa == 'si':
                     empresa_obj = Empresa.objects.filter(nombreempresa=empresa_solicitante).first()
@@ -197,14 +212,16 @@ def _crear_solicitud_base(request, tipo_solicitud_id, template_name, mensaje_exi
                             idtipoempresa=tipo_empresa_obj
                         )
 
+                # ===============================
+                # Crear la solicitud
+                # ===============================
                 programa_formacion = Programaformacion.objects.get(codigoprograma=nombre_programa_codigo)
                 modalidad = Modalidad.objects.get(idmodalidad=1)  
                 municipio = Municipios.objects.get(codigomunicipio=municipio_formacion)
                 programa_especial_obj = Programaespecial.objects.get(idespecial=programa_especial)
-                # ambiente_obj = Ambiente.objects.filter(idambiente=nombre_ambiente).first() if nombre_ambiente else None
                 tipo_solicitud = Tiposolicitud.objects.get(idtiposolicitud=tipo_solicitud_id)
 
-                Solicitud.objects.create(
+                solicitud_creada = Solicitud.objects.create(
                     idtiposolicitud=tipo_solicitud,
                     codigoprograma=programa_formacion,
                     idhorario=horario,
@@ -221,7 +238,23 @@ def _crear_solicitud_base(request, tipo_solicitud_id, template_name, mensaje_exi
                     fechasolicitud=timezone.now().date()
                 )
 
-                mensaje_exito='Solicitud de ficha creada exitosamente.'
+                # ===============================
+                # Guardar carta en carpeta específica (solo si la solicitud se creó)
+                # ===============================
+                if carta_solicitud:
+                    folder_name = f"carta_{nit_empresa}"
+                    carpeta_destino = os.path.join(settings.MEDIA_ROOT, 'Cartas_de_solicitud', folder_name)
+                    os.makedirs(carpeta_destino, exist_ok=True)
+
+                    filename_pdf = f"carta_{nit_empresa}.pdf"
+                    ruta_guardado = os.path.join(carpeta_destino, filename_pdf)
+
+                    # Guardar archivo en disco
+                    with open(ruta_guardado, 'wb') as f:
+                        for chunk in carta_solicitud.chunks(): 
+                            f.write(chunk)
+
+                # Mensaje de éxito
                 messages.success(request, mensaje_exito)
                 return redirect('Crearsolicitud')
 
@@ -230,7 +263,11 @@ def _crear_solicitud_base(request, tipo_solicitud_id, template_name, mensaje_exi
             return redirect('Crearsolicitud')
 
     return render(request, template_name, context)
-
+    
+# ===============================
+# Vista: Solicitud Regular
+# ===============================
+@login_required_custom
 def solicitud_regular(request):
     return _crear_solicitud_base(
         request, 
@@ -239,6 +276,11 @@ def solicitud_regular(request):
         mensaje_exito='Solicitud de ficha regular creada exitosamente.'
     )
 
+
+# ===============================
+# Vista: Solicitud Campesina
+# ===============================
+@login_required_custom
 def solicitud_campesina(request):
     return _crear_solicitud_base(
         request, 

@@ -9,12 +9,12 @@
         {% for message in messages %}
           <div class="alert"
             style="padding: 12px; margin: 15px 0; border-radius: 6px; font-size: 14px; border: 1px solid;
-                    {% if message.tags == 'success' %}
-                      background-color: #d4edda; color: #155724; border-color: #c3e6cb;
+            {% if message.tags == 'success' %}
+              background-color: #d4edda; color: #155724; border-color: #c3e6cb;
             {% elif message.tags == 'error' %}
-                      background-color: #f8d7da; color: #721c24; border-color: #f5c6cb;
+              background-color: #f8d7da; color: #721c24; border-color: #f5c6cb;
             {% else %}
-                      background-color: #d1ecf1; color: #0c5460; border-color: #bee5eb;
+              background-color: #d1ecf1; color: #0c5460; border-color: #bee5eb;
             {% endif %}">{{ message }}</div>
         {% endfor %}
       {% endif %}
@@ -24,7 +24,6 @@
         <h2 class="titulo-pagina">Consultar solicitudes {{ user }} {{ user_name }}</h2>
         <p class="subtitulo-pagina">Aquí puede consultar el estado de las fichas solicitadas y descargar los documentos correspondientes</p>
       </div>
-
 
       <!-- busqueda y filtro -->
       <!-- filtro por nombre de programa -->
@@ -55,8 +54,10 @@
           <thead>
             <tr>
               <th>Nombre del Programa</th>
+              <th>Revisión realizada por</th>
               <th>Estado</th>
               <th>Codigo de la ficha</th>
+              <th>Codigo de solicitud</th>
               <th>Descargar ficha de caracterización</th>
               <th>Descargar documento de los aspirantes</th>
               <th>Descargar carta de solicitud</th>
@@ -68,21 +69,57 @@
           </thead>
           <tbody>
             {% for solicitud_consulta in solicitudes %}
-              <form action="{% url 'ficha_funcionario' solicitud_consulta.idsolicitud %}" method="POST" enctype="multipart/form-data">
-                {% csrf_token %}
-                <tr data-fecha="{{ solicitud_consulta.fechasolicitud|date:'Y-m-d' }}">
+              <tr data-fecha="{{ solicitud_consulta.fechasolicitud|date:'Y-m-d' }}">
+                <form action="{% url 'ficha_funcionario' solicitud_consulta.idsolicitud %}" method="POST" enctype="multipart/form-data" style="display: contents;">
+                  {% csrf_token %}
+
+                  <!-- Programa -->
                   <td>{{ solicitud_consulta.codigoprograma.nombreprograma }}</td>
+
+                  <!-- Nombre visible y rol -->
                   <td>
-                    <select name="estado" id="estado">
+                    {% if solicitud_consulta.visible_nombre %}
+                      {{ solicitud_consulta.visible_nombre }}
+                    {% comment %} {% else %}
+                      Sin revisión aún {% endcomment %}
+                    {% endif %}
+                  </td>
+
+                  <!-- Estado -->
+                  <td>
+                    <select name="estado" id="estado_{{ solicitud_consulta.idsolicitud }}">
                       <option value="">-- Seleccione un estado --</option>
                       {% for item in estado %}
-                        <option value="{{ item.idestado }}">{{ item.estados }}</option>
+                        <option value="{{ item.idestado }}"
+                          {% if solicitud_consulta.estado_usuario == item.estados %}
+                            selected
+                          {% endif %}
+                        >
+                          {{ item.estados }}
+                        </option>
                       {% endfor %}
                     </select>
                   </td>
+
+                  <!-- Código ficha -->
                   <td>
-                    <input type="number" id="codigo_ficha" name="codigo_ficha" class="entrada-texto" placeholder="codigo de ficha" required />
+                    <input type="number" id="codigo_ficha_{{ solicitud_consulta.idsolicitud }}" name="codigo_ficha" class="entrada-texto"
+                          value="{{ solicitud_consulta.codigo_ficha}}"
+                          placeholder="Código de ficha"
+                          {% if solicitud_consulta.codigo_ficha %}readonly{% endif %}
+                          required />
                   </td>
+
+                  <!-- Código solicitud -->
+                  <td>
+                    <input type="number" id="codigo_solicitud_{{ solicitud_consulta.idsolicitud }}" name="codigo_solicitud" class="entrada-texto"
+                          value="{{ solicitud_consulta.codigo_solicitud}}"
+                          placeholder="Código de solicitud"
+                          {% if solicitud_consulta.codigo_solicitud %}readonly{% endif %}
+                          required />
+                  </td>
+
+                  <!-- Descargas -->
                   <td>
                     <a href="{% url 'ficha_caracterizacion_pdf' solicitud_consulta.idsolicitud %}" class="boton-descargar">Descargar PDF</a>
                   </td>
@@ -90,33 +127,57 @@
                     <a href="{% url 'descargar_pdf' solicitud_consulta.idsolicitud rol %}" class="boton-descargar">Descargar PDF</a>
                   </td>
                   <td>
-                    <a href="{% url 'descargar_carta' solicitud_consulta.idsolicitud rol %}" class="boton-descargar">Descargar Carta</a>
+                    {% if solicitud_consulta.boton_ver_carta_disabled %}
+                      <button class="boton-descargar" disabled>Ver Carta (No disponible)</button>
+                    {% elif solicitud_consulta.mostrar_boton_carta_funcionario %}
+                      <a href="{% url 'descargar_carta' solicitud_consulta.idsolicitud rol %}" class="boton-descargar">Descargar Carta</a>
+                    {% else %}
+                      <a href="{% url 'descargar_carta' solicitud_consulta.idsolicitud rol %}" class="boton-descargar" > Descargar carta </a>
+                    {% endif %}
                   </td>
-                  <td>
-                    <!-- Enlace de descarga -->
-                    <a href="{% url 'descargar_excel' solicitud_consulta.idsolicitud rol %}" class="link-excel" data-id="{{ solicitud_consulta.idsolicitud }}">Descargar excel</a>
 
-                    <!-- Campo de subida -->
+                  <!-- Excel -->
+                  <td>
+                    <a href="{% url 'descargar_excel' solicitud_consulta.idsolicitud rol %}" class="link-excel" data-id="{{ solicitud_consulta.idsolicitud }}">Descargar excel</a>
                     <div class="subida-reemplazo" data-id="{{ solicitud_consulta.idsolicitud }}" style="display: none;">
-                      <input type="file" class="archivo-subida" name="actualizar_excel" id="actualizar_excel" data-id="{{ solicitud_consulta.idsolicitud }}" />
+                      <input type="file" class="archivo-subida" name="actualizar_excel" id="actualizar_excel_{{ solicitud_consulta.idsolicitud }}" data-id="{{ solicitud_consulta.idsolicitud }}" />
                     </div>
                   </td>
+
+                  <!-- Fecha solicitud -->
                   <td>{{ solicitud_consulta.fechasolicitud }}</td>
+
+                  <!-- Observación -->
                   <td>
-                    <textarea name="observacion" id="observacion" class="entrada-texto">{{ultimo_envio.observacion}}</textarea>
+                    <textarea name="observacion" id="observacion_{{ solicitud_consulta.idsolicitud }}" class="entrada-texto">
+                      {% if solicitud_consulta.observacion_usuario %}
+                        {{ solicitud_consulta.observacion_usuario }}
+                      {% elif solicitud_consulta.observacion_coordinador %}
+                        {{ solicitud_consulta.observacion_coordinador }}
+                      {% else %}
+                        Sin observación
+                      {% endif %}
+                    </textarea>
                   </td>
+
+                  <!-- Botón enviar -->
                   <td>
-                    <button type="submit">Enviar</button>
+                    {% if solicitud_consulta.estado_usuario == "Matriculada" %}
+                      <button type="submit" class="disabled" disabled>Enviar</button>
+                    {% else %}
+                      <button type="submit">Enviar</button>
+                    {% endif %}
                   </td>
-                </tr>
-              </form>
+                </form>
+
+              </tr>
             {% endfor %}
           </tbody>
         </table>
       </div>
     </main>
 
-    <!-- ✅ JS SOLO PARA FUNCIONARIO -->
+    <!-- JS SOLO PARA FUNCIONARIO -->
     <script>
       document.addEventListener('DOMContentLoaded', function () {
         document.querySelectorAll('.link-excel').forEach((enlace) => {
@@ -157,14 +218,14 @@
         const filtroTipo = document.getElementById('filtro-tipo-funcionario').value
         const filtroFecha = document.getElementById('filtro-fecha').value // formato yyyy-mm-dd
         const filas = document.querySelectorAll('.tabla-fichas tbody tr')
-        
-        filas.forEach(fila => {
+      
+        filas.forEach((fila) => {
           const programa = fila.cells[0].textContent.toLowerCase()
           const fecha = fila.getAttribute('data-fecha')
           let mostrar = true
-
+      
           // Programa
-            if (filtroPrograma && !programa.includes(filtroPrograma)) mostrar = false
+          if (filtroPrograma && !programa.includes(filtroPrograma)) mostrar = false
           // Tipo Regular/Campesina (se infiere del nombre del programa)
           if (filtroTipo) {
             const esCampesina = programa.includes('campesina')
@@ -173,26 +234,43 @@
           }
           // Fecha exacta
           if (filtroFecha && fecha !== filtroFecha) mostrar = false
-
+      
           fila.style.display = mostrar ? '' : 'none'
         })
       }
-
-      function filtrarPorProgramaFuncionario(){aplicarFiltrosFuncionario()}
-      function filtrarPorTipoFuncionario(){aplicarFiltrosFuncionario()}
+      
+      function filtrarPorProgramaFuncionario() {
+        aplicarFiltrosFuncionario()
+      }
+      function filtrarPorTipoFuncionario() {
+        aplicarFiltrosFuncionario()
+      }
       document.getElementById('filtro-fecha').addEventListener('change', aplicarFiltrosFuncionario)
     </script>
   {% elif rol == 2 %}
     {% comment %}Mostrar esto solo al Coordinador{% endcomment %}
     <main class="contenido-principal">
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert"
+            style="padding: 12px; margin: 15px 0; border-radius: 6px; font-size: 14px; border: 1px solid;
+            {% if message.tags == 'success' %}
+                background-color: #d4edda; color: #155724; border-color: #c3e6cb;
+            {% elif message.tags == 'error' %}
+                      background-color: #f8d7da; color: #721c24; border-color: #f5c6cb;
+            {% else %}              
+                      background-color: #d1ecf1; color: #0c5460; border-color: #bee5eb;
+            {% endif %}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+
       <!-- Título de la sección -->
       <div class="titulo-seccion">
         <h2 class="titulo-pagina">Consultar solicitudes {{ user }} {{ user_name }}</h2>
         <p class="subtitulo-pagina">Aquí puede consultar el estado de las fichas solicitadas y descargar los documentos correspondientes</p>
       </div>
 
-      <!-- busqueda y filtro -->
-      <!-- filtro por nombre de programa -->
+      <!-- Filtros -->
       <div class="filtros-busqueda">
         <div class="filtro-nombre-programa">
           <label for="filtro-programa-coordinador">Filtrar por Nombre de Programa:</label>
@@ -211,17 +289,19 @@
           <input type="date" id="filtro-fecha-coord" />
         </div>
       </div>
-       
-      <!-- filtro por Instructor (para funcionario, administrador y Coordinador) -->
 
-      <!-- Contenedor de la tabla de fichas -->
+      <!-- Contenedor de la tabla -->
       <div class="contenedor-tabla-fichas">
         <table class="tabla-fichas">
           <thead>
             <tr>
               <th>Nombre del Programa</th>
+              <th>Instructor solicitante</th>
               <th>Estado</th>
               <th>Ficha de Caracterización</th>
+              <th>Documento aspirantes</th>
+              <th>Carta de solicitud</th>
+              <th>Formato inscripción masivo</th>
               <th>Fecha de Creación</th>
               <th>Observación de solicitud</th>
               <th>Compartir</th>
@@ -230,73 +310,99 @@
           <tbody>
             {% for solicitud_consulta in solicitudes %}
               <tr data-fecha="{{ solicitud_consulta.fechasolicitud|date:'Y-m-d' }}">
-                <form action="{% url 'ficha_funcionario' solicitud_consulta.idsolicitud %}" method="POST">
-                  {% csrf_token %}
-                  <td>{{ solicitud_consulta.codigoprograma.nombreprograma }}</td>
-                  <td>
-                    <select name="estado" id="estado">
-                      <option value="">-- Seleccione un estado --</option>
-                      {% for item in estado %}
-                        <option value="{{ item.idestado }}">{{ item.estados }}</option>
-                      {% endfor %}
-                    </select>
-                  </td>
-                  <td>
-                    <input type="number" id="codigo_ficha" name="codigo_ficha" class="entrada-texto" placeholder="codigo de ficha" required />
-                  </td>
-                  <td>
-                    <a href="{% url 'ficha_caracterizacion_pdf' solicitud_consulta.idsolicitud %}" class="boton-descargar">Descargar PDF</a>
-                  </td>
-                  <td>
-                    <a href="{% url 'descargar_pdf' solicitud_consulta.idsolicitud rol %}" class="boton-descargar">Descargar PDF</a>
-                  </td>
-                  <td>
-                    <a href="{% url 'descargar_carta' solicitud_consulta.idsolicitud rol %}" class="boton-descargar">Descargar Carta</a>
-                  </td>
-                  <td>
-                    <a href="{% url 'descargar_excel' solicitud_consulta.idsolicitud rol %}" class="link-excel">Descargar Excel</a>
-                  </td>
-                  <td>{{ solicitud_consulta.fechasolicitud }}</td>
-                  <td>
-                    <textarea name="observacion" class="entrada-texto"></textarea>
-                  </td>
-                  <td>
-                    <button type="submit">Enviar</button>
-                  </td>
-                </form>
+            <form action="{% url 'revision_coordinador' solicitud_consulta.idsolicitud %}" method="POST">
+              {% csrf_token %}
+              <!-- Nombre del programa -->
+              <td>{{ solicitud_consulta.codigoprograma.nombreprograma }}</td>
+              <!-- Nombre visible del usuario que revisó o creó la solicitud -->
+              <td>{{ solicitud_consulta.visible_nombre }}</td>
+              <!-- Selección de estado de la solicitud -->
+              <td>
+                <select name="estado">
+                  <option value="">-- Seleccione un estado --</option>
+                  {% for item in estado %}
+                    <option value="{{ item.id }}"
+                      {% if solicitud_consulta.estado_coordinador == item.estado %}
+                        selected
+                      {% endif %}>
+                      {{ item.estado }}
+                    </option>
+                  {% endfor %}
+                </select>
+              </td>
+              <!-- Enlaces para descargar/ver documentos relacionados con la solicitud -->
+              <td>
+                <a href="{% url 'ficha_caracterizacion' solicitud_consulta.idsolicitud %}" class="boton-descargar">Ver ficha de caracterización</a>
+              </td>
+              <td>
+                <a href="{% url 'ver_pdf_aspirantes' solicitud_consulta.idsolicitud %}" class="boton-descargar">Ver documento aspirantes</a>
+              </td>
+              <td>
+                {% if solicitud_consulta.boton_ver_carta_disabled %}
+                  <a class="boton-descargar disabled" style="pointer-events: none; opacity: 0.5;" 
+                    title="No hay empresa asociada">Ver carta de solicitud</a>
+                {% else %}
+                  <a href="{% url 'ver_pdf_carta' solicitud_consulta.idsolicitud %}" class="boton-descargar">
+                    Ver carta de solicitud
+                  </a>
+                {% endif %}
+              </td>
+              <td>
+                <a href="{% url 'ver_formato' solicitud_consulta.idsolicitud %}" class="link-excel">Ver formato inscripción masivo</a>
+              </td>
+              <!-- Fecha de la solicitud -->
+              <td>{{ solicitud_consulta.fechasolicitud }}</td>
+              <!-- Observaciones del coordinador -->
+              <td>
+                <textarea name="observacion" class="entrada-texto">{{ solicitud_consulta.observacion_coordinador }}</textarea>
+              </td>
+              <!-- Botón de envío; deshabilitado si la solicitud ya está aprobada -->
+              <td>
+                {% if solicitud_consulta.estado_coordinador == "Aprobado" %}
+                  <button type="submit" class="disabled" disabled>Enviar</button>
+                {% else %}
+                  <button type="submit">Enviar</button>
+                {% endif %}
+              </td>
+            </form>
               </tr>
             {% endfor %}
           </tbody>
         </table>
       </div>
     </main>
-    
+
     <script>
       // Funciones de filtrado para coordinadores
-      function aplicarFiltrosCoordinador(){
+      function aplicarFiltrosCoordinador() {
         const filtroPrograma = document.getElementById('filtro-programa-coordinador').value.toLowerCase()
         const filtroTipo = document.getElementById('filtro-tipo-coordinador').value
         const filtroFecha = document.getElementById('filtro-fecha-coord').value
         const filas = document.querySelectorAll('.tabla-fichas tbody tr')
-
-        filas.forEach(fila => {
+      
+        filas.forEach((fila) => {
           const programa = fila.cells[0].textContent.toLowerCase()
           const fecha = fila.getAttribute('data-fecha')
           let mostrar = true
           if (filtroPrograma && !programa.includes(filtroPrograma)) mostrar = false
-          if (filtroTipo){
+          if (filtroTipo) {
             const esCampesina = programa.includes('campesina')
             if (filtroTipo === 'Regular' && esCampesina) mostrar = false
             if (filtroTipo === 'Campesina' && !esCampesina) mostrar = false
           }
-            if (filtroFecha && fecha !== filtroFecha) mostrar = false
+          if (filtroFecha && fecha !== filtroFecha) mostrar = false
           fila.style.display = mostrar ? '' : 'none'
         })
       }
-      function filtrarPorProgramaCoordinador(){aplicarFiltrosCoordinador()}
-      function filtrarPorTipoCoordinador(){aplicarFiltrosCoordinador()}
+      function filtrarPorProgramaCoordinador() {
+        aplicarFiltrosCoordinador()
+      }
+      function filtrarPorTipoCoordinador() {
+        aplicarFiltrosCoordinador()
+      }
       document.getElementById('filtro-fecha-coord').addEventListener('change', aplicarFiltrosCoordinador)
     </script>
+
   {% else %}
     {% comment %}Mostrar esto solo al Instructor/Administrador{% endcomment %}
     <main class="contenido-principal">
@@ -336,7 +442,7 @@
               <th>Estado</th>
               <th>Observación dada por el funcionario</th>
               <th>Ficha de Caracterización</th>
-              <th>Documentos de Aprendices</th>
+              <th>Cantidad aspirantes Inscritos</th>
               <th>Excel sofia plus</th>
               <th>Fecha de Creación</th>
               <th>Compartir</th>
@@ -348,24 +454,35 @@
                 <td>{{ solicitud_consulta.codigoprograma.nombreprograma }}</td>
                 <td>
                   {% if solicitud_consulta.estado_usuario %}
-                      {% if solicitud_consulta.estado_usuario == "Matriculada" %}
-                          <span class="estado-aprobado">{{ solicitud_consulta.estado_usuario }}</span>
-                      {% elif solicitud_consulta.estado_usuario == "Rechazada" %}
-                          <span class="estado-rechazado">{{ solicitud_consulta.estado_usuario }}</span>
-                      {% elif solicitud_consulta.estado_usuario == "Creada" %}
-                          <span class="estado-creada">{{ solicitud_consulta.estado_usuario }}</span>
-                      {% elif solicitud_consulta.estado_usuario == "Creacion" %}
-                          <span class="estado estado-creacion">{{ solicitud_consulta.estado_usuario }}</span>
-                      {% endif %}
+                    <!-- Estado dado por el funcionario -->
+                    {% if solicitud_consulta.estado_usuario == 'Matriculada' %}
+                      <span class="estado-aprobado">{{ solicitud_consulta.estado_usuario }}</span>
+                    {% elif solicitud_consulta.estado_usuario == 'Rechazada' %}
+                      <span class="estado-rechazado">{{ solicitud_consulta.estado_usuario }}</span>
+                    {% elif solicitud_consulta.estado_usuario == 'Creada' %}
+                      <span class="estado-creada">{{ solicitud_consulta.estado_usuario }}</span>
+                    {% elif solicitud_consulta.estado_usuario == 'Creacion' %}
+                      <span class="estado estado-creacion">{{ solicitud_consulta.estado_usuario }}</span>
+                    {% endif %}
+                  {% elif solicitud_consulta.estado_coordinador %}
+                    <!-- Solo si no hay funcionario, mostrar el del coordinador -->
+                    {% if solicitud_consulta.estado_coordinador == 'Aprobada' %}
+                      <span class="estado-aprobado">{{ solicitud_consulta.estado_coordinador }}</span>
+                    {% elif solicitud_consulta.estado_coordinador == 'Rechazada' %}
+                      <span class="estado-rechazado">{{ solicitud_consulta.estado_coordinador }}</span>
+                    {% else %}
+                      <span class="estado">{{ solicitud_consulta.estado_coordinador }}</span>
+                    {% endif %}
                   {% else %}
-                      <span class="estado-espera">Lista de espera</span>
+                    <!-- Si no hay ninguno -->
+                    <span class="estado-espera">Lista de espera</span>
                   {% endif %}
                 </td>
                 <td>
                   {% if solicitud_consulta.observacion_usuario %}
-                      {{ solicitud_consulta.observacion_usuario }}
+                    {{ solicitud_consulta.observacion_usuario }}
                   {% else %}
-                      Sin observación
+                    Sin observación
                   {% endif %}
                 </td>
                 <td>
@@ -379,8 +496,12 @@
                   {% endif %}
                 </td>
                 <td>
-                  <a href="{% url 'sofia_plus_descarga' solicitud_consulta.idsolicitud %}" class="boton-descargar">Descargar excel</a>
-                </td> 
+                  {% if solicitud_consulta.estado_usuario in 'Matriculada Rechazada Creacion Creada Lista de espera' %}
+                    <a href="{% url 'sofia_plus_descarga' solicitud_consulta.idsolicitud %}" class="boton-descargar">Descargar excel</a>
+                  {% else %}
+                    <a href="#" class="boton-descargar disabled-link" onclick="return false;">Descargar excel</a>
+                  {% endif %}
+                </td>
                 <td>{{ solicitud_consulta.fechasolicitud }}</td>
                 <td>
                   <button onclick="document.getElementById('modal-{{ solicitud_consulta.idsolicitud }}').style.display='block'" class="boton-compartir">Compartir</button>
@@ -398,7 +519,7 @@
                   <div class="cuerpo-modal">
                     <p class="programa-seleccionado">Programa: {{ solicitud_consulta.codigoprograma.nombreprograma }}</p>
 
-                    <!-- ✅ Enlace con href correcto -->
+                    <!-- Enlace con href correcto -->
                     <div class="opcion-compartir">
                       <h4>Compartir con enlace</h4>
                       <div class="grupo-link">
@@ -446,14 +567,14 @@
         </table>
       </div>
     </main>
-    
+
     <script>
       // Funciones de filtrado para instructores/administradores
       function filtrarPorPrograma() {
         const filtro = document.getElementById('filtro-programa').value.toLowerCase()
         const filas = document.querySelectorAll('.tabla-fichas tbody tr')
-        
-        filas.forEach(fila => {
+      
+        filas.forEach((fila) => {
           const programa = fila.cells[0].textContent.toLowerCase()
           if (programa.includes(filtro)) {
             fila.style.display = ''
@@ -466,8 +587,8 @@
       function filtrarPorTipo() {
         const filtro = document.getElementById('filtro-tipo').value
         const filas = document.querySelectorAll('.tabla-fichas tbody tr')
-        
-        filas.forEach(fila => {
+      
+        filas.forEach((fila) => {
           const programa = fila.cells[0].textContent
           if (filtro === '') {
             fila.style.display = ''
@@ -487,12 +608,12 @@
         const filtroTipo = document.getElementById('filtro-tipo').value
         const filtroFecha = document.getElementById('filtro-fecha-general').value
         const filas = document.querySelectorAll('.tabla-fichas tbody tr')
-        
-        filas.forEach(fila => {
+      
+        filas.forEach((fila) => {
           const programa = fila.cells[0].textContent.toLowerCase()
           const fecha = fila.getAttribute('data-fecha')
           let mostrarFila = true
-          
+      
           if (filtroPrograma && !programa.includes(filtroPrograma)) mostrarFila = false
           if (filtroTipo) {
             const esCampesina = programa.includes('campesina')

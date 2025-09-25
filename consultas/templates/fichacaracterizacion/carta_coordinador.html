@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Carta de Solicitud</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            margin: 40px;
+        }
+        p {
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <p>
+        Yo <strong>{{ usuario.nombre }} {{ usuario.apellido }}</strong> apruebo la petición
+        para el programa de formación <strong>{{ solicitud.codigoprograma.nombreprograma }}</strong>.
+    </p>
+</body>
+</html>

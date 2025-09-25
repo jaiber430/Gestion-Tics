@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ver Excel</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: center;
+        }
+        th, td {
+            border: 1px solid #444;
+            padding: 8px;
+        }
+        {% comment %} th {
+            background-color: #333;
+            color: white;
+            text-transform: uppercase;
+        } {% endcomment %}
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tr:hover {
+            background-color: #eaeaea;
+        }
+        .alert {
+            padding: 10px;
+            margin: 20px 0;
+            border: 1px solid red;
+            background-color: #fdd;
+            color: #900;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    {% if error %}
+      <div class="alert">{{ error }}</div>
+    {% else %}
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+                <!-- Encabezado que ocupa TODAS las columnas -->
+                <th colspan="{{ datos.0|length }}" style="background-color: #4CAF50; color: white; font-weight: bold; text-align: center;">
+                FORMATO PARA LA INSCRIPCIÓN DE ASPIRANTES EN SOFIA PLUS v1.0
+                </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              {% for celda in datos.0 %}
+                <th>{{ celda }}</th>
+              {% endfor %}
+            </tr>
+            {% for fila in datos|slice:"1:" %}
+              <tr>
+                {% for celda in fila %}
+                  <td>{{ celda }}</td>
+                {% endfor %}
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% endif %}
+</body>
+</html>

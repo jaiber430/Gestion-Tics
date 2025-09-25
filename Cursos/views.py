@@ -1,25 +1,44 @@
-from django.shortcuts import render
-# Importar los modelos requeridos
-from Cursos.models import Usuario
-from django.contrib.auth import logout
+from django.shortcuts import render, redirect
 from django.contrib import messages
+from Cursos.models import Usuario
+import string, secrets
+import datetime, calendar
+from .models import Solicitud, Ficha, Estados, EstadosCoordinador, Solicitudcoordinador, Aspirantes
+from functools import wraps
+from django.contrib.auth import logout as django_logout
 
-# Create your views here.
 
+# ===============================
+# Decorador personalizado
+# ===============================
+def login_required_custom(view_func):
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        if not request.session.get("user_id"):
+            messages.error(request, "Debes iniciar sesión primero")
+            return redirect("index")  # nombre de tu URL para la página de login
+        return view_func(request, *args, **kwargs)
+    return wrapper
+
+# ===============================
+# Vista de inicio
+# ===============================
 def index(request):
-    return render(request, "inicio/index.html",{
+    return render(request, "inicio/index.html", {
         'Title': 'Hi',
     })
 
+# ===============================
+# Vista de login
+# ===============================
 def login_view(request):
-    # Se asegutra de que los datos digitados y  enviados del formulario sean recibidos
     if request.method == "POST":
         numero_identificacion = request.POST.get("numeroCedula")
         clave = request.POST.get("clave")
         rol = int(request.POST.get("rol"))
 
-        # Se asegura que los datos coincidan con los del modelo
         try:
+            # Buscar usuario
             user = Usuario.objects.get(
                 numeroidentificacion=numero_identificacion,
                 clave=clave,
@@ -29,8 +48,9 @@ def login_view(request):
             # Guardar en sesión
             request.session['user_id'] = user.idusuario
             request.session['name'] = user.nombre
+            request.session['rol'] = rol
 
-            # Definir layout para cada rol (Evita multiples archivos con el mismo contenido y diferente layout)
+            # Layout y rol_name
             if rol == 1:
                 layout = "layout/layoutinstructor.html"
                 rol_name = "Instructor"
@@ -43,9 +63,13 @@ def login_view(request):
             elif rol == 4:
                 layout = "layout/layout_admin.html"
                 rol_name = "Administrador"
+            elif rol == 5:
+                layout = "layout/layout_programa.html"
+                rol_name = "Modificador"
+            else:
+                layout = "layout/layout_desconocido.html"
+                rol_name = "Desconocido"
 
-
-            # Si todo esta en orden redirige a la pagina de inicio
             return render(request, "user/inicio.html", {
                 "layout": layout,
                 "rol": rol,
@@ -54,9 +78,29 @@ def login_view(request):
                 "name": user.nombre,
             })
 
-        # Si el usuario ingresa mal los caracteres o no existe se muestra este mensaje
         except Usuario.DoesNotExist:
             messages.error(request, "Usuario no encontrado o credenciales incorrectas")
             return render(request, "inicio/index.html")
 
     return render(request, "inicio/index.html")
+
+# ==============================================
+# Cerrar sesion
+# ==============================================
+
+def cerrar_sesion(request):
+    """
+    Cierra la sesión del usuario y lo redirige al login
+    """
+
+    # Si quieres usar el sistema de auth de Django
+    django_logout(request)
+
+    # O limpiar todo lo que hayas guardado en sesión
+    request.session.flush()
+
+    # Mensaje de confirmación
+    messages.success(request, "Sesión cerrada correctamente.")
+
+    # Redirigir al inicio o al login
+    return redirect("login")

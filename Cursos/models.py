@@ -1,5 +1,5 @@
 from django.db import models
-from aspirantes.utils import upload_to_dynamic  # 👈 Importamos la función de rutas dinámicasa
+from aspirantes.utils import upload_to_dynamic  #Importamos la función de rutas dinámicasa
 
 class Ambiente(models.Model):
     idambiente = models.AutoField(primary_key=True)
@@ -184,12 +184,20 @@ class Ficha(models.Model):
     class Meta:
         db_table = 'ficha'
 
+class EstadosCoordinador(models.Model):
+    estado = models.CharField(max_length=50)
+
+    class Meta:
+        managed = False
+        db_table = 'estados_coordinador'
+
 class Solicitudcoordinador(models.Model):
     idsolicitudcoordinador = models.AutoField(primary_key=True)
-    idusuario = models.ForeignKey('Usuario', models.DO_NOTHING, db_column='idusuario')
-    idsolicitud = models.ForeignKey('Solicitud', models.DO_NOTHING, db_column='idsolicitud')
-    idestado = models.ForeignKey('Estados', models.DO_NOTHING, db_column='idestado')
-    observacion = models.IntegerField()
+    usuario_revisador = models.ForeignKey('Usuario', models.DO_NOTHING, db_column='usuario_revisador', related_name='revisiones')
+    usuario_solicitud = models.ForeignKey('Usuario', models.DO_NOTHING, db_column='usuario_solicitud', related_name='solicitudes_revisadas')
+    idsolicitud = models.ForeignKey(Solicitud, models.DO_NOTHING, db_column='idsolicitud')
+    idestado = models.ForeignKey(EstadosCoordinador, models.DO_NOTHING, db_column='idestado')
+    observacion = models.TextField()
     fecha = models.DateField(blank=True, null=True)
 
     class Meta:

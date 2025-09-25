@@ -15,8 +15,6 @@
     <link rel="stylesheet" href="{% static 'css/index-styles.css' %}">
     <link rel="stylesheet" href="{% static 'css/consultarsolicitudes.css' %}">
 
-    {% comment %} <script src="{% static 'js/filtradorregular.js' %}"></script> {% endcomment %}
-
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="{% static "img/logoSena.png" %}" />
   </head>
@@ -55,7 +53,7 @@
 
             <!-- Botón Cerrar Sesión -->
             <li class="elemento-menu">
-              <a href="{% url 'index' %}" class="boton-cerrar-sesion">Cerrar Sesión</a>
+              <a href="{% url 'salir' %}" class="boton-cerrar-sesion">Cerrar Sesión</a>
             </li>
           </ul>
         </nav>

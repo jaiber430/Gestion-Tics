@@ -4,7 +4,7 @@ from django.template.loader import render_to_string
 from Cursos.models import (
     Usuario, Solicitud, Programaformacion, Horario, Modalidad, 
     Departamentos, Municipios, Empresa, Programaespecial, Ambiente,
-    Aspirantes, Caracterizacion, Tipoidentificacion, Estados, Ficha
+    Aspirantes, Caracterizacion, Tipoidentificacion, Estados, Ficha, Solicitudcoordinador, EstadosCoordinador
 )
 # COnvertir ficha de caracterizacion a pdf
 from weasyprint import HTML, CSS
@@ -23,25 +23,47 @@ import calendar
 import shutil
 # Importar mensajes
 from django.contrib import messages
+# Poder visualizar el excel
+from openpyxl import load_workbook
+# Importar decorador personalizado para el logueo
+from Cursos.views import login_required_custom
+
+from django.http import HttpResponseNotFound
+from xhtml2pdf import pisa
+from django.template.loader import get_template
+
+# from io import BytesIO
+
+# import pandas as pd
 # Create your views here.
 
 # =====================================================================
 # Consultas dependiendo del rol
 # =====================================================================
+@login_required_custom
 def consultas_instructor(request):
+    """
+    Vista de consultas para Instructor, Coordinador, Funcionario y Administrador.
+    """
 
-    # Codigo encargado de generar numeros y letras aleatorios (Link)
+    import string, secrets, datetime, calendar
+
+    # ============================
+    # Generar código aleatorio
+    # ============================
     caracteres = string.ascii_letters + string.digits
     codigo = ''.join(secrets.choice(caracteres) for _ in range(5))
 
-    # Traer la sesión del id que se encuantra en el sistema
+    # ============================
+    # Usuario en sesión
+    # ============================
     user_id = request.session.get('user_id')
-
-    # Obtener el usuario y su rol
     usuario = Usuario.objects.select_related('rol').get(idusuario=user_id)
     id_rol = usuario.rol.idrol
 
-    # Definir layout según rol
+    # ============================
+    # Layout según rol
+    # ============================
     if id_rol == 1:
         layout = 'layout/layoutinstructor.html'
         rol_name = 'Instructor'
@@ -54,60 +76,117 @@ def consultas_instructor(request):
     elif id_rol == 4:
         layout = 'layout/layout_admin.html'
         rol_name = "Administrador"
-
-    """
-    ======================================
-    Obtener la solicitud para la consulta
-    ======================================
-    """
-    # Solo si el rol es funcionario hará esto
-    if id_rol == 3:
-
-        # Fecha actual y rango del mes
-        hoy = datetime.date.today()
-        anio = hoy.year
-        mes = hoy.month
-        primer_dia = datetime.date(anio, mes, 1)
-        ultimo_dia = datetime.date(anio, mes, calendar.monthrange(anio, mes)[1])
-
-        # Traer todas las solicitudes dentro del mes actual (sin limitar al funcionario logueado)
-        solicitudes_mes = Solicitud.objects.filter(
-            fechasolicitud__range=(primer_dia, ultimo_dia)
-        ).order_by('-fechasolicitud')  # Ordenar de más reciente a más antigua
-
-        # Filtrar solo las solicitudes que cumplan la condición de cupo
-        solicitudes_filtradas = []
-        for solicitud in solicitudes_mes:
-            aspirantes_registrados = Aspirantes.objects.filter(solicitudinscripcion=solicitud).count()
-            if aspirantes_registrados >= solicitud.cupo:
-                solicitudes_filtradas.append(solicitud)
-
-        solicitudes = solicitudes_filtradas if solicitudes_filtradas else Solicitud.objects.none()
-
     else:
-        # Para otros roles, traer solo solicitudes del usuario directamente
-        solicitudes = Solicitud.objects.select_related('idusuario') \
+        layout = 'layout/layout_admin.html'
+        rol_name = "Desconocido"
+
+    # ============================
+    # Obtener solicitudes
+    # ============================
+    if id_rol == 2:  # Coordinador: solicitudes del mes actual
+        hoy = datetime.date.today()
+        primer_dia = datetime.date(hoy.year, hoy.month, 1)
+        ultimo_dia = datetime.date(hoy.year, hoy.month, calendar.monthrange(hoy.year, hoy.month)[1])
+
+        solicitudes = Solicitud.objects.filter(
+            fechasolicitud__range=(primer_dia, ultimo_dia)
+        ).select_related('idusuario', 'idempresa').order_by('-fechasolicitud')
+
+    elif id_rol == 3:  # Funcionario: solicitudes aprobadas por coordinador
+        solicitudes_aprobadas = Solicitudcoordinador.objects.filter(
+            idestado__estado="Aprobado"
+        ).values_list('idsolicitud', flat=True)
+
+        solicitudes = Solicitud.objects.filter(
+            idsolicitud__in=solicitudes_aprobadas
+        ).select_related('idusuario', 'idempresa').order_by('-fechasolicitud')
+
+    else:  # Instructor o Admin: solo las suyas o todas
+        solicitudes = Solicitud.objects.select_related('idusuario', 'idempresa') \
             .filter(idusuario=user_id) \
-            .order_by('-fechasolicitud')  # Ordenar de más reciente a más antigua
+            .order_by('-fechasolicitud')
 
-    # Obtener estados
-    estado = Estados.objects.values('idestado', 'estados')
+    # ============================
+    # Estados según rol
+    # ============================
+    if id_rol == 3:
+        estado = Estados.objects.values('idestado', 'estados')
+    elif id_rol == 2:
+        estado = EstadosCoordinador.objects.values('id', 'estado')
+    else:
+        estado = Estados.objects.none()
 
-    # Obtener todas las fichas del usuario logueado
-    fichas_usuario = Ficha.objects.filter(idusuario=user_id).select_related('idestado', 'idsolicitud')
-
-    # Asignar estado y observación a cada solicitud
+    # ============================
+    # Procesar cada solicitud
+    # ============================
     for solicitud in solicitudes:
-        # Buscar la ficha relacionada con esta solicitud para el usuario
-        ficha = fichas_usuario.filter(idsolicitud=solicitud.idsolicitud).first()
+        # ----------------------------
+        # Última revisión del coordinador
+        # ----------------------------
+        ultima_revision = Solicitudcoordinador.objects.filter(
+            idsolicitud=solicitud
+        ).select_related('usuario_revisador', 'usuario_solicitud', 'idestado').order_by('-fecha').first()
+
+        if ultima_revision:
+            solicitud.estado_coordinador = ultima_revision.idestado.estado
+            solicitud.observacion_coordinador = ultima_revision.observacion or "Sin observación"
+        else:
+            solicitud.estado_coordinador = None
+            solicitud.observacion_coordinador = "Sin observación"
+
+        # ----------------------------
+        # Estados y observaciones del funcionario (ficha real)
+        # ----------------------------
+        ficha = Ficha.objects.filter(idsolicitud=solicitud.idsolicitud).select_related('idestado', 'idusuario').first()
         if ficha:
-            solicitud.estado_usuario = ficha.idestado.estados  # Estado de la ficha
-            solicitud.observacion_usuario = ficha.observacion  # Observación asociada
+            solicitud.estado_usuario = ficha.idestado.estados if ficha.idestado else None
+            solicitud.observacion_usuario = ficha.observacion or ''
+            solicitud.codigo_ficha = ficha.codigoficha or ''
         else:
             solicitud.estado_usuario = None
-            solicitud.observacion_usuario = None
+            solicitud.observacion_usuario = solicitud.observacion_coordinador or ''
+            solicitud.codigo_ficha = ''
 
-    # Para roles de instructor (1) y administrador (4), obtener aspirantes de cada solicitud
+        # ----------------------------
+        # Siempre mostrar el código de solicitud
+        # ----------------------------
+        solicitud.codigo_solicitud = solicitud.codigosolicitud
+
+        # ----------------------------
+        # Nombre visible por defecto: el creador de la solicitud
+        # ----------------------------
+        if getattr(solicitud, 'idusuario', None):
+            creador = solicitud.idusuario
+            solicitud.visible_nombre = f"{creador.nombre} {creador.apellido}"
+        else:
+            solicitud.visible_nombre = "Creador desconocido"
+
+        # ----------------------------
+        # Sobrescribir visible_nombre según rol
+        # ----------------------------
+        if id_rol == 2 and ultima_revision and ultima_revision.usuario_solicitud:
+            solicitud.visible_nombre = f"{ultima_revision.usuario_solicitud.nombre} {ultima_revision.usuario_solicitud.apellido}"
+        elif id_rol == 3 and ultima_revision and ultima_revision.idestado.estado == "Aprobado" and ultima_revision.usuario_revisador:
+            solicitud.visible_nombre = f"{ultima_revision.usuario_revisador.nombre} {ultima_revision.usuario_revisador.apellido}"
+        elif id_rol == 1:  # Instructor: mostrar funcionario si existe
+            if ficha and ficha.idusuario:
+                funcionario = ficha.idusuario
+                solicitud.visible_nombre = f"{funcionario.nombre} {funcionario.apellido}"
+            else:
+                solicitud.visible_nombre = "Sin aprobación aún"
+
+        # ----------------------------
+        # Verificar empresa nula para Coordinador
+        # ----------------------------
+        solicitud.boton_ver_carta_disabled = (id_rol == 2 and solicitud.idempresa is None)
+        # ----------------------------------------------
+        # Verificar si la empresa es nula
+        # ----------------------------------------------
+        solicitud.mostrar_boton_carta_funcionario = (id_rol == 3 and solicitud.idempresa is None)
+
+    # ============================
+    # Aspirantes para Instructor/Admin
+    # ============================
     if id_rol in [1, 4]:
         for solicitud in solicitudes:
             aspirantes = Aspirantes.objects.select_related(
@@ -115,19 +194,23 @@ def consultas_instructor(request):
             ).filter(solicitudinscripcion=solicitud.idsolicitud)
             solicitud.aspirantes = aspirantes
 
-    # Renderizar el template
+    # ============================
+    # Renderizar template
+    # ============================
     return render(request, "consultas/consultas_instructor.html", {
         "layout": layout,
         "rol": id_rol,
         "user": rol_name,
         'codigo': codigo,
         'solicitudes': solicitudes,
-        'estado': estado,
+        'estado': estado
     })
+
 
 # ===============================================================================
 # Mostrar la ficha de caracterización
 # ===============================================================================
+@login_required_custom
 def ficha_caracterizacion(request, solicitud_id):
     """
     Vista para mostrar la ficha de caracterización
@@ -160,7 +243,7 @@ def ficha_caracterizacion(request, solicitud_id):
     usuario = solicitud.idusuario
     empresa = solicitud.idempresa
     programa_especial = solicitud.idespecial
-    ambiente = solicitud.ambiente  # ✅ Campo de texto, se usa directo
+    ambiente = solicitud.ambiente  #Campo de texto, se usa directo
     
     # Definir layout según rol del usuario actual
     id_rol = usuario_actual.rol.idrol
@@ -197,7 +280,7 @@ def ficha_caracterizacion(request, solicitud_id):
 # ======================================================================
 # Generar la ficha de caracterización en pdf
 # ======================================================================
-
+@login_required_custom
 def ficha_caracterizacion_pdf(request, solicitud_id):
     """Genera un PDF de la ficha de caracterización usando WeasyPrint.
     Solo lo guarda en disco si el rol es 3 (funcionario). En otros roles, solo lo descarga sin guardar.
@@ -276,7 +359,7 @@ def ficha_caracterizacion_pdf(request, solicitud_id):
 
     pdf_bytes = html.write_pdf(stylesheets=[css])
 
-    # ✅ SOLO si el rol es 3, guardar en disco
+    # Solo si el rol es 3, guardar en disco
     if int(id_rol) == 3:
         folder_name = f"solicitud_{solicitud.idsolicitud}"
         carpeta_destino = os.path.join(settings.MEDIA_ROOT, 'funcionario', folder_name)
@@ -306,7 +389,7 @@ def ficha_caracterizacion_pdf(request, solicitud_id):
 # ========================================================================
 # Descargar el PDF combinado de los aspirantes
 # ========================================================================
-
+@login_required_custom
 def descargar_pdf(request, id, idrol):
     folder_name = f"solicitud_{id}"
 
@@ -338,7 +421,7 @@ def descargar_pdf(request, id, idrol):
 # =======================================================================
 # Descargar excel como funcionario
 # =======================================================================
-
+@login_required_custom
 def descargar_excel(request, id, idrol):
     folder_name = f"solicitud_{id}"
 
@@ -369,62 +452,79 @@ def descargar_excel(request, id, idrol):
 # ========================================================================
 # Descargar la carta de solicitud de la empresa
 # ========================================================================
-
+@login_required_custom
 def descargar_carta(request, id, idrol): 
+    # ============================
     # Buscar la solicitud
-    buscar_nit = Solicitud.objects.get(idsolicitud=id)
+    # ============================
+    solicitud = get_object_or_404(Solicitud, idsolicitud=id)
 
-    # Obtener NIT de la empresa relacionada
-    nit = buscar_nit.idempresa.nitempresa
+    # ============================
+    # Determinar qué PDF usar
+    # ============================
+    if solicitud.idempresa:  # Empresa existe
+        nit = solicitud.idempresa.nitempresa
+        folder_name = f"carta_{nit}"
+        ruta_pdf = os.path.join(settings.MEDIA_ROOT, 'Cartas_de_solicitud', folder_name, f'carta_{nit}.pdf')
+    else:  # Empresa nula → usar carta interna generada
+        folder_name = f"carta_{solicitud.idsolicitud}"
+        ruta_pdf = os.path.join(settings.MEDIA_ROOT, 'Cartas_de_solicitud', folder_name, f'{folder_name}.pdf')
 
-    guardar_carta = f"solicitud_{id}"
-
-    # Nombre de la carpeta
-    folder_name = f"carta_{nit}"
-
-    # Ruta del archivo original (en su carpeta correspondiente)
-    buscar_carta = os.path.join(settings.MEDIA_ROOT, 'Cartas_de_solicitud', folder_name, f'carta_{nit}.pdf')
-
-    if not os.path.exists(buscar_carta):
+    # ============================
+    # Verificar si el archivo existe
+    # ============================
+    if not os.path.exists(ruta_pdf):
         raise Http404("PDF no encontrado")
 
-    # Si el rol es 3 = funcionario, crear una copia del archivo
+    # ============================
+    # Si el rol es 3 = Funcionario, crear copia del archivo
+    # ============================
     if int(idrol) == 3:
-        # Carpeta destino
-        carpeta_destino = os.path.join(settings.MEDIA_ROOT, 'Funcionario', guardar_carta)
+        carpeta_destino = os.path.join(settings.MEDIA_ROOT, 'Funcionario', f'solicitud_{solicitud.idsolicitud}')
         os.makedirs(carpeta_destino, exist_ok=True)
 
         # Ruta completa del archivo copia
-        generar_copia = os.path.join(carpeta_destino, f'carta_{nit}.pdf')
+        generar_copia = os.path.join(carpeta_destino, os.path.basename(ruta_pdf))
 
         # Copiar el archivo original al nuevo destino
-        shutil.copy2(buscar_carta, generar_copia)
+        shutil.copy2(ruta_pdf, generar_copia)
 
-    # Descargar el archivo original
+    # ============================
+    # Descargar el archivo
+    # ============================
     return FileResponse(
-        open(buscar_carta, 'rb'),
+        open(ruta_pdf, 'rb'),
         as_attachment=True,
-        filename='Carta solicitud.pdf',
+        filename='Carta_solicitud.pdf',
         content_type='application/pdf'
     )
+
 
 # ===========================================
 # Funcionario respuestas a las solicitudes
 # ===========================================
-
+@login_required_custom
 def revision_fichas(request, id):
 
+    # ----------------------------
     # Buscar la solicitud
+    # ----------------------------
     solicitud = get_object_or_404(Solicitud, idsolicitud=id)
 
+    # ----------------------------
     # Obtener el id del usuario en sesión
+    # ----------------------------
     user_id = request.session.get('user_id')
 
+    # ----------------------------
     # Obtener el usuario y su rol
+    # ----------------------------
     usuario = Usuario.objects.select_related('rol').get(idusuario=user_id)
     id_rol = usuario.rol.idrol
 
+    # ----------------------------
     # Definir layout según rol del usuario actual
+    # ----------------------------
     if id_rol == 1:
         layout = 'layout/layoutinstructor.html'
     elif id_rol == 2:
@@ -436,74 +536,102 @@ def revision_fichas(request, id):
     else:
         layout = 'layout/layout_admin.html'
 
+    # ----------------------------
     # Validar envío de formulario
+    # ----------------------------
     if request.method == "POST":
         try:
+            # ----------------------------
             # Capturar datos enviados
+            # ----------------------------
             estados = request.POST.get('estado')
+            numero_solicitud = request.POST.get('codigo_solicitud')
             numero_ficha = request.POST.get('codigo_ficha')
             observacion = request.POST.get('observacion')
             nuevo_archivo = request.FILES.get('actualizar_excel')
 
-            # Crear carpeta donde se van a almacenar los formatos
-            carpeta_almacenar = f"solicitud_{id}"
-            excel_archivo = f"formato_inscripcion_{id}.xlsx"
-            carpeta_excel = os.path.join(settings.MEDIA_ROOT, 'Funcionario', carpeta_almacenar, 'Masivos_sofia_plus')
-            os.makedirs(carpeta_excel, exist_ok=True)
+            # ----------------------------
+            # Obtener objetos relacionados
+            # ----------------------------
+            id_estado = Estados.objects.get(idestado=estados)
+            creado_por = solicitud.idusuario
 
-            # Ruta completa
-            directorio_excel = os.path.join(carpeta_excel, excel_archivo)
+            # ----------------------------
+            # Buscar si ya existe ficha para esta solicitud
+            # ----------------------------
+            ficha = Ficha.objects.filter(idsolicitud=solicitud).first()
 
-            # Guardar el archivo físicamente
+            if ficha:
+                # ----------------------------
+                # Actualizar ficha existente
+                # ----------------------------
+                ficha.codigoficha = numero_ficha
+                ficha.idestado = id_estado
+                ficha.observacion = observacion
+                ficha.save()
+            else:
+                # ----------------------------
+                # Crear nueva ficha si no existía
+                # ----------------------------
+                Ficha.objects.create(
+                    codigoficha=numero_ficha,
+                    idsolicitud=solicitud,
+                    idestado=id_estado,
+                    idusuario=creado_por,
+                    observacion=observacion,
+                )
+
+            # ----------------------------
+            # Actualizar la solicitud con el número/código
+            # ----------------------------
+            solicitud.codigosolicitud = numero_solicitud
+            solicitud.save()
+
+            # ----------------------------
+            # Guardar Excel si se envía uno nuevo
+            # ----------------------------
             if nuevo_archivo:
-                with open(directorio_excel, 'wb+') as destino:
+                carpeta_almacenar = f"solicitud_{id}"
+                excel_archivo = f"formato_inscripcion_{id}.xlsx"
+                carpeta_excel = os.path.join(
+                    settings.MEDIA_ROOT,
+                    'Funcionario',
+                    carpeta_almacenar,
+                    'Masivos_sofia_plus'
+                )
+                os.makedirs(carpeta_excel, exist_ok=True)
+
+                ruta_excel = os.path.join(carpeta_excel, excel_archivo)
+                with open(ruta_excel, 'wb+') as destino:
                     for chunk in nuevo_archivo.chunks():
                         destino.write(chunk)
 
-            # Validar duplicados correctamente y con redirect al mismo formulario
-            duplicado = Ficha.objects.filter(
-                codigoficha=numero_ficha
-            ).exists()
-
-            if duplicado:
-                messages.error(request, 'La ficha ya existe')
-                return redirect('consultas_instructor')
-
-            # Obtener objetos relacionados
-            id_estado = Estados.objects.get(idestado=estados)
-
-            # Ya tienes la solicitud desde arriba, no es necesario volver a consultarla
-            usuario_solicitud = solicitud
-            creado_por = usuario_solicitud.idusuario
-
-            # Crear registro en la tabla de aspirantes
-            Ficha.objects.create(
-                codigoficha=numero_ficha,
-                idsolicitud=solicitud,
-                idestado=id_estado,
-                idusuario=creado_por,
-                observacion=observacion,
-            )
-
+            # ----------------------------
             # Mensaje de éxito
+            # ----------------------------
             messages.success(request, 'Haz enviado respuesta a esta solicitud')
             return redirect('consultas_instructor')
 
         except Exception as e:
+            # ----------------------------
             # Mensaje de error en caso de excepción
+            # ----------------------------
             messages.error(request, f'Error al enviar respuesta: {e}')
             return redirect('consultas_instructor')
 
+    # ----------------------------
     # Renderizar plantilla si no hay envío de formulario
+    # ----------------------------
     return render(request, 'consultas/consultas_instructor.html', {
         'layout': layout,
         'messages': messages
     })
 
+
 # ===============================================================
 # Descargar el formato generado por sofia plus
 # ===============================================================
-
+@login_required_custom
 def descargar_excel_ficha(request, id):
     # Nombre del archivo esperado
     excel_archivo = f"formato_inscripcion_{id}.xlsx"
@@ -524,3 +652,185 @@ def descargar_excel_ficha(request, id):
     else:
         # Si no existe, mostrar un error
         raise Http404("Aun no se ha subido el excel.")
+
+@login_required_custom
+def revision_coordinador(request, id_solicitud):
+    # ============================
+    # Buscar la solicitud
+    # ============================
+    solicitud = get_object_or_404(Solicitud, idsolicitud=id_solicitud)
+
+    # ============================
+    # Obtener el usuario en sesión (el que revisa)
+    # ============================
+    user_id = request.session.get('user_id')
+    usuario_revisador = Usuario.objects.select_related('rol').get(idusuario=user_id)
+    id_rol = usuario_revisador.rol.idrol
+
+    # ============================
+    # Definir layout según rol
+    # ============================
+    if id_rol == 1:
+        layout = 'layout/layoutinstructor.html'
+    elif id_rol == 2:
+        layout = 'layout/layout_coordinador.html'
+    elif id_rol == 3:
+        layout = 'layout/layout_funcionario.html'
+    elif id_rol == 4:
+        layout = 'layout/layout_admin.html'
+    else:
+        layout = 'layout/layout_admin.html'
+
+    # ============================
+    # Procesar POST
+    # ============================
+    if request.method == "POST":
+        try:
+            # ----------------------------
+            # Capturar datos del formulario
+            # ----------------------------
+            estado_id = request.POST.get('estado')
+            observacion = request.POST.get('observacion')
+
+            if not estado_id:
+                messages.error(request, 'Debe seleccionar un estado')
+                return redirect('consultas_instructor')
+
+            # ----------------------------
+            # Obtener objeto estado
+            # ----------------------------
+            estado_obj = EstadosCoordinador.objects.get(id=estado_id)
+
+            # ----------------------------
+            # Usuario que creó la solicitud
+            # ----------------------------
+            usuario_solicitud = solicitud.idusuario  
+
+            # ----------------------------
+            # Buscar si ya existe una revisión previa para esta solicitud
+            # ----------------------------
+            revision, creada = Solicitudcoordinador.objects.update_or_create(
+                idsolicitud=solicitud,
+                defaults={
+                    "usuario_solicitud": usuario_solicitud,          # usuario que creó la solicitud
+                    "usuario_revisador": usuario_revisador,  # coordinador que revisa
+                    "idestado": estado_obj,
+                    "observacion": observacion,
+                    "fecha": datetime.date.today(),
+                }
+            )
+
+            # ============================
+            # Generar carta PDF internamente SOLO SI la revisión fue exitosa
+            # ============================
+            try:
+                if solicitud.idempresa is None:
+                    # Renderizar template HTML
+                    template = get_template('fichacaracterizacion/carta_coordinador.html')
+                    contexto = {
+                        'solicitud': solicitud,
+                        'usuario': usuario_revisador,
+                    }
+                    html = template.render(contexto)
+
+                    # Crear carpeta para guardar PDF
+                    folder_archive_name = f'carta_{solicitud.idsolicitud}'
+                    carpeta = os.path.join(settings.MEDIA_ROOT, 'Cartas_de_solicitud', folder_archive_name)
+                    os.makedirs(carpeta, exist_ok=True)
+
+                    # Ruta del PDF
+                    archivo_pdf = os.path.join(carpeta, f'{folder_archive_name}.pdf')
+
+                    # Crear PDF
+                    with open(archivo_pdf, "wb") as destino:
+                        pisa_status = pisa.CreatePDF(html, dest=destino)
+
+                    if pisa_status.err:
+                        print(f"Error generando PDF para solicitud {solicitud.idsolicitud}")
+                    else:
+                        print(f"PDF generado y guardado en {archivo_pdf}")
+
+            except Exception as pdf_error:
+                print(f"Error generando PDF para solicitud {solicitud.idsolicitud}: {pdf_error}")
+
+            # ============================
+            # Mensajes de éxito
+            # ============================
+            if creada:
+                messages.success(request, 'Solicitud revisada correctamente (nueva revisión creada)')
+            else:
+                messages.success(request, 'Solicitud revisada correctamente (revisión actualizada)')
+
+            return redirect('consultas_instructor')
+
+        except Exception as e:
+            messages.error(request, f'Error al enviar respuesta: {e}')
+            return redirect('consultas_instructor')
+
+    # ============================
+    # Si no es POST, renderizar la plantilla
+    # ============================
+    return render(request, 'consultas/consultas_instructor.html', {
+        'layout': layout,
+        'messages': messages
+    })
+
+
+
+@login_required_custom
+def ver_formato_inscripcion(request, id_solicitud):
+    # Nombre del archivo
+    folder_name = f'formato_inscripcion_{id_solicitud}.xlsx'
+    ruta_archivo = os.path.join(settings.MEDIA_ROOT, "excel", folder_name)
+
+    datos = []
+    error = None
+
+    try:
+        # Cargar el archivo Excel
+        wb = load_workbook(ruta_archivo)
+        ws = wb.active  # primera hoja
+
+        # Recorrer todas las filas y columnas
+        for row in ws.iter_rows(values_only=True):
+            fila = []
+            for celda in row:
+                fila.append("" if celda is None else str(celda))
+            datos.append(fila)
+
+    except Exception as e:
+            error = f"Error al abrir el archivo: {e}"
+
+    return render(request, "fichacaracterizacion/formato_inscripcion.html", {
+        "datos": datos,
+        "error": error
+    })
+
+@login_required_custom
+def ver_pdf_aspirantes(request, id_solicitud):
+    folder_name = f'solicitud_{id_solicitud}'
+    ruta_pdf = f"{settings.MEDIA_URL}pdf/{folder_name}/combinado.pdf"
+    return redirect(ruta_pdf)
+
+@login_required_custom
+def ver_pdf_carta(request, id_solicitud):
+    # Buscar la solicitud
+    solicitud = get_object_or_404(Solicitud, idsolicitud=id_solicitud)
+
+    # Empresa vinculada
+    empresa = solicitud.idempresa  
+
+    # Tomar el NIT de la empresa
+    nit_empresa = empresa.nitempresa  
+
+    # Nombre de la carpeta y archivo
+    folder_name = f"carta_{nit_empresa}"
+    relative_path = f"Cartas_de_solicitud/{folder_name}/{folder_name}.pdf"
+    absolute_path = os.path.join(settings.MEDIA_ROOT, relative_path)
+
+    # Verificar si el archivo existe
+    if os.path.exists(absolute_path):
+        ruta_pdf = f"{settings.MEDIA_URL}{relative_path}"
+        return redirect(ruta_pdf)
+    else:
+        return HttpResponseNotFound("El archivo PDF no existe para esta solicitud.")

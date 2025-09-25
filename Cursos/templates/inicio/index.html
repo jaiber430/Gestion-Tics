@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
   <head>
@@ -9,7 +10,7 @@
         {{ title }}
       {% endblock %}
     </title>
-    <link rel="stylesheet" href="../../static/css/index-styles.css" />
+    <link rel="stylesheet" href="{% static 'css/index-styles.css' %}" />
   </head>
   <body>
     <!-- Contenedor principal de la aplicación -->
@@ -18,7 +19,7 @@
       <header class="encabezado">
         <!-- Logo del SENA -->
         <div class="logo-contenedor">
-          <img src="Assets/img/sena_logo.png" alt="Logo SENA" class="logo" />
+          <img src="{% static 'img/Sena.png' %}" alt="Logo SENA" class="logo" />
           <h1 class="titulo-principal">Sistema de Gestión SENA</h1>
         </div>
       </header>
@@ -55,6 +56,7 @@
                 <option value="2">Coordinador</option>
                 <option value="3">Funcionario</option>
                 <option value="4">Administrador</option>
+                <option value="5">Curricular</option>
               </select>
             </div>
 
