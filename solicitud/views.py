@@ -182,6 +182,24 @@ def _crear_solicitud_base(request, tipo_solicitud_id, template_name, mensaje_exi
                             mes2_fechas = ', '.join(dias[mitad:])
                     else:
                         mes1_fechas = ', '.join(dias)
+                else:
+                    mes1_fechas, mes2_fechas = None, None
+
+                # ===============================
+                # Validación: evitar duplicados de ambiente + fechas + horas + días
+                # ===============================
+                if Solicitud.objects.filter(
+                    ambiente=nombre_ambiente,
+                    idhorario__fechainicio=datetime.strptime(fecha_inicio, '%Y-%m-%d').date(),
+                    idhorario__fechafin=datetime.strptime(fecha_finalizacion, '%Y-%m-%d').date(),
+                    idhorario__horas=f"{hora_inicio}-{hora_fin}",
+                    idhorario__diassemana=', '.join(dias_semana)
+                ).exists():
+                    messages.error(
+                        request,
+                        "Ya existe una solicitud con este ambiente, fechas y horario."
+                    )
+                    return redirect('Crearsolicitud')
 
                 # ===============================
                 # Crear horario
@@ -263,6 +281,7 @@ def _crear_solicitud_base(request, tipo_solicitud_id, template_name, mensaje_exi
             return redirect('Crearsolicitud')
 
     return render(request, template_name, context)
+
     
 # ===============================
 # Vista: Solicitud Regular
