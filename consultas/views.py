@@ -30,6 +30,7 @@ from Cursos.views import login_required_custom
 
 from django.http import HttpResponseNotFound
 from xhtml2pdf import pisa
+from io import BytesIO
 from django.template.loader import get_template
 
 # from io import BytesIO
@@ -183,6 +184,28 @@ def consultas_instructor(request):
         # Verificar si la empresa es nula
         # ----------------------------------------------
         solicitud.mostrar_boton_carta_funcionario = (id_rol == 3 and solicitud.idempresa is None)
+
+        # ----------------------------
+        # Flags de disponibilidad de Excel para deshabilitar botones en UI
+        # ----------------------------
+        try:
+            # Excel generado por funcionario (ruta usada por la vista 'descargar_excel')
+            ruta_excel_funcionario = os.path.join(settings.MEDIA_ROOT, 'excel', f'formato_inscripcion_{solicitud.idsolicitud}.xlsx')
+            solicitud.excel_funcionario_disponible = os.path.exists(ruta_excel_funcionario)
+
+            # Excel masivo de Sofia Plus (ruta usada por 'descargar_excel_ficha' / 'sofia_plus_descarga')
+            carpeta_excel_sofia = os.path.join(
+                settings.MEDIA_ROOT,
+                'Funcionario',
+                f"solicitud_{solicitud.idsolicitud}",
+                'Masivos_sofia_plus'
+            )
+            ruta_excel_sofia = os.path.join(carpeta_excel_sofia, f'formato_inscripcion_{solicitud.idsolicitud}.xlsx')
+            solicitud.excel_masivo_disponible = os.path.exists(ruta_excel_sofia)
+        except Exception:
+            # En caso de cualquier problema al verificar, marcamos como no disponible
+            solicitud.excel_funcionario_disponible = False
+            solicitud.excel_masivo_disponible = False
 
     # ============================
     # Aspirantes para Instructor/Admin
