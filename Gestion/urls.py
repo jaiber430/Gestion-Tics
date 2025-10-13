@@ -67,6 +67,8 @@ urlpatterns = [
     path('ver_pdf_aspirantes/<int:id_solicitud>/', views_consultas.ver_pdf_aspirantes, name="ver_pdf_aspirantes"),
     # Ver carta
     path('ver_pdf_carta/<int:id_solicitud>/', views_consultas.ver_pdf_carta, name='ver_pdf_carta'),
+    # Reportes
+    path('reportes/', views_consultas.reportes, name='reportes'),
     # Cerrar sesión    
     path('cerrar_sesion/', views.cerrar_sesion, name='salir'),
     # Buscar programa

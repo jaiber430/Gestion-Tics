@@ -2,19 +2,6 @@
 
 {% block content %}
 
-  <style>
-    /* Estilo para deshabilitar visualmente los enlaces */
-    .disabled-link {
-      background-color: #ccc !important;
-      color: #666 !important;
-      cursor: not-allowed !important;
-      pointer-events: none !important;
-      opacity: 0.8;
-      text-decoration: none !important;
-      border-color: #cfcfcf !important;
-    }
-  </style>
-
   {% comment %}Mostar esto solo al funcionario{% endcomment %}
   {% if rol == 3 %}
     <!-- Sección principal - Consultar Fichas -->

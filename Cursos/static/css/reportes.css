@@ -1,0 +1,273 @@
+/* Estilos para la vista de Reportes
+	 Usa variables globales definidas en otros CSS (inicio.css / index-styles.css)
+	 y mantiene el look & feel del sitio. */
+
+/* Utilidades */
+.hidden { display: none !important; }
+
+/* Botones base */
+.btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: .6rem;
+	border: none;
+	border-radius: var(--radio-borde, .8rem);
+	padding: var(--espaciado-md, 1.2rem) var(--espaciado-xl, 2.4rem);
+	font-family: var(--fuente-principal, Arial, sans-serif);
+	font-size: 1.4rem;
+	font-weight: var(--peso-medio, 500);
+	cursor: pointer;
+	text-decoration: none;
+	transition: background-color .2s ease, box-shadow .2s ease, color .2s ease;
+}
+
+.btn-primary {
+	background-color: var(--color-primario, #2E7D32);
+	color: var(--color-secundario, #fff);
+}
+
+.btn-primary:hover { background-color: var(--color-primario-hover, #1B5E20); }
+
+.btn-secondary {
+	background-color: var(--color-borde, #E0E0E0);
+	color: var(--color-texto-principal, #212121);
+}
+
+.btn-secondary:hover { background-color: #bdbdbd; }
+
+.btn:focus {
+	outline: none;
+	box-shadow: 0 0 0 .3rem rgba(46,125,50,.25);
+}
+
+/* Contenedores tipo tarjeta */
+.card {
+	background: var(--color-secundario, #fff);
+	border: .1rem solid var(--color-borde, #E0E0E0);
+	border-radius: var(--radio-borde, .8rem);
+	box-shadow: var(--sombra-ligera, 0 2px 4px rgba(0,0,0,.1));
+}
+
+/* Tabla responsiva */
+.table-responsive {
+	width: 100%;
+	overflow: auto;
+	border: .1rem solid var(--color-borde, #E0E0E0);
+	border-radius: var(--radio-borde, .8rem);
+	background: var(--color-secundario, #fff);
+	box-shadow: var(--sombra-ligera, 0 2px 4px rgba(0,0,0,.1));
+}
+
+.table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 1.3rem;
+}
+
+.table thead th {
+	position: sticky;
+	top: 0;
+	z-index: 1;
+	background: var(--color-primario, #2E7D32);
+	color: var(--color-secundario, #fff);
+	text-align: left;
+	font-weight: var(--peso-semi-negrita, 600);
+	padding: .9rem .8rem;
+	white-space: nowrap;
+}
+
+.table tbody td { padding: .8rem .8rem; border-bottom: .1rem solid var(--color-borde, #E0E0E0); }
+.table tbody tr:hover { background: var(--color-fondo, #F5F5F5); }
+
+/* Scrollbar sutil en contenedor de tabla (WebKit) */
+.table-responsive::-webkit-scrollbar { height: 8px; width: 8px; }
+.table-responsive::-webkit-scrollbar-track { background: transparent; }
+.table-responsive::-webkit-scrollbar-thumb { background: #c2c2c2; border-radius: 4px; }
+.table-responsive::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
+
+/* Formularios (inputs y selects) */
+label {
+	display: block;
+	font-size: 1.3rem;
+	font-weight: var(--peso-medio, 500);
+	color: var(--color-texto-principal, #212121);
+	margin-bottom: var(--espaciado-xs, .4rem);
+}
+
+.form-control {
+	width: 100%;
+	padding: .9rem 1.1rem;
+	border: .1rem solid var(--color-borde, #E0E0E0);
+	border-radius: .6rem;
+	background: var(--color-secundario, #fff);
+	color: var(--color-texto-principal, #212121);
+	font-family: var(--fuente-principal, Arial, sans-serif);
+	font-size: 1.3rem;
+}
+
+.form-control:focus {
+	outline: none;
+	border-color: var(--color-primario, #2E7D32);
+	box-shadow: 0 0 0 .25rem rgba(46,125,50,.25);
+}
+
+/* Grid de filtros (ajusta el inline del template) */
+.grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(260px, 1fr));
+	gap: var(--espaciado-md, 1.6rem);
+}
+
+@media (max-width: 720px) {
+	.grid { grid-template-columns: 1fr; }
+}
+
+/* Modal personalizado (clases usadas en el template) */
+.modal-overlay {
+	position: fixed;
+	inset: 0;
+	background: rgba(0,0,0,.45);
+	z-index: 1000;
+}
+
+.modal-window {
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	width: min(900px, 96vw);
+	max-height: 90vh;
+	overflow: auto;
+	background: var(--color-secundario, #fff);
+	border-radius: var(--radio-borde, .8rem);
+	box-shadow: var(--sombra-media, 0 4px 12px rgba(0,0,0,.15));
+	z-index: 1001;
+}
+
+.modal-header,
+.modal-footer { padding: .75rem 1rem; }
+
+.modal-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	border-bottom: .1rem solid var(--color-borde, #E0E0E0);
+	background: var(--color-fondo, #F5F5F5);
+}
+
+.modal-footer {
+	border-top: .1rem solid var(--color-borde, #E0E0E0);
+	display: flex;
+	justify-content: flex-end;
+	gap: .8rem;
+	background: var(--color-fondo, #F5F5F5);
+}
+
+.modal-title { margin: 0; font-size: 1.6rem; font-weight: var(--peso-semi-negrita, 600); color: var(--color-primario, #2E7D32); }
+.modal-body { padding: 1rem; }
+
+.btn-close {
+	background: transparent;
+	border: none;
+	font-size: 2.2rem;
+	line-height: 1;
+	cursor: pointer;
+	color: var(--color-texto-secundario, #757575);
+}
+
+.btn-close:hover { color: var(--color-error, #D32F2F); }
+
+/* Espaciados locales */
+.reportes-panel {
+	padding: var(--espaciado-md, 1.6rem);
+}
+
+/* Ajustes visuales para listas dentro de tarjetas métricas */
+.card ul { margin: .25rem 0 0; padding-left: 1.6rem; max-height: 180px; overflow: auto; }
+.card ul li { line-height: 1.4; }
+
+/* Contenedor y tarjetas de métricas */
+.metrics-wrap {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--espaciado-md, 1.6rem);
+	margin-bottom: var(--espaciado-md, 1.6rem);
+}
+
+.metric-card {
+	position: relative;
+	padding: 1rem 1.2rem;
+	min-width: 220px;
+	border-left: .4rem solid var(--color-primario, #2E7D32);
+	background: linear-gradient(180deg, var(--color-secundario, #fff) 0%, #fafafa 100%);
+	transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+
+.metric-card::after {
+	content: "";
+	position: absolute;
+	top: -20%;
+	right: -10%;
+	width: 120px;
+	height: 120px;
+	background: radial-gradient(closest-side, rgba(46,125,50,.08), transparent 70%);
+	pointer-events: none;
+}
+
+.metric-card:hover {
+	transform: translateY(-2px);
+	box-shadow: var(--sombra-media, 0 4px 12px rgba(0,0,0,.15));
+}
+
+.metric-card--sm { min-width: 180px; }
+.metric-card--md { min-width: 220px; }
+.metric-card--lg { min-width: 260px; }
+
+/* Variación de tarjeta con padding interno */
+.card--padded { padding: 1rem; }
+
+/* Utilidad de margen inferior */
+.mb-md { margin-bottom: var(--espaciado-md, 1.6rem); }
+
+/* Utilidades de texto */
+.text-muted { color: var(--color-texto-secundario, #757575); }
+.text-sm { font-size: 1.2rem; }
+.text-lg { font-size: 2.0rem; }
+.fw-600 { font-weight: var(--peso-semi-negrita, 600); }
+.text-center { text-align: center; }
+
+/* Ajustes tipográficos dentro de las métricas */
+.metric-card .text-muted {
+	text-transform: uppercase;
+	letter-spacing: .03em;
+	opacity: .9;
+	margin-bottom: .3rem;
+	font-size: 1.1rem; /* más pequeño dentro de la tarjeta */
+}
+
+/* Valor principal inmediatamente después del label */
+.metric-card .text-muted + div {
+	font-size: 2.2rem;
+	font-weight: var(--peso-negrita, 700);
+	color: var(--color-primario, #2E7D32);
+}
+
+/* En caso de usar .text-lg para el valor, amplíalo dentro de la tarjeta */
+.metric-card .text-lg { font-size: 2.4rem; }
+
+/* Lists dentro de métricas */
+.metric-card ul { max-height: 160px; overflow: auto; padding-left: 1.6rem; margin-top: .4rem; }
+.metric-card ul li { padding: .15rem 0; }
+.metric-card ul li::marker { color: var(--color-primario, #2E7D32); font-weight: 600; }
+.metric-card ul::-webkit-scrollbar { width: 8px; }
+.metric-card ul::-webkit-scrollbar-thumb { background: #c2c2c2; border-radius: 4px; }
+.metric-card ul::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
+
+/* Resalte sutil para cifras dentro de métricas */
+.metric-card strong {
+	background: var(--color-fondo, #F5F5F5);
+	border-radius: .4rem;
+	padding: .1rem .4rem;
+}
+

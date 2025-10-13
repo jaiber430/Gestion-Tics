@@ -1,0 +1,260 @@
+{% extends layout %}
+
+{% block content %}
+	<main class="contenido-principal">
+		<div class="titulo-seccion">
+			<h2 class="titulo-pagina">Reportes</h2>
+			<p class="subtitulo-pagina">Filtra por los campos disponibles y consulta las solicitudes.</p>
+		</div>
+
+		<!-- Botón para abrir modal de filtros -->
+		<div class="mb-md">
+			<button type="button" id="openFiltersBtn" class="btn btn-primary">Filtros</button>
+		</div>
+
+		<!-- Modal de filtros (custom, sin Bootstrap) -->
+
+		<div id="filtersOverlay" class="modal-overlay hidden" aria-hidden="true"></div>
+		<div id="filtersModal" class="modal-window hidden" role="dialog" aria-modal="true" aria-labelledby="filtersTitle">
+			<div class="modal-header">
+				<h5 id="filtersTitle" class="modal-title">Filtros de reportes</h5>
+				<button type="button" id="closeFiltersBtn" class="btn-close" aria-label="Cerrar">×</button>
+			</div>
+			<form method="get">
+				<div class="modal-body">
+					<div class="grid">
+								<div>
+									<label>Instructor</label>
+									<input id="searchInstructor" type="text" class="form-control" placeholder="Escribe para buscar..." oninput="filterSelect('searchInstructor','selectInstructor')">
+									<select id="selectInstructor" name="instructor" class="form-control" size="8">
+										<option value="">Todos</option>
+										{% for i in instructores %}
+											<option value="{{ i.idusuario }}" {% if f_instructor|default:'' == i.idusuario|stringformat:'s' %}selected{% endif %}>{{ i.nombre }} {{ i.apellido }}</option>
+										{% endfor %}
+									</select>
+								</div>
+
+								<div>
+									<label>Área</label>
+									<input id="searchArea" type="text" class="form-control" placeholder="Escribe para buscar..." oninput="filterSelect('searchArea','selectArea')">
+									<select id="selectArea" name="area" class="form-control" size="8">
+										<option value="">Todas</option>
+										{% for a in areas %}
+											<option value="{{ a.idarea }}" {% if f_area|default:'' == a.idarea|stringformat:'s' %}selected{% endif %}>{{ a.area }}</option>
+										{% endfor %}
+									</select>
+								</div>
+
+								<div>
+									<label>Tipo de solicitud</label>
+									<select name="tipo_solicitud" class="form-control">
+										<option value="">Todas</option>
+										{% for ts in tipos_solicitud %}
+											<option value="{{ ts.idtiposolicitud }}" {% if f_tipo_solicitud|default:'' == ts.idtiposolicitud|stringformat:'s' %}selected{% endif %}>
+												{% with v=ts.tiposolicitud|lower %}
+													{% if v == 'campesena' or v == 'campesina' %}CampeSENA{% else %}{{ ts.tiposolicitud }}{% endif %}
+												{% endwith %}
+											</option>
+										{% endfor %}
+									</select>
+								</div>
+
+								<div>
+									<label>¿Tiene empresa?</label>
+									<select name="con_empresa" class="form-control">
+										<option value="" {% if not f_con_empresa %}selected{% endif %}>Todas</option>
+										<option value="si" {% if f_con_empresa == 'si' %}selected{% endif %}>Sí</option>
+										<option value="no" {% if f_con_empresa == 'no' %}selected{% endif %}>No</option>
+									</select>
+								</div>
+
+								<div>
+									<label>Tipo de empresa</label>
+									<select name="tipo_empresa" class="form-control">
+										<option value="">Todas</option>
+										{% for te in tipos_empresa %}
+											<option value="{{ te.idtipoempresa }}" {% if f_tipo_empresa|default:'' == te.idtipoempresa|stringformat:'s' %}selected{% endif %}>{{ te.tipoempresa }}</option>
+										{% endfor %}
+									</select>
+								</div>
+
+								<div>
+									<label>Estado de solicitud (coordinador)</label>
+									<select name="estado_solicitud" class="form-control">
+										<option value="">Todos</option>
+										{% for es in estados_solicitud %}
+											<option value="{{ es.id }}" {% if f_estado_solicitud|default:'' == es.id|stringformat:'s' %}selected{% endif %}>{{ es.estado }}</option>
+										{% endfor %}
+									</select>
+								</div>
+
+								<div>
+									<label>Estado de ficha</label>
+									<select name="estado_ficha" class="form-control">
+										<option value="">Todos</option>
+										{% for ef in estados_ficha %}
+											<option value="{{ ef.idestado }}" {% if f_estado_ficha|default:'' == ef.idestado|stringformat:'s' %}selected{% endif %}>{{ ef.estados }}</option>
+										{% endfor %}
+									</select>
+								</div>
+							</div>
+				</div>
+				<div class="modal-footer">
+					<a href="?" class="btn btn-secondary">Limpiar</a>
+					<button type="submit" class="btn btn-primary">Aplicar filtros</button>
+				</div>
+			</form>
+		</div>
+
+		<section class="card card--padded">
+			<div class="metrics-wrap">
+				<div class="card metric-card metric-card--sm">
+					<div class="text-muted text-sm">Total</div>
+					<div class="text-lg fw-600">{{ metricas.total }}</div>
+				</div>
+				<div class="card metric-card metric-card--md">
+					<div class="text-muted text-sm">Empresa</div>
+					<div><strong>Con:</strong> {{ metricas.empresa.con }} &nbsp; | &nbsp; <strong>Sin:</strong> {{ metricas.empresa.sin }}</div>
+				</div>
+				<div class="card metric-card metric-card--lg">
+					<div class="text-muted text-sm">Tipo de solicitud</div>
+					<ul>
+						{% for nombre, cant in metricas_tipos %}
+							<li>{{ nombre }}: <strong>{{ cant }}</strong></li>
+						{% empty %}
+							<li>—</li>
+						{% endfor %}
+					</ul>
+				</div>
+				<div class="card metric-card metric-card--lg">
+					<div class="text-muted text-sm">Estado solicitud</div>
+					<ul>
+						{% for nombre, cant in metricas_estado_solicitud %}
+							<li>{{ nombre }}: <strong>{{ cant }}</strong></li>
+						{% empty %}
+							<li>—</li>
+						{% endfor %}
+					</ul>
+				</div>
+				<div class="card metric-card metric-card--lg">
+					<div class="text-muted text-sm">Estado ficha</div>
+					<ul>
+						{% for nombre, cant in metricas_estado_ficha %}
+							<li>{{ nombre }}: <strong>{{ cant }}</strong></li>
+						{% empty %}
+							<li>—</li>
+						{% endfor %}
+					</ul>
+				</div>
+				<div class="card metric-card metric-card--lg">
+					<div class="text-muted text-sm">Área</div>
+					<ul>
+						{% for nombre, cant in metricas_area %}
+							<li>{{ nombre }}: <strong>{{ cant }}</strong></li>
+						{% empty %}
+							<li>—</li>
+						{% endfor %}
+					</ul>
+				</div>
+				<div class="card metric-card metric-card--lg">
+					<div class="text-muted text-sm">Tipo de empresa</div>
+					<ul>
+						{% for nombre, cant in metricas_tipo_empresa %}
+							<li>{{ nombre }}: <strong>{{ cant }}</strong></li>
+						{% empty %}
+							<li>—</li>
+						{% endfor %}
+					</ul>
+				</div>
+			</div>
+
+			<div class="table-responsive">
+				<table class="table">
+					<thead>
+						<tr>
+							<th>Fecha</th>
+							<th>Instructor</th>
+							<th>Tipo solicitud</th>
+							<th>Empresa</th>
+							<th>Tipo empresa</th>
+							<th>Estado solicitud</th>
+							<th>Estado ficha</th>
+							<th>Área</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for s in solicitudes %}
+							<tr>
+								<td>{{ s.fechasolicitud|date:'Y-m-d' }}</td>
+								<td>{{ s.idusuario.nombre }} {{ s.idusuario.apellido }}</td>
+								<td>
+									{% with v=s.idtiposolicitud.tiposolicitud|lower %}
+										{% if v == 'campesena' or v == 'campesina' %}CampeSENA{% else %}{{ s.idtiposolicitud.tiposolicitud }}{% endif %}
+									{% endwith %}
+								</td>
+								<td>
+									{% if s.idempresa %}
+										{{ s.idempresa.nombreempresa }}
+									{% else %}
+										—
+									{% endif %}
+								</td>
+								<td>{{ s.tipo_empresa_nombre|default:'—' }}</td>
+								<td>{{ s.estado_solicitud_nombre|default:'—' }}</td>
+								<td>{{ s.estado_ficha_nombre|default:'—' }}</td>
+								<td>{{ s.area_nombre|default:'—' }}</td>
+							</tr>
+						{% empty %}
+							<tr>
+								<td colspan="8" class="text-center">No hay resultados para los filtros seleccionados.</td>
+							</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+		</section>
+
+		<script>
+		function filterSelect(inputId, selectId) {
+			const input = document.getElementById(inputId);
+			const select = document.getElementById(selectId);
+			if (!input || !select) return;
+
+			const term = input.value.toLowerCase();
+			for (const option of select.options) {
+				if (option.value === "") { // Mantener siempre la opción vacía visible
+					option.hidden = false;
+					continue;
+				}
+				const text = option.text.toLowerCase();
+				option.hidden = term && !text.includes(term);
+			}
+		}
+
+		// Modal controls
+		(function(){
+			const openBtn = document.getElementById('openFiltersBtn');
+			const closeBtn = document.getElementById('closeFiltersBtn');
+			const modal = document.getElementById('filtersModal');
+			const overlay = document.getElementById('filtersOverlay');
+
+			function openModal(){
+				modal.classList.remove('hidden');
+				overlay.classList.remove('hidden');
+				overlay.setAttribute('aria-hidden','false');
+			}
+
+			function closeModal(){
+				modal.classList.add('hidden');
+				overlay.classList.add('hidden');
+				overlay.setAttribute('aria-hidden','true');
+			}
+
+			if (openBtn) openBtn.addEventListener('click', openModal);
+			if (closeBtn) closeBtn.addEventListener('click', closeModal);
+			if (overlay) overlay.addEventListener('click', closeModal);
+			document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeModal(); });
+		})();
+		</script>
+	</main>
+{% endblock %}
