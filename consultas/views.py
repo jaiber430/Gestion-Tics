@@ -2,9 +2,10 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.http import Http404, FileResponse,  HttpResponse
 from django.template.loader import render_to_string
 from Cursos.models import (
-    Usuario, Solicitud, Programaformacion, Horario, Modalidad, 
+    Usuario, Solicitud, Programaformacion, Horario, Modalidad,
     Departamentos, Municipios, Empresa, Programaespecial, Ambiente,
-    Aspirantes, Caracterizacion, Tipoidentificacion, Estados, Ficha, Solicitudcoordinador, EstadosCoordinador
+    Aspirantes, Caracterizacion, Tipoidentificacion, Estados, Ficha,
+    Solicitudcoordinador, EstadosCoordinador, Area, Tipoempresa, Tiposolicitud
 )
 # COnvertir ficha de caracterizacion a pdf
 from weasyprint import HTML, CSS
@@ -30,6 +31,7 @@ from Cursos.views import login_required_custom
 
 from django.http import HttpResponseNotFound
 from xhtml2pdf import pisa
+from io import BytesIO
 from django.template.loader import get_template
 
 # from io import BytesIO
@@ -184,6 +186,28 @@ def consultas_instructor(request):
         # ----------------------------------------------
         solicitud.mostrar_boton_carta_funcionario = (id_rol == 3 and solicitud.idempresa is None)
 
+        # ----------------------------
+        # Flags de disponibilidad de Excel para deshabilitar botones en UI
+        # ----------------------------
+        try:
+            # Excel generado por funcionario (ruta usada por la vista 'descargar_excel')
+            ruta_excel_funcionario = os.path.join(settings.MEDIA_ROOT, 'excel', f'formato_inscripcion_{solicitud.idsolicitud}.xlsx')
+            solicitud.excel_funcionario_disponible = os.path.exists(ruta_excel_funcionario)
+
+            # Excel masivo de Sofia Plus (ruta usada por 'descargar_excel_ficha' / 'sofia_plus_descarga')
+            carpeta_excel_sofia = os.path.join(
+                settings.MEDIA_ROOT,
+                'Funcionario',
+                f"solicitud_{solicitud.idsolicitud}",
+                'Masivos_sofia_plus'
+            )
+            ruta_excel_sofia = os.path.join(carpeta_excel_sofia, f'formato_inscripcion_{solicitud.idsolicitud}.xlsx')
+            solicitud.excel_masivo_disponible = os.path.exists(ruta_excel_sofia)
+        except Exception:
+            # En caso de cualquier problema al verificar, marcamos como no disponible
+            solicitud.excel_funcionario_disponible = False
+            solicitud.excel_masivo_disponible = False
+
     # ============================
     # Aspirantes para Instructor/Admin
     # ============================
@@ -204,6 +228,225 @@ def consultas_instructor(request):
         'codigo': codigo,
         'solicitudes': solicitudes,
         'estado': estado
+    })
+
+
+# =====================================================================
+# Reportes (página simple con layout según rol)
+# =====================================================================
+@login_required_custom
+def reportes(request):
+    """Página de Reportes: acceso SOLO para Coordinador (2) y Funcionario (3).
+
+    Filtros disponibles:
+    - instructor (Usuario con rol Instructor)
+    - tipo de solicitud (Tiposolicitud: p.e. 'CAMPESENA' o 'REGULAR')
+    - con/sin empresa
+    - tipo de empresa (Tipoempresa)
+    - estado de solicitud (EstadosCoordinador)
+    - estado de ficha (Estados)
+    - área (Area del Programaformacion)
+    """
+    user_id = request.session.get('user_id')
+    usuario = get_object_or_404(Usuario.objects.select_related('rol'), idusuario=user_id)
+    id_rol = usuario.rol.idrol
+
+    # Restringir acceso: solo roles 2 y 3
+    if id_rol not in (2, 3):
+        messages.error(request, 'No tienes permisos para acceder a Reportes.')
+        return redirect('consultas_instructor')
+
+    # Layout y etiqueta de usuario según rol permitido
+    layout = 'layout/layout_coordinador.html' if id_rol == 2 else 'layout/layout_funcionario.html'
+    rol_name = 'Coordinador' if id_rol == 2 else 'Funcionario'
+
+    # ---------------------------------
+    # Parámetros de filtro (GET)
+    # ---------------------------------
+    instructor_id = request.GET.get('instructor') or ''
+    tipo_solicitud_id = request.GET.get('tipo_solicitud') or ''
+    con_empresa = request.GET.get('con_empresa') or ''  # '', 'si', 'no'
+    tipo_empresa_id = request.GET.get('tipo_empresa') or ''
+    estado_solicitud_id = request.GET.get('estado_solicitud') or ''  # EstadosCoordinador.id
+    estado_ficha_id = request.GET.get('estado_ficha') or ''          # Estados.idestado
+    area_id = request.GET.get('area') or ''
+
+    # ---------------------------------
+    # Query base
+    # ---------------------------------
+    solicitudes_qs = (
+        Solicitud.objects
+        .select_related(
+            'idusuario', 'idtiposolicitud',
+            'idempresa__idtipoempresa',
+            'codigoprograma__idarea'
+        )
+        .order_by('-fechasolicitud')
+    )
+
+    # ---------------------------------
+    # Aplicar filtros
+    # ---------------------------------
+    if instructor_id:
+        solicitudes_qs = solicitudes_qs.filter(idusuario__idusuario=instructor_id)
+
+    if tipo_solicitud_id:
+        solicitudes_qs = solicitudes_qs.filter(idtiposolicitud__idtiposolicitud=tipo_solicitud_id)
+
+    if con_empresa == 'si':
+        solicitudes_qs = solicitudes_qs.filter(idempresa__isnull=False)
+    elif con_empresa == 'no':
+        solicitudes_qs = solicitudes_qs.filter(idempresa__isnull=True)
+
+    if tipo_empresa_id:
+        solicitudes_qs = solicitudes_qs.filter(idempresa__idtipoempresa__idtipoempresa=tipo_empresa_id)
+
+    if estado_ficha_id:
+        # Estado de Ficha (relación inversa a Ficha)
+        solicitudes_qs = solicitudes_qs.filter(ficha__idestado__idestado=estado_ficha_id)
+
+    if estado_solicitud_id:
+        # Estado de Solicitud (revisión del coordinador)
+        solicitudes_qs = solicitudes_qs.filter(solicitudcoordinador__idestado__id=estado_solicitud_id)
+
+    if area_id:
+        solicitudes_qs = solicitudes_qs.filter(codigoprograma__idarea__idarea=area_id)
+
+    solicitudes_qs = solicitudes_qs.distinct()
+
+    # ---------------------------------
+    # Enriquecer con estados de ficha y solicitud (evitar N+1)
+    # ---------------------------------
+    solicitudes = list(solicitudes_qs)
+    if solicitudes:
+        ids = [s.idsolicitud for s in solicitudes]
+
+        # Fichas por solicitud
+        fichas = (
+            Ficha.objects
+            .filter(idsolicitud_id__in=ids)
+            .select_related('idestado')
+        )
+        fichas_map = {f.idsolicitud_id: f for f in fichas}
+
+        # Última revisión del coordinador por solicitud (si hubiese varias, tomamos la más reciente por fecha)
+        revisiones = (
+            Solicitudcoordinador.objects
+            .filter(idsolicitud_id__in=ids)
+            .select_related('idestado')
+            .order_by('idsolicitud_id', '-fecha')
+        )
+        revisiones_map = {}
+        for r in revisiones:
+            if r.idsolicitud_id not in revisiones_map:
+                revisiones_map[r.idsolicitud_id] = r
+
+        # Asignar campos calculados a cada solicitud
+        for s in solicitudes:
+            f = fichas_map.get(s.idsolicitud)
+            s.estado_ficha_nombre = f.idestado.estados if f and f.idestado else None
+            s.codigo_ficha = f.codigoficha if f else None
+
+            rv = revisiones_map.get(s.idsolicitud)
+            s.estado_solicitud_nombre = rv.idestado.estado if rv and rv.idestado else None
+
+            s.tipo_empresa_nombre = s.idempresa.idtipoempresa.tipoempresa if s.idempresa and s.idempresa.idtipoempresa else None
+            s.area_nombre = s.codigoprograma.idarea.area if s.codigoprograma and s.codigoprograma.idarea else None
+
+    # ---------------------------------
+    # Métricas basadas en los filtros aplicados
+    # ---------------------------------
+    from collections import Counter
+
+    tipos_cont = Counter()
+    empresa_con = 0
+    empresa_sin = 0
+    estado_sol_cont = Counter()
+    estado_ficha_cont = Counter()
+    area_cont = Counter()
+    tipo_empresa_cont = Counter()
+
+    def normalizar_tipo_solicitud(valor):
+        if not valor:
+            return '—'
+        v = str(valor).lower()
+        return 'CampeSENA' if v in ('campesena', 'campesina') else valor
+
+    for s in solicitudes:
+        # Tipo de solicitud
+        tipos_cont[normalizar_tipo_solicitud(getattr(getattr(s, 'idtiposolicitud', None), 'tiposolicitud', None))] += 1
+
+        # Empresa
+        if getattr(s, 'idempresa', None):
+            empresa_con += 1
+            tipo_empresa_cont[getattr(getattr(s, 'idempresa', None), 'idtipoempresa', None) and s.idempresa.idtipoempresa.tipoempresa or '—'] += 1
+        else:
+            empresa_sin += 1
+
+        # Estados
+        estado_sol_cont[s.estado_solicitud_nombre or '—'] += 1
+        estado_ficha_cont[s.estado_ficha_nombre or 'Sin ficha'] += 1
+
+        # Área
+        area_cont[s.area_nombre or '—'] += 1
+
+    def ordenar_items(counter_obj):
+        return sorted(counter_obj.items(), key=lambda x: (-x[1], str(x[0])))
+
+    metricas = {
+        'total': len(solicitudes),
+        'empresa': {
+            'con': empresa_con,
+            'sin': empresa_sin,
+        },
+    }
+
+    metricas_tipos = ordenar_items(tipos_cont)
+    metricas_estado_sol = ordenar_items(estado_sol_cont)
+    metricas_estado_ficha = ordenar_items(estado_ficha_cont)
+    metricas_area = ordenar_items(area_cont)
+    metricas_tipo_empresa = ordenar_items(tipo_empresa_cont)
+
+    # ---------------------------------
+    # Catálogos para filtros
+    # ---------------------------------
+    instructores = Usuario.objects.filter(rol__idrol=1).order_by('nombre', 'apellido')
+    tipos_solicitud = Tiposolicitud.objects.all().order_by('tiposolicitud')
+    tipos_empresa = Tipoempresa.objects.all().order_by('tipoempresa')
+    estados_ficha = Estados.objects.all().order_by('estados')
+    estados_sol = EstadosCoordinador.objects.all().order_by('estado')
+    areas = Area.objects.all().order_by('area')
+
+    return render(request, 'reportes/reportes.html', {
+        'layout': layout,
+        'rol': id_rol,
+        'user': rol_name,
+        'title': 'Reportes',
+        # resultados
+        'solicitudes': solicitudes,
+        # opciones
+        'instructores': instructores,
+        'tipos_solicitud': tipos_solicitud,
+        'tipos_empresa': tipos_empresa,
+        'estados_ficha': estados_ficha,
+        'estados_solicitud': estados_sol,
+        'areas': areas,
+        # valores seleccionados
+        'f_instructor': instructor_id,
+        'f_tipo_solicitud': tipo_solicitud_id,
+        'f_con_empresa': con_empresa,
+        'f_tipo_empresa': tipo_empresa_id,
+        'f_estado_solicitud': estado_solicitud_id,
+        'f_estado_ficha': estado_ficha_id,
+        'f_area': area_id,
+        'total_resultados': len(solicitudes),
+        # métricas
+        'metricas': metricas,
+        'metricas_tipos': metricas_tipos,
+        'metricas_estado_solicitud': metricas_estado_sol,
+        'metricas_estado_ficha': metricas_estado_ficha,
+        'metricas_area': metricas_area,
+        'metricas_tipo_empresa': metricas_tipo_empresa,
     })
 
 

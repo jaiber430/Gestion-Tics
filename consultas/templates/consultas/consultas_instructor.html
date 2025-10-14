@@ -139,10 +139,15 @@
 
                   <!-- Excel -->
                   <td>
-                    <a href="{% url 'descargar_excel' solicitud_consulta.idsolicitud rol %}" class="link-excel" data-id="{{ solicitud_consulta.idsolicitud }}">Descargar excel</a>
-                    <div class="subida-reemplazo" data-id="{{ solicitud_consulta.idsolicitud }}" style="display: none;">
-                      <input type="file" class="archivo-subida" name="actualizar_excel" id="actualizar_excel_{{ solicitud_consulta.idsolicitud }}" data-id="{{ solicitud_consulta.idsolicitud }}" />
-                    </div>
+                    {% if solicitud_consulta.excel_funcionario_disponible %}
+                      <a href="{% url 'descargar_excel' solicitud_consulta.idsolicitud rol %}"
+                         class="link-excel boton-descargar" data-id="{{ solicitud_consulta.idsolicitud }}">Descargar excel</a>
+                      <div class="subida-reemplazo" data-id="{{ solicitud_consulta.idsolicitud }}" style="display: none;">
+                        <input type="file" class="archivo-subida" name="actualizar_excel" id="actualizar_excel_{{ solicitud_consulta.idsolicitud }}" data-id="{{ solicitud_consulta.idsolicitud }}" />
+                      </div>
+                    {% else %}
+                      <a class="link-excel boton-descargar disabled-link" data-id="{{ solicitud_consulta.idsolicitud }}" tabindex="-1" aria-disabled="true">Descargar excel</a>
+                    {% endif %}
                   </td>
 
                   <!-- Fecha solicitud -->
@@ -184,6 +189,8 @@
       // Función para mostrar alerta si el Excel no está disponible
       document.addEventListener('DOMContentLoaded', function () {
         document.querySelectorAll('.link-excel').forEach((enlace) => {
+          // Si está deshabilitado, no aplicar la lógica de reemplazo
+          if (enlace.classList.contains('disabled-link')) return
           // Obtener el ID único del enlace
           const id = enlace.dataset.id
           // Seleccionar los elementos relacionados
@@ -514,10 +521,10 @@
                   {% endif %}
                 </td>
                 <td>
-                  {% if solicitud_consulta.estado_usuario in 'Matriculada Rechazada Creacion Creada Lista de espera' %}
+                  {% if solicitud_consulta.estado_usuario in 'Matriculada Rechazada Creacion Creada Lista de espera' and solicitud_consulta.excel_masivo_disponible %}
                     <a href="{% url 'sofia_plus_descarga' solicitud_consulta.idsolicitud %}" class="boton-descargar">Descargar excel</a>
                   {% else %}
-                    <a href="#" class="boton-descargar disabled-link" onclick="return false;">Descargar excel</a>
+                    <a class="boton-descargar disabled-link" tabindex="-1" aria-disabled="true">Descargar excel</a>
                   {% endif %}
                 </td>
                 <td>{{ solicitud_consulta.fechasolicitud }}</td>

@@ -140,6 +140,17 @@ body {
     background-color: var(--color-primario-hover);
 }
 
+    /* Estilo para deshabilitar visualmente los enlaces */
+    .disabled-link {
+      background-color: #ccc !important;
+      color: #666 !important;
+      cursor: not-allowed !important;
+      pointer-events: none !important;
+      opacity: 0.8;
+      text-decoration: none !important;
+      border-color: #cfcfcf !important;
+    }
+
 .enlace-menu.activo {
     background-color: var(--color-primario-claro);
     font-weight: var(--peso-semi-negrita);

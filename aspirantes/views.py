@@ -27,7 +27,12 @@ def formulario_aspirantes(request, idsolicitud):
     # Asegurarse de que no se puedan voler a registrar aspirantes una vez se cumpla la cantidad
     cerrar_inscripciones = Aspirantes.objects.filter(solicitudinscripcion=solicitud).count()
     if cerrar_inscripciones >= solicitud.cupo:
-        raise Http404("Ya se alcanzó el cupo máximo de aspirantes.")
+        # En lugar de un 404, mostrar un mensaje en la misma vista y ocultar el formulario
+        messages.error(request, 'Los cupos ya están completos para esta solicitud.')
+        return render(request, 'forms/formulario_aspirantes.html', {
+            'solicitud': solicitud,
+            'cupo_completo': True,
+        })
 
     caracterizacion = Caracterizacion.objects.all()
     tipo_documento = Tipoidentificacion.objects.all()
@@ -36,6 +41,7 @@ def formulario_aspirantes(request, idsolicitud):
         'tipos_identificacion': tipo_documento,
         'caracterizaciones': caracterizacion,
         'solicitud': solicitud,
+        'cupo_completo': False,
     })
 
 
@@ -54,6 +60,18 @@ def registro_aspirante(request):
             solicitud_inscripcion = request.POST.get('idsolicitud')
 
             fecha_registro = datetime.now()
+
+            # Bloquear registro si el cupo ya está completo (validación del lado servidor)
+            try:
+                solicitud_obj = Solicitud.objects.get(idsolicitud=solicitud_inscripcion)
+            except Solicitud.DoesNotExist:
+                messages.error(request, 'La solicitud no existe.')
+                return redirect('formularioaspirantes', idsolicitud=solicitud_inscripcion)
+
+            conteo_actual = Aspirantes.objects.filter(solicitudinscripcion=solicitud_obj).count()
+            if conteo_actual >= solicitud_obj.cupo:
+                messages.error(request, 'Los cupos ya están completos para esta solicitud.')
+                return redirect('formularioaspirantes', idsolicitud=solicitud_inscripcion)
 
             # Validar duplicados correctamente y con redirect al mismo formulario
             duplicado = Aspirantes.objects.filter(
