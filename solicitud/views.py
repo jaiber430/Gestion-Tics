@@ -260,17 +260,19 @@ def _crear_solicitud_base(request, tipo_solicitud_id, template_name, mensaje_exi
                 # Guardar carta en carpeta específica (solo si la solicitud se creó)
                 # ===============================
                 if carta_solicitud:
-                    folder_name = f"carta_{nit_empresa}"
+                    # Carpeta basada en el ID de la solicitud recién creada
+                    folder_name = f"carta_{solicitud_creada.idsolicitud}"
                     carpeta_destino = os.path.join(settings.MEDIA_ROOT, 'Cartas_de_solicitud', folder_name)
                     os.makedirs(carpeta_destino, exist_ok=True)
 
-                    filename_pdf = f"carta_{nit_empresa}.pdf"
+                    filename_pdf = f"carta_{solicitud_creada.idsolicitud}.pdf"
                     ruta_guardado = os.path.join(carpeta_destino, filename_pdf)
 
                     # Guardar archivo en disco
                     with open(ruta_guardado, 'wb') as f:
                         for chunk in carta_solicitud.chunks(): 
                             f.write(chunk)
+
 
                 # Mensaje de éxito
                 messages.success(request, mensaje_exito)

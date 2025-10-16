@@ -126,7 +126,7 @@
 						{% endfor %}
 					</ul>
 				</div>
-				<div class="card metric-card metric-card--lg">
+				{% comment %} <div class="card metric-card metric-card--lg">
 					<div class="text-muted text-sm">Estado solicitud</div>
 					<ul>
 						{% for nombre, cant in metricas_estado_solicitud %}
@@ -135,8 +135,8 @@
 							<li>—</li>
 						{% endfor %}
 					</ul>
-				</div>
-				<div class="card metric-card metric-card--lg">
+				</div> {% endcomment %}
+				{% comment %} <div class="card metric-card metric-card--lg">
 					<div class="text-muted text-sm">Estado ficha</div>
 					<ul>
 						{% for nombre, cant in metricas_estado_ficha %}
@@ -145,8 +145,8 @@
 							<li>—</li>
 						{% endfor %}
 					</ul>
-				</div>
-				<div class="card metric-card metric-card--lg">
+				</div> {% endcomment %}
+				{% comment %} <div class="card metric-card metric-card--lg">
 					<div class="text-muted text-sm">Área</div>
 					<ul>
 						{% for nombre, cant in metricas_area %}
@@ -155,8 +155,8 @@
 							<li>—</li>
 						{% endfor %}
 					</ul>
-				</div>
-				<div class="card metric-card metric-card--lg">
+				</div> {% endcomment %}
+				{% comment %} <div class="card metric-card metric-card--lg">
 					<div class="text-muted text-sm">Tipo de empresa</div>
 					<ul>
 						{% for nombre, cant in metricas_tipo_empresa %}
@@ -165,7 +165,7 @@
 							<li>—</li>
 						{% endfor %}
 					</ul>
-				</div>
+				</div> {% endcomment %}
 			</div>
 
 			<div class="table-responsive">

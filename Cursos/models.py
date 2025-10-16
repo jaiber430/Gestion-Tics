@@ -175,7 +175,7 @@ class Aspirantes(models.Model):
 
 class Ficha(models.Model):
     idficha = models.AutoField(primary_key=True)
-    codigoficha = models.IntegerField(unique=True)
+    codigoficha = models.IntegerField(unique=True, null=True)
     idsolicitud = models.ForeignKey(Solicitud, on_delete=models.CASCADE, db_column='idsolicitud')
     idestado = models.ForeignKey(Estados, on_delete=models.CASCADE, db_column='idestado')
     idusuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, db_column='idusuario')

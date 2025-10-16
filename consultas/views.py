@@ -788,10 +788,10 @@ def revision_fichas(request, id):
             # Capturar datos enviados
             # ----------------------------
             estados = request.POST.get('estado')
-            numero_solicitud = request.POST.get('codigo_solicitud')
-            numero_ficha = request.POST.get('codigo_ficha')
+            numero_solicitud = request.POST.get('codigo_solicitud', None)
+            numero_ficha = request.POST.get('codigo_ficha', None)
             observacion = request.POST.get('observacion')
-            nuevo_archivo = request.FILES.get('actualizar_excel')
+            nuevo_archivo = request.FILES.get('actualizar_excel', None)
 
             # ----------------------------
             # Obtener objetos relacionados
@@ -808,7 +808,9 @@ def revision_fichas(request, id):
                 # ----------------------------
                 # Actualizar ficha existente
                 # ----------------------------
-                ficha.codigoficha = numero_ficha
+                if numero_ficha is not None and numero_ficha != "":
+                    ficha.codigoficha = numero_ficha  # solo si se envía valor nuevo
+
                 ficha.idestado = id_estado
                 ficha.observacion = observacion
                 ficha.save()
@@ -817,7 +819,7 @@ def revision_fichas(request, id):
                 # Crear nueva ficha si no existía
                 # ----------------------------
                 Ficha.objects.create(
-                    codigoficha=numero_ficha,
+                    codigoficha=numero_ficha if numero_ficha else None,
                     idsolicitud=solicitud,
                     idestado=id_estado,
                     idusuario=creado_por,
@@ -827,8 +829,12 @@ def revision_fichas(request, id):
             # ----------------------------
             # Actualizar la solicitud con el número/código
             # ----------------------------
-            solicitud.codigosolicitud = numero_solicitud
-            solicitud.save()
+            if numero_solicitud is not None and numero_solicitud != "":
+                solicitud.codigosolicitud = numero_solicitud  # solo si se envía valor nuevo
+                solicitud.save()
+            else:
+                # Si no se envía, mantiene el valor existente
+                pass
 
             # ----------------------------
             # Guardar Excel si se envía uno nuevo
@@ -848,6 +854,9 @@ def revision_fichas(request, id):
                 with open(ruta_excel, 'wb+') as destino:
                     for chunk in nuevo_archivo.chunks():
                         destino.write(chunk)
+            else:
+                # Si no se envía archivo nuevo, mantiene el anterior
+                pass
 
             # ----------------------------
             # Mensaje de éxito
@@ -1060,14 +1069,15 @@ def ver_pdf_carta(request, id_solicitud):
     # Buscar la solicitud
     solicitud = get_object_or_404(Solicitud, idsolicitud=id_solicitud)
 
-    # Empresa vinculada
-    empresa = solicitud.idempresa  
+    # Tomar el ID de la solicitud
+    idsolicitud = solicitud.idsolicitud
 
-    # Tomar el NIT de la empresa
-    nit_empresa = empresa.nitempresa  
+    # Validar que exista la solicitud
+    if not idsolicitud:
+        return HttpResponseNotFound("Esta solicitud no existe o no tiene un ID válido.")
 
     # Nombre de la carpeta y archivo
-    folder_name = f"carta_{nit_empresa}"
+    folder_name = f"carta_{idsolicitud}"
     relative_path = f"Cartas_de_solicitud/{folder_name}/{folder_name}.pdf"
     absolute_path = os.path.join(settings.MEDIA_ROOT, relative_path)
 
