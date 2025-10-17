@@ -48,8 +48,6 @@ def consultas_instructor(request):
     Vista de consultas para Instructor, Coordinador, Funcionario y Administrador.
     """
 
-    import string, secrets, datetime, calendar
-
     # ============================
     # Generar código aleatorio
     # ============================
@@ -90,9 +88,24 @@ def consultas_instructor(request):
         primer_dia = datetime.date(hoy.year, hoy.month, 1)
         ultimo_dia = datetime.date(hoy.year, hoy.month, calendar.monthrange(hoy.year, hoy.month)[1])
 
+        # Obtener todas las solicitudes del mes
         solicitudes = Solicitud.objects.filter(
             fechasolicitud__range=(primer_dia, ultimo_dia)
         ).select_related('idusuario', 'idempresa').order_by('-fechasolicitud')
+
+        # Filtrar solo las que tienen la cantidad de aspirantes IGUAL al cupo
+        solicitudes_con_cupo_completo = []
+        for solicitud in solicitudes:
+            # Contar aspirantes para esta solicitud
+            cantidad_aspirantes = Aspirantes.objects.filter(
+                solicitudinscripcion=solicitud.idsolicitud
+            ).count()
+            
+            # Solo incluir si la cantidad de aspirantes es IGUAL al cupo
+            if cantidad_aspirantes == solicitud.cupo:
+                solicitudes_con_cupo_completo.append(solicitud)
+        
+        solicitudes = solicitudes_con_cupo_completo
 
     elif id_rol == 3:  # Funcionario: solicitudes aprobadas por coordinador
         solicitudes_aprobadas = Solicitudcoordinador.objects.filter(
@@ -706,9 +719,9 @@ def descargar_carta(request, id, idrol):
     # Determinar qué PDF usar
     # ============================
     if solicitud.idempresa:  # Empresa existe
-        nit = solicitud.idempresa.nitempresa
-        folder_name = f"carta_{nit}"
-        ruta_pdf = os.path.join(settings.MEDIA_ROOT, 'Cartas_de_solicitud', folder_name, f'carta_{nit}.pdf')
+        # Usar el ID de la solicitud en lugar del NIT para la estructura de carpetas
+        folder_name = f"carta_{solicitud.idsolicitud}"
+        ruta_pdf = os.path.join(settings.MEDIA_ROOT, 'Cartas_de_solicitud', folder_name, f'carta_{solicitud.idsolicitud}.pdf')
     else:  # Empresa nula → usar carta interna generada
         folder_name = f"carta_{solicitud.idsolicitud}"
         ruta_pdf = os.path.join(settings.MEDIA_ROOT, 'Cartas_de_solicitud', folder_name, f'{folder_name}.pdf')
@@ -741,7 +754,6 @@ def descargar_carta(request, id, idrol):
         filename='Carta_solicitud.pdf',
         content_type='application/pdf'
     )
-
 
 # ===========================================
 # Funcionario respuestas a las solicitudes
