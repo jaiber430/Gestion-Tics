@@ -30,7 +30,7 @@ from openpyxl import load_workbook
 from Cursos.views import login_required_custom
 
 from django.http import HttpResponseNotFound
-from xhtml2pdf import pisa
+# from xhtml2pdf import pisa
 from io import BytesIO
 from django.template.loader import get_template
 
@@ -995,7 +995,7 @@ def revision_coordinador(request, id_solicitud):
                         'solicitud': solicitud,
                         'usuario': usuario_revisador,
                     }
-                    html = template.render(contexto)
+                    html_string = template.render(contexto)
 
                     # Crear carpeta para guardar PDF
                     folder_archive_name = f'carta_{solicitud.idsolicitud}'
@@ -1005,14 +1005,11 @@ def revision_coordinador(request, id_solicitud):
                     # Ruta del PDF
                     archivo_pdf = os.path.join(carpeta, f'{folder_archive_name}.pdf')
 
-                    # Crear PDF
-                    with open(archivo_pdf, "wb") as destino:
-                        pisa_status = pisa.CreatePDF(html, dest=destino)
+                    # Crear PDF con WeasyPrint
+                    html = HTML(string=html_string)
+                    html.write_pdf(target=archivo_pdf)
 
-                    if pisa_status.err:
-                        print(f"Error generando PDF para solicitud {solicitud.idsolicitud}")
-                    else:
-                        print(f"PDF generado y guardado en {archivo_pdf}")
+                    print(f"PDF generado y guardado en {archivo_pdf}")
 
             except Exception as pdf_error:
                 print(f"Error generando PDF para solicitud {solicitud.idsolicitud}: {pdf_error}")
