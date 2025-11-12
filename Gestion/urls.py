@@ -73,6 +73,8 @@ urlpatterns = [
     path('cerrar_sesion/', views.cerrar_sesion, name='salir'),
     # Buscar programa
     path('buscar_programa/', views_programas.buscar_programas, name='buscar_programa'),
+    # Crear programa
+    path('crear_programa/', views_programas.crear_programa, name='crear_programa'),
     # Editar programa 
     path('editar_programa', views_programas.editar_programa, name="actualizar_programa"),
     #Borrar programa

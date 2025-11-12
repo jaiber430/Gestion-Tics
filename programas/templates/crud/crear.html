@@ -1,0 +1,119 @@
+{% extends 'layout/layout_programa.html' %}
+
+{% block content %}
+  <main class="contenido-principal">
+    <!-- Mensajes de Django -->
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert"
+          style="padding: 12px; margin: 15px 0; border-radius: 6px; font-size: 14px; border: 1px solid;
+          {% if message.tags == 'success' %}  
+            background-color: #d4edda; color: #155724; border-color: #c3e6cb;
+          {% elif message.tags == 'error' %}
+            background-color: #f8d7da; color: #721c24; border-color: #f5c6cb;
+          {% else %}
+            background-color: #d1ecf1; color: #0c5460; border-color: #bee5eb;
+          {% endif %}">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+
+    <!-- Botón para volver -->
+    <div style="margin-bottom: 20px;">
+      <a href="{% url 'buscar_programa' %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Volver al Listado
+      </a>
+    </div>
+
+    <!-- Modal de creación (Abierto por defecto) -->
+    <div class="modal fade show" id="crearModal" tabindex="-1" aria-labelledby="crearModalLabel" aria-hidden="false" style="display: block; background-color: rgba(0,0,0,0.5);">
+      <div class="modal-dialog">
+        <div class="modal-content modal-programa">
+          <form method="POST" action="{% url 'crear_programa' %}">
+            {% csrf_token %}
+
+            <div class="modal-header modal-programa-header">
+              <h5 class="modal-title" id="crearModalLabel">Crear Nuevo Programa</h5>
+              <a href="{% url 'buscar_programa' %}" class="btn-cerrar-modal" aria-label="Cerrar">&times;</a>
+            </div>
+
+            <div class="modal-body modal-programa-body">
+              <div class="mb-3">
+                <label for="codigo" class="form-label">Código del Programa *</label>
+                <input 
+                  type="text" 
+                  name="codigo" 
+                  id="codigo" 
+                  class="form-control" 
+                  placeholder="Ej: 21410101"
+                  required
+                />
+              </div>
+
+              <div class="mb-3">
+                <label for="version" class="form-label">Versión *</label>
+                <input 
+                  type="text" 
+                  name="version" 
+                  id="version" 
+                  class="form-control" 
+                  placeholder="Ej: 1.0"
+                  required
+                />
+              </div>
+
+              <div class="mb-3">
+                <label for="nombre" class="form-label">Nombre del Programa *</label>
+                <input 
+                  type="text" 
+                  name="nombre" 
+                  id="nombre" 
+                  class="form-control" 
+                  placeholder="Ej: Gestión de Proyectos TIC"
+                  required
+                />
+              </div>
+
+              <div class="mb-3">
+                <label for="horas" class="form-label">Horas *</label>
+                <input 
+                  type="number" 
+                  name="horas" 
+                  id="horas" 
+                  class="form-control" 
+                  placeholder="Ej: 120"
+                  required
+                  min="1"
+                />
+              </div>
+
+              <div class="mb-3">
+                <label for="area" class="form-label">Área *</label>
+                <select name="area" id="area" class="form-control" required>
+                  <option value="">-- Seleccione un área --</option>
+                  {% for area in areas %}
+                    <option value="{{ area.idarea }}">{{ area.area }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label for="modalidad" class="form-label">Modalidad *</label>
+                <select name="modalidad" id="modalidad" class="form-control" required>
+                  <option value="">-- Seleccione una modalidad --</option>
+                  {% for modalidad in modalidades %}
+                    <option value="{{ modalidad.idmodalidad }}">{{ modalidad.modalidad }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+
+            <div class="modal-footer modal-programa-footer">
+              <a href="{% url 'buscar_programa' %}" class="boton-cancelar-modal">Cerrar</a>
+              <button type="submit" class="boton-guardar-modal">Crear Programa</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </main>
+{% endblock %}
