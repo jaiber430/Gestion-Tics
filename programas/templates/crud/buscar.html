@@ -25,6 +25,13 @@
         <button type="submit" class="programa-boton">Buscar</button>
       </form>
 
+      <!-- Botón para crear nuevo programa -->
+      <div style="margin-top: 25px; margin-bottom: 35px; text-align: right;">
+        <a href="{% url 'crear_programa' %}" class="programa-boton">
+          <i class="fas fa-plus"></i> Crear Programa
+        </a>
+      </div>
+
       <!-- Tabla de resultados -->
       {% if buscar %}
       <div class="contenedor-tabla-programas">
