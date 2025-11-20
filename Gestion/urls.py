@@ -73,10 +73,15 @@ urlpatterns = [
     path('cerrar_sesion/', views.cerrar_sesion, name='salir'),
     # Buscar programa
     path('buscar_programa/', views_programas.buscar_programas, name='buscar_programa'),
+    # Crear programa
+    path('crear_programa/', views_programas.crear_programa, name='crear_programa'),
     # Editar programa 
     path('editar_programa', views_programas.editar_programa, name="actualizar_programa"),
     #Borrar programa
     path("borrar/<str:codigo>/", views_programas.borrar_programa, name="borrar_programa"),
+    # URLs para verificación de usuarios
+    path('verificacion_usuario/', views.verificacion_usuario, name='verificacion_usuario'),
+    path('verificar_usuario/<int:idusuario>/', views.verificar_usuario, name='verificar_usuario'),
 ]
 # Poder almacenar archivos en la carpeta media
 if settings.DEBUG:

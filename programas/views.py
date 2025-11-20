@@ -63,3 +63,51 @@ def borrar_programa(request, codigo):
     programa.delete()
     messages.success(request, "Programa eliminado correctamente.")
     return redirect("buscar_programa")
+
+
+# Crear programa
+@login_required_custom
+def crear_programa(request):
+    if request.method == "POST":
+        # Obtener datos del formulario
+        codigo = request.POST.get("codigo")
+        version = request.POST.get("version")
+        nombre = request.POST.get("nombre")
+        horas = request.POST.get("horas")
+        area_id = request.POST.get("area")
+        modalidad_id = request.POST.get("modalidad")
+
+        # Validar que no exista un programa con el mismo código
+        if Programaformacion.objects.filter(codigoprograma=codigo).exists():
+            messages.error(request, "Ya existe un programa con este código.")
+            return redirect("crear_programa")
+
+        try:
+            # Obtener las relaciones
+            area = get_object_or_404(Area, idarea=area_id)
+            modalidad = get_object_or_404(Modalidad, idmodalidad=modalidad_id)
+
+            # Crear el nuevo programa
+            nuevo_programa = Programaformacion(
+                codigoprograma=codigo,
+                verision=version,
+                nombreprograma=nombre,
+                horas=horas,
+                idarea=area,
+                idmodalidad=modalidad
+            )
+            nuevo_programa.save()
+            messages.success(request, "Programa creado correctamente.")
+            return redirect("buscar_programa")
+        except Exception as e:
+            messages.error(request, f"Error al crear el programa: {str(e)}")
+            return redirect("crear_programa")
+
+    # GET: Mostrar formulario de creación
+    areas = Area.objects.all()
+    modalidades = Modalidad.objects.all()
+
+    return render(request, "crud/crear.html", {
+        "areas": areas,
+        "modalidades": modalidades
+    })

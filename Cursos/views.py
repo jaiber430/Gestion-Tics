@@ -42,7 +42,8 @@ def login_view(request):
             user = Usuario.objects.get(
                 numeroidentificacion=numero_identificacion,
                 clave=clave,
-                rol=rol
+                rol=rol,
+                verificado=1
             )
 
             # Guardar en sesión
@@ -79,7 +80,7 @@ def login_view(request):
             })
 
         except Usuario.DoesNotExist:
-            messages.error(request, "Usuario no encontrado o credenciales incorrectas")
+            messages.error(request, 'Su usuario aun no ha sido verificado por un administardor o las credenciales son incorrectas')
             return render(request, "inicio/index.html")
 
     return render(request, "inicio/index.html")
@@ -104,3 +105,33 @@ def cerrar_sesion(request):
 
     # Redirigir al inicio o al login
     return redirect("login")
+
+
+def verificacion_usuario(request):
+    # Trae todos los usuarios con verificado=0
+    usuariosSinAprobar = Usuario.objects.filter(verificado=0)
+    return render(request, 'inicio/verificarUsuarios.html',{
+        'usuariosSinVerificar': usuariosSinAprobar,
+    })
+
+def verificar_usuario(request, idusuario):
+    if request.method == "POST":
+        try:
+            # Verifica que el usuario existe antes de actualizar
+            usuario = Usuario.objects.get(idusuario=idusuario)
+            # Actualiza solo el usuario seleccionado
+            usuario.verificado = 1
+            usuario.save()
+            
+            # Mensaje si todo sale bien
+            messages.success(request, f'Usuario {usuario.nombre} ha sido verificado.')
+            
+        except Usuario.DoesNotExist:
+            # Manejo de error si el usuario no existe
+            messages.error(request, 'El usuario no existe.')
+        except Exception as e:
+            # Manejo de otros errores
+            messages.error(request, f'Error al verificar usuario: {str(e)}')
+
+    # Redirige a la lista de usuarios sin verificar
+    return redirect('verificacion_usuario')

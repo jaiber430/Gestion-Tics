@@ -112,6 +112,7 @@ class Usuario(models.Model):
     correo = models.CharField(unique=True, max_length=255)
     clave = models.CharField(max_length=255)
     fecha = models.DateField()
+    verificado = models.IntegerField(blank=True, null=True)
 
     class Meta:
         db_table = 'usuario'

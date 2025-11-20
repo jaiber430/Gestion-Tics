@@ -1,4 +1,4 @@
-{% comment %} Este layout es del administrador {% endcomment %}
+{% comment %}Este layout es del administrador{% endcomment %}
 {% load static %}
 <!DOCTYPE html>
 <html lang="es">
@@ -10,13 +10,13 @@
 
     <!-- Hoja de css principal -->
     <link rel="stylesheet" href="{% static 'css/inicio.css' %}" />
-    <link rel="stylesheet" href="{% static 'css/crearficha.css' %}">
-    <link rel="stylesheet" href="{% static 'css/formulariosolicitud.css' %}">
-    <link rel="stylesheet" href="{% static 'css/index-styles.css' %}">
-    <link rel="stylesheet" href="{% static 'css/consultarsolicitudes.css' %}">
+    <link rel="stylesheet" href="{% static 'css/crearficha.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/formulariosolicitud.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/index-styles.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/consultarsolicitudes.css' %}" />
 
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="{% static "img/logoSena.png" %}" />
+    <link rel="icon" type="image/png" href="{% static 'img/logoSena.png' %}" />
   </head>
   <body>
     <!-- Contenedor principal de la aplicación -->
@@ -38,17 +38,22 @@
 
             <!-- Opción Crear Ficha -->
             <li class="elemento-menu">
-              <a href="{% url "Crearsolicitud" %}" class="enlace-menu active">Crear Solicitud</a>
+              <a href="{% url 'Crearsolicitud' %}" class="enlace-menu active">Crear Solicitud</a>
             </li>
 
             <!-- Opción Estado de Cursos -->
             <li class="elemento-menu">
-              <a href="{% url "consultas_instructor" %}" class="enlace-menu">Consultar Solicitudes</a>
+              <a href="{% url 'consultas_instructor' %}" class="enlace-menu">Consultar Solicitudes</a>
             </li>
 
             <!-- Opcion estado de fichas -->
             <li class="elemento-menu">
               <a href="#" class="enlace-menu">Consultar Fichas</a>
+            </li>
+
+            <!-- Opcion estado de fichas -->
+            <li class="elemento-menu">
+              <a href="{% url 'verificacion_usuario'%}" class="enlace-menu">Verificar usuario</a>
             </li>
 
             <!-- Botón Cerrar Sesión -->
