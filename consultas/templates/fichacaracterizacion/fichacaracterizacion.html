@@ -78,7 +78,7 @@
 
         <!-- Modalidad del Programa -->
         <section class="modalidad-programa">
-            <label>Modalidad del programa*</label>
+            <label>Modalidad del programa*
             <div class="modalidades">
                 <div class="modalidad-item">
                     <div class="checkbox" {% if modalidad.modalidad == 'Presencial' %}style="background-color: #000; color: white;"{% endif %}>{% if modalidad.modalidad == 'Presencial' %}✓{% endif %}</div>
@@ -97,14 +97,14 @@
                     <span>COMBINADA</span>
                 </div>
             </div>
+            </label>
         </section>
 
         <!-- Ubicación -->
         <section class="ubicacion">
             <div class="campo">
-                <label>Departamento desarrollo de formación*
-                    <input type="text" class="input-campo" value="{{ departamento.departamentos|default:'' }}" readonly>
-                </label>
+                <label>Departamento desarrollo de formación*</label>
+                <input type="text" class="input-campo" value="{{ departamento.departamentos|default:'' }}" readonly>
             </div>
             <div class="campo">
                 <label>Municipio desarrollo formación*</label>
