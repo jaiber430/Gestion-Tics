@@ -263,3 +263,96 @@ body {
     font-size: 1.3rem;
     margin: 0;
 }
+
+/* 
+   MODAL DE CONFIRMACIÓN - VERIFICAR USUARIOS
+ */
+
+.modal-confirmacion {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-contenido-confirmacion {
+    background-color: var(--color-secundario);
+    padding: var(--espaciado-lg);
+    border-radius: var(--radio-borde);
+    box-shadow: var(--sombra-media);
+    max-width: 400px;
+    text-align: center;
+}
+
+.modal-contenido-confirmacion p {
+    font-size: 1.6rem;
+    margin-bottom: var(--espaciado-lg);
+    color: var(--color-texto-principal);
+}
+
+.botones-modal {
+    display: flex;
+    gap: var(--espaciado-md);
+    justify-content: center;
+}
+
+.boton-modal {
+    padding: var(--espaciado-md) var(--espaciado-lg);
+    border: none;
+    border-radius: var(--radio-borde);
+    font-size: 1.4rem;
+    font-weight: var(--peso-medio);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.boton-confirmar {
+    background-color: #388E3C;
+    color: var(--color-secundario);
+}
+
+.boton-confirmar:hover {
+    background-color: #2E7D32;
+}
+
+.boton-cancelar {
+    background-color: var(--color-borde);
+    color: var(--color-texto-principal);
+}
+
+.boton-cancelar:hover {
+    background-color: #D0D0D0;
+}
+
+.boton-verificar {
+    padding: var(--espaciado-md) var(--espaciado-lg);
+    background-color: var(--color-primario);
+    color: var(--color-secundario);
+    border: none;
+    border-radius: var(--radio-borde);
+    font-size: 1.4rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.boton-verificar:hover {
+    background-color: var(--color-primario-hover);
+}
+
+/* Mensaje cuando no hay usuarios sin verificar */
+.sin-usuarios-mensaje {
+    background-color: #E8F5E9;
+    color: #1B5E20;
+    padding: var(--espaciado-lg);
+    border-radius: var(--radio-borde);
+    border-left: 0.4rem solid #388E3C;
+    font-size: 1.4rem;
+    text-align: center;
+    margin-top: var(--espaciado-lg);
+}

@@ -303,3 +303,44 @@ body {
     font-size: 1.3rem;
     margin: 0;
 }
+
+/* 
+   ALERTAS
+ */
+
+.alert {
+    padding: var(--espaciado-md) var(--espaciado-lg);
+    margin: var(--espaciado-lg) 0;
+    border-radius: var(--radio-borde);
+    font-size: 1.4rem;
+    border-left: 0.4rem solid;
+    box-shadow: var(--sombra-ligera);
+}
+
+.alert-success,
+.alert.success {
+    background-color: #E8F5E9;
+    color: #1B5E20;
+    border-left-color: var(--color-exito);
+}
+
+.alert-error,
+.alert.error {
+    background-color: #FFEBEE;
+    color: #B71C1C;
+    border-left-color: var(--color-error);
+}
+
+.alert-info,
+.alert.info {
+    background-color: #E3F2FD;
+    color: #1565C0;
+    border-left-color: #2196F3;
+}
+
+.alert-warning,
+.alert.warning {
+    background-color: #FFF3E0;
+    color: #D84315;
+    border-left-color: var(--color-advertencia);
+}

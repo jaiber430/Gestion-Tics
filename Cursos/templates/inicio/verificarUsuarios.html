@@ -4,7 +4,7 @@
   <div class="seccion-formulario">
     <h3 class="titulo-seccion-form">Usuarios sin Verificación</h3>
 
-    <!-- BLOQUE DE MENSAJES - AÑADE ESTO -->
+    <!-- BLOQUE DE MENSAJES -->
     {% if messages %}
       <div class="mensajes">
         {% for message in messages %}
@@ -19,13 +19,49 @@
       <form class="formulario-ficha" method="post" action="{% url 'verificar_usuario' usuario.idusuario %}" enctype="multipart/form-data" style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
         {% csrf_token %}
         <input type="text" class="entrada-texto" value="{{ usuario.nombre }}" readonly />
-        <input type="submit" value="✔" style="cursor:pointer;" 
-               onclick="return confirm('¿Estás seguro de verificar a {{ usuario.nombre }}?')" />
+        <button type="button" class="boton-verificar" onclick="confirmarVerificacion('{{ usuario.nombre }}', this.form)">✔</button>
       </form>
     {% endfor %}
 
     {% if not usuariosSinVerificar %}
-      <p>No hay usuarios sin verificar.</p>
+      <p class="sin-usuarios-mensaje">No hay usuarios sin verificar.</p>
     {% endif %}
   </div>
+
+  <!-- Modal de confirmación -->
+  <div id="modal-confirmacion" class="modal-confirmacion" style="display: none;">
+    <div class="modal-contenido-confirmacion">
+      <p id="mensaje-confirmacion"></p>
+      <div class="botones-modal">
+        <button class="boton-modal boton-confirmar" onclick="confirmar()">Sí, verificar</button>
+        <button class="boton-modal boton-cancelar" onclick="cancelar()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let formularioActual = null;
+
+    function confirmarVerificacion(nombre, form) {
+      const modal = document.getElementById('modal-confirmacion');
+      const mensaje = document.getElementById('mensaje-confirmacion');
+      
+      mensaje.textContent = `¿Estás seguro de verificar a ${nombre}?`;
+      formularioActual = form;
+      modal.style.display = 'flex';
+    }
+
+    function confirmar() {
+      if (formularioActual) {
+        formularioActual.submit();
+      }
+      cancelar();
+    }
+
+    function cancelar() {
+      const modal = document.getElementById('modal-confirmacion');
+      modal.style.display = 'none';
+      formularioActual = null;
+    }
+  </script>
 {% endblock %}

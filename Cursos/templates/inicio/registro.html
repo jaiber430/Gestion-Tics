@@ -94,15 +94,38 @@
             {% comment %} Tipo de contrato {% endcomment %}
             <div class="campo-entrada">
               <label for="rol" class="etiqueta-campo">Tipo de contrato*:</label>
-              <select id="contrato" name="contrato" class="selector-usuario" required>
-                <option value="">Contrato</option>
+              <select id="contrato" name="contrato" class="selector-usuario" required onchange="mostrarNumeroContrato()">
+                <option value="">Seleccione una opción</option>
                 <option value="1">Planta</option>
                 <option value="2">Contrato</option>
               </select>
             </div>
 
+            <!-- Campo para número de contrato (oculto por defecto) -->
+            <div class="campo-entrada" id="numero-contrato-contenedor" style="display: none;">
+              <label for="numeroContrato" class="etiqueta-campo">Número de Contrato*:</label>
+              <input type="text" id="numeroContrato" name="numeroContrato" class="entrada-texto" placeholder="Ingrese el número de contrato" />
+            </div>
+
             <!-- Botón de inicio de sesión -->
             <input type="submit" class="boton-ingresar" value="Registrarse"/>
+
+            <script>
+              function mostrarNumeroContrato() {
+                const contrato = document.getElementById('contrato').value;
+                const contenedor = document.getElementById('numero-contrato-contenedor');
+                const input = document.getElementById('numeroContrato');
+                
+                if (contrato === '2') {
+                  contenedor.style.display = 'block';
+                  input.required = true;
+                } else {
+                  contenedor.style.display = 'none';
+                  input.required = false;
+                  input.value = '';
+                }
+              }
+            </script>
           </form>
           {% if messages %}
             {% for message in messages %}
