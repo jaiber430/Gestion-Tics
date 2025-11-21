@@ -204,7 +204,7 @@
           </div>
           <div class="campo-entrada">
             <label for="fechaFinalizacion" class="etiqueta-campo">Fecha de Finalización*:</label>
-            <input type="date" id="fechaFinalizacion" name="fechaFinalizacion" class="entrada-texto" required />
+            <input type="date" id="fechaFinalizacion" name="fechaFinalizacion" class="entrada-texto" readonly />
           </div>
         </div>
         
@@ -297,17 +297,15 @@
     document.addEventListener('DOMContentLoaded', function () {
       console.log("Formulario campesino cargado correctamente");
 
-      // Limitar fechas (inicio y fin) a partir de mañana
-      const manana = new Date();
-      manana.setDate(manana.getDate() + 1);
-      const yyyy = manana.getFullYear();
-      const mm = String(manana.getMonth() + 1).padStart(2, '0');
-      const dd = String(manana.getDate()).padStart(2, '0');
+      // Permitir cualquier día del mes actual
+      const hoy = new Date();
+      const primerDiaDelMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+      const yyyy = primerDiaDelMes.getFullYear();
+      const mm = String(primerDiaDelMes.getMonth() + 1).padStart(2, '0');
+      const dd = String(primerDiaDelMes.getDate()).padStart(2, '0');
       const minISO = `${yyyy}-${mm}-${dd}`;
       const inputFechaInicio = document.getElementById('fechaInicio');
-      const inputFechaFin = document.getElementById('fechaFinalizacion');
       if (inputFechaInicio) inputFechaInicio.setAttribute('min', minISO);
-      if (inputFechaFin) inputFechaFin.setAttribute('min', minISO);
 
       // Guardar opciones de municipios
       const selectMunicipio = document.getElementById('municipioFormacion');
@@ -572,43 +570,39 @@
     // Función para generar el calendario de días específicos
     function generarCalendario() {
       const fechaInicio = document.getElementById('fechaInicio').value;
-      const fechaFin = document.getElementById('fechaFinalizacion').value;
       const diasSeleccionados = Array.from(document.querySelectorAll('input[name="diasSemana[]"]:checked'))
                                      .map(cb => parseInt(cb.value));
 
       const container = document.getElementById('calendarioContainer');
       const calendarioMeses = document.getElementById('calendarioMeses');
 
-      if (!fechaInicio || !fechaFin || diasSeleccionados.length === 0) {
+      if (!fechaInicio || diasSeleccionados.length === 0) {
         container.style.display = 'none';
+        limpiarFechaFin();
         return;
       }
 
       const inicio = new Date(fechaInicio);
-      const fin = new Date(fechaFin);
-
-      if (inicio >= fin) {
-        container.style.display = 'none';
-        alert('La fecha de fin debe ser posterior a la fecha de inicio');
-        return;
-      }
 
       // Verificar si hay horarios seleccionados
       const horasPorDia = calcularHorasPorDia();
       if (horasPorDia === 0) {
         container.style.display = 'none';
+        limpiarFechaFin();
         return;
       }
 
       // Limpiar calendario anterior
       calendarioMeses.innerHTML = '';
 
-      // Generar calendarios por mes
+      // Generar calendarios por mes (3 meses adelante es suficiente)
       const fechaActual = new Date(inicio);
       fechaActual.setDate(1);
+      const fechaLimite = new Date(inicio);
+      fechaLimite.setMonth(fechaLimite.getMonth() + 3);
 
-      while (fechaActual <= fin) {
-        calendarioMeses.appendChild(generarMes(fechaActual, inicio, fin, diasSeleccionados));
+      while (fechaActual <= fechaLimite) {
+        calendarioMeses.appendChild(generarMes(fechaActual, inicio, diasSeleccionados));
         fechaActual.setMonth(fechaActual.getMonth() + 1);
       }
 
@@ -616,10 +610,12 @@
       
       // Actualizar información de horas
       actualizarInfoHoras();
+      // Actualizar fecha de fin basada en fechas seleccionadas
+      actualizarFechaFin();
     }
 
     // Función para generar calendario de un mes
-    function generarMes(fecha, fechaInicio, fechaFin, diasSeleccionados) {
+    function generarMes(fecha, fechaInicio, diasSeleccionados) {
       const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
       const mesDiv = document.createElement('div');
       mesDiv.className = 'calendar-mes';
@@ -649,12 +645,12 @@
       for (let dia=1; dia<=ultimoDia.getDate(); dia++) {
         const fechaDia = new Date(fecha.getFullYear(), fecha.getMonth(), dia);
         const diaSemana = fechaDia.getDay();
-        const enRango = fechaDia >= fechaInicio && fechaDia <= fechaFin;
+        const esAnteriorAlInicio = fechaDia < fechaInicio;
         const esSeleccion = diasSeleccionados.includes(diaSemana);
         const diaDiv = document.createElement('div');
         diaDiv.className = 'calendar-day';
         
-        if (enRango && esSeleccion) {
+        if (!esAnteriorAlInicio && esSeleccion) {
           diaDiv.classList.add('calendar-day--selectable');
           const label = document.createElement('label');
           const checkbox = document.createElement('input');
@@ -663,10 +659,11 @@
           checkbox.value=fechaDia.toISOString().split('T')[0];
           checkbox.checked=true;
           
-          // Event listener para validar límite de horas
+          // Event listener para validar límite de horas y actualizar fecha fin
           checkbox.addEventListener('change', function() {
             validarLimiteHoras();
             actualizarInfoHoras();
+            actualizarFechaFin();
           });
           
           label.appendChild(checkbox);
@@ -709,6 +706,7 @@
       if (finMinutos <= inicioMinutos) {
         return 0;
       }
+      
       
       return (finMinutos - inicioMinutos) / 60; // Retorna horas decimales
     }
@@ -785,6 +783,29 @@
       }
       
       return diasSeleccionados <= diasNecesarios;
+    }
+
+    // Función para actualizar fecha de fin basada en fechas seleccionadas
+    function actualizarFechaFin() {
+      const fechasEspecificas = Array.from(document.querySelectorAll('input[name="fechasEspecificas[]"]:checked'))
+                                     .map(cb => cb.value);
+      
+      if (fechasEspecificas.length === 0) {
+        limpiarFechaFin();
+        return;
+      }
+
+      // Ordenar fechas y obtener la última
+      const fechasOrdenadas = fechasEspecificas.sort();
+      const ultimaFecha = fechasOrdenadas[fechasOrdenadas.length - 1];
+
+      // Establecer la fecha de fin en el campo
+      document.getElementById('fechaFinalizacion').value = ultimaFecha;
+    }
+
+    // Función para limpiar la fecha de fin
+    function limpiarFechaFin() {
+      document.getElementById('fechaFinalizacion').value = '';
     }
   </script>
 {% endblock %}
