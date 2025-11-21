@@ -1,6 +1,14 @@
 from django.db import models
 from aspirantes.utils import upload_to_dynamic  #Importamos la función de rutas dinámicasa
 
+class Tipocontrato(models.Model):
+    idcontrato = models.AutoField(db_column='idContrato', primary_key=True)  # Field name made lowercase.
+    tipocontrato = models.CharField(db_column='tipoContrato', max_length=50)  # Field name made lowercase.
+
+    class Meta:
+        managed = False
+        db_table = 'tipocontrato'
+
 class Ambiente(models.Model):
     idambiente = models.AutoField(primary_key=True)
     ambiente = models.CharField(max_length=250)
@@ -106,15 +114,17 @@ class Usuario(models.Model):
     idusuario = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=100)
     apellido = models.CharField(max_length=100)
-    rol = models.ForeignKey(Rol, on_delete=models.CASCADE, db_column='rol')
-    tipoidentificacion = models.ForeignKey(Tipoidentificacion, on_delete=models.CASCADE, db_column='tipoidentificacion')
+    rol = models.ForeignKey(Rol, models.DO_NOTHING, db_column='rol')
+    tipoidentificacion = models.ForeignKey(Tipoidentificacion, models.DO_NOTHING, db_column='tipoidentificacion')
     numeroidentificacion = models.IntegerField(unique=True)
     correo = models.CharField(unique=True, max_length=255)
     clave = models.CharField(max_length=255)
     fecha = models.DateField()
     verificado = models.IntegerField(blank=True, null=True)
+    contrato = models.ForeignKey(Tipocontrato, models.DO_NOTHING, db_column='contrato', blank=True, null=True)
 
     class Meta:
+        managed = False
         db_table = 'usuario'
 
 class Tiposolicitud(models.Model):

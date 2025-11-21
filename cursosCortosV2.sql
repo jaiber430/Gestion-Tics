@@ -626,7 +626,7 @@ CREATE TABLE IF NOT EXISTS `django_session` (
   KEY `django_session_expire_date_a5c62663` (`expire_date`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
 
--- Volcando datos para la tabla complementario.django_session: 6 rows
+-- Volcando datos para la tabla complementario.django_session: 7 rows
 /*!40000 ALTER TABLE `django_session` DISABLE KEYS */;
 INSERT INTO `django_session` (`session_key`, `session_data`, `expire_date`) VALUES
 	('hzsn467i74qfqk3eym95mw56g29f41lz', 'eyJ1c2VyX2lkIjoxLCJuYW1lIjoiSmFpYmVyIn0:1urzfA:0PbGX13xU8YFi2Zj3kdvqiLvDocP-MNWbOR7Zfx9Sm0', '2025-09-12 14:01:08.345178'),
@@ -634,8 +634,7 @@ INSERT INTO `django_session` (`session_key`, `session_data`, `expire_date`) VALU
 	('navu9dbqmyhcmefl2xf71s04cnn8je2i', 'eyJ1c2VyX2lkIjoxLCJuYW1lIjoiQ3Jpc3RpYW4ifQ:1urc6n:juS_EXj6b62PvfqG2jVKRvaJdgc1Sf5RLba1U7nY6Mw', '2025-09-11 12:52:05.778617'),
 	('oj1z454255n9s8zhe0r8hw6dg06n5i3r', 'eyJ1c2VyX2lkIjoyLCJuYW1lIjoiSGkifQ:1uuEYl:gNNeqaeloYS6C7NOT4PfNkVN6WLgYlDd-6vkrCMxx30', '2025-09-18 18:19:47.620445'),
 	('io2w1zr25k74oeb3kbw5x1fkm4afmn2s', 'eyJ1c2VyX2lkIjo0LCJuYW1lIjoiS2V2aW4ifQ:1v0qj5:yty6sdZgFUz_seCmQWLnA91MKkt_U5SwxH4nIQKKlX8', '2025-10-07 00:17:47.573276'),
-	('52etsingw8mvu1c91v84qc6zkijcfmil', 'eyJ1c2VyX2lkIjoxLCJuYW1lIjoiQU5HRUxBIFBBVFJJQ0lBICIsInJvbCI6MX0:1v1mfX:tdr6fOsgWaZM9IAC5QLqVicQ2NJHnacOJUvH_cMR-ZQ', '2025-10-09 14:09:59.523078'),
-	('n2qrp0fhklf2vwjcfoq1dbmlcmhsctzx', 'eyJ1c2VyX2lkIjo0LCJuYW1lIjoiR0xPUklBIEVMQ1kgIiwicm9sIjo0fQ:1vLvmk:4M2XOuTa-PST6jZtl_nz8nqZYzGjcx4QTNPG3vHxhKQ', '2025-12-04 03:56:42.025039');
+	('52etsingw8mvu1c91v84qc6zkijcfmil', 'eyJ1c2VyX2lkIjoxLCJuYW1lIjoiQU5HRUxBIFBBVFJJQ0lBICIsInJvbCI6MX0:1v1mfX:tdr6fOsgWaZM9IAC5QLqVicQ2NJHnacOJUvH_cMR-ZQ', '2025-10-09 14:09:59.523078');
 /*!40000 ALTER TABLE `django_session` ENABLE KEYS */;
 
 -- Volcando estructura para tabla complementario.empresa
@@ -5062,6 +5061,18 @@ INSERT INTO `solicitudcoordinador` (`idsolicitudcoordinador`, `usuario_revisador
 	(5, 2, 1, 4, 1, 'Probando adno', '2025-10-16'),
 	(6, 2, 1, 1, 1, 'Prueba de carta', '2025-10-16');
 
+-- Volcando estructura para tabla complementario.tipocontrato
+CREATE TABLE IF NOT EXISTS `tipocontrato` (
+  `idContrato` int NOT NULL AUTO_INCREMENT,
+  `tipoContrato` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_spanish2_ci NOT NULL,
+  PRIMARY KEY (`idContrato`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish2_ci;
+
+-- Volcando datos para la tabla complementario.tipocontrato: ~2 rows (aproximadamente)
+INSERT INTO `tipocontrato` (`idContrato`, `tipoContrato`) VALUES
+	(1, 'Planta'),
+	(2, 'Contrato');
+
 -- Volcando estructura para tabla complementario.tipoempresa
 CREATE TABLE IF NOT EXISTS `tipoempresa` (
   `idtipoempresa` int NOT NULL AUTO_INCREMENT,
@@ -5126,27 +5137,31 @@ CREATE TABLE IF NOT EXISTS `usuario` (
   `apellido` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_spanish2_ci NOT NULL,
   `rol` int NOT NULL,
   `tipoidentificacion` int NOT NULL,
-  `numeroidentificacion` int NOT NULL DEFAULT (0),
+  `numeroidentificacion` int NOT NULL,
   `correo` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_spanish2_ci NOT NULL,
   `clave` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_spanish2_ci NOT NULL,
   `fecha` date NOT NULL,
   `verificado` int DEFAULT NULL,
+  `contrato` int DEFAULT NULL,
   PRIMARY KEY (`idusuario`),
   UNIQUE KEY `correo` (`correo`),
   UNIQUE KEY `numeroidentificacion` (`numeroidentificacion`),
   KEY `rol` (`rol`),
   KEY `tipoidentificacion` (`tipoidentificacion`),
+  KEY `FK_usuario_tipocontrato` (`contrato`),
+  CONSTRAINT `FK_usuario_tipocontrato` FOREIGN KEY (`contrato`) REFERENCES `tipocontrato` (`idContrato`),
   CONSTRAINT `usuario_ibfk_1` FOREIGN KEY (`rol`) REFERENCES `rol` (`idrol`),
   CONSTRAINT `usuario_ibfk_2` FOREIGN KEY (`tipoidentificacion`) REFERENCES `tipoidentificacion` (`idtipoidentificacion`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_spanish2_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_spanish2_ci;
 
--- Volcando datos para la tabla complementario.usuario: ~5 rows (aproximadamente)
-INSERT INTO `usuario` (`idusuario`, `nombre`, `apellido`, `rol`, `tipoidentificacion`, `numeroidentificacion`, `correo`, `clave`, `fecha`, `verificado`) VALUES
-	(1, 'ANGELA PATRICIA ', 'OBANDO PALECHOR', 1, 2, 310487659, 'APOBANDO@SENA.EDU.CO', '12345678', '2025-09-24', 1),
-	(2, 'JONNY EDWIN', 'RIOS DELGADO', 2, 2, 303733375, 'jonnyriosdelgado@gmail.com', '12345678', '2025-09-24', 0),
-	(3, 'JUAN DAVID ', 'ORDOÑEZ RIVERA', 3, 2, 312665164, 'jdordonezr@sena.edu.co', '12345678', '2025-09-24', 1),
-	(4, 'GLORIA ELCY ', 'TELLO RAMIREZ', 4, 2, 317620122, 'tgloriaelcy@gmail.com', '12345678', '2025-09-25', 1),
-	(5, 'CLARA MARCELA ', 'QUILINDO MARTINEZ', 5, 2, 305258427, 'cquilindomartinez@gmail.com', '12345678', '2025-09-25', 1);
+-- Volcando datos para la tabla complementario.usuario: ~6 rows (aproximadamente)
+INSERT INTO `usuario` (`idusuario`, `nombre`, `apellido`, `rol`, `tipoidentificacion`, `numeroidentificacion`, `correo`, `clave`, `fecha`, `verificado`, `contrato`) VALUES
+	(1, 'ANGELA PATRICIA ', 'OBANDO PALECHOR', 1, 2, 310487659, 'APOBANDO@SENA.EDU.CO', '12345678', '2025-09-24', 1, NULL),
+	(2, 'JONNY EDWIN', 'RIOS DELGADO', 2, 2, 303733375, 'jonnyriosdelgado@gmail.com', '12345678', '2025-09-24', 0, NULL),
+	(3, 'JUAN DAVID ', 'ORDOÑEZ RIVERA', 3, 2, 312665164, 'jdordonezr@sena.edu.co', '12345678', '2025-09-24', 1, NULL),
+	(4, 'GLORIA ELCY ', 'TELLO RAMIREZ', 4, 2, 317620122, 'tgloriaelcy@gmail.com', '12345678', '2025-09-25', 1, NULL),
+	(5, 'CLARA MARCELA ', 'QUILINDO MARTINEZ', 5, 2, 305258427, 'cquilindomartinez@gmail.com', '12345678', '2025-09-25', 1, NULL),
+	(7, 'Jaiber', 'Almeida', 1, 2, 1061720628, 'jaiber4302@gmail.com', '12345', '2025-11-20', 1, 1);
 
 /*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;

@@ -35,6 +35,10 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.index, name="index"),
     path('pagina_principal/', views.login_view, name="login"),
+    # Ruta para mostrar el formulario de registro
+    path('registro/', views.registerUser, name='registro'),
+    # Ruta para procesar el formulario (DEBE SER LA MISMA)
+    path('registro/', views.registerUser, name='register'),
     # Paginas de creación (Admin - Instru)
     path('crearficha/', views_solicitud.crear_solicitud, name="Crearsolicitud"),
     path('formulario_solicitud_regular/', views_solicitud.solicitud_regular, name="crearregular"),

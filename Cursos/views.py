@@ -1,9 +1,8 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from Cursos.models import Usuario
+from Cursos.models import Usuario, Solicitud, Ficha, Estados, EstadosCoordinador, Solicitudcoordinador, Aspirantes, Tipoidentificacion, Rol, Tipocontrato
 import string, secrets
 import datetime, calendar
-from .models import Solicitud, Ficha, Estados, EstadosCoordinador, Solicitudcoordinador, Aspirantes
 from functools import wraps
 from django.contrib.auth import logout as django_logout
 
@@ -135,3 +134,65 @@ def verificar_usuario(request, idusuario):
 
     # Redirige a la lista de usuarios sin verificar
     return redirect('verificacion_usuario')
+
+def registerUser(request):
+    # Si es POST, procesa el registro
+    if request.method == 'POST':
+        # Obtener datos del usuario
+        nombreUser = request.POST.get('nombre')
+        apellidoUser = request.POST.get('apellido')
+        rolUser = request.POST.get('rol')
+        tipoIdentificacionUser = request.POST.get('tipo_documento')
+        numeroIdentificacionUser = request.POST.get('numeroCedula')
+        correoUser = request.POST.get('correo')
+        claveUser = request.POST.get('clave')
+        contratoUser = request.POST.get('contrato')
+
+        fechaRegistroUser = datetime.datetime.now()
+        verificacionUser = 0
+
+        # Validar si la cédula ya existe
+        if Usuario.objects.filter(numeroidentificacion=numeroIdentificacionUser).exists():
+            messages.error(request, 'El número de cédula ya está registrado')
+            return render(request, "inicio/registro.html", {
+                'title': 'Registro',
+                'tipos_identificacion': Tipoidentificacion.objects.all(),
+            })
+
+        # Validar si el correo ya existe
+        if Usuario.objects.filter(correo=correoUser).exists():
+            messages.error(request, 'El correo electrónico ya está registrado')
+            return render(request, "inicio/registro.html", {
+                'title': 'Registro',
+                'tipos_identificacion': Tipoidentificacion.objects.all(),
+            })
+
+        # Verificacion de datos enviados con FK
+        rol_obj = Rol.objects.get(idrol=rolUser)
+        tipo_obj = Tipoidentificacion.objects.get(idtipoidentificacion=tipoIdentificacionUser)
+        contrato_obj = Tipocontrato.objects.get(idcontrato=contratoUser)
+
+        # Crear usuario
+        registrarUsuario = Usuario(
+            nombre=nombreUser,
+            apellido=apellidoUser,
+            rol=rol_obj,
+            tipoidentificacion=tipo_obj,
+            numeroidentificacion=numeroIdentificacionUser,
+            correo=correoUser,
+            clave=claveUser,
+            fecha=fechaRegistroUser,
+            verificado=verificacionUser,
+            contrato=contrato_obj
+        )
+        
+        registrarUsuario.save()
+        messages.success(request, 'Te has registrado exitosamente. Espera verificación.')
+        return redirect('index')
+
+    # Si es GET, muestra el formulario
+    tipo_documento = Tipoidentificacion.objects.all()
+    return render(request, "inicio/registro.html", {
+        'title': 'Registro',
+        'tipos_identificacion': tipo_documento,
+    })

@@ -63,6 +63,7 @@
             <!-- Botón de inicio de sesión -->
             <input type="submit" class="boton-ingresar" value="ingresar"/>
           </form>
+          <input type="button" class="boton-ingresar" value="Registrarme" onclick="window.location.href='{% url 'registro' %}'" />
           {% if messages %}
             {% for message in messages %}
               <div class="alert alert-success">
