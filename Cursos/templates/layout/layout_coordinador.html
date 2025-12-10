@@ -13,10 +13,10 @@
     <link rel="stylesheet" href="{% static 'css/formulariosolicitud.css' %}" />
     <link rel="stylesheet" href="{% static 'css/index-styles.css' %}" />
     <link rel="stylesheet" href="{% static 'css/consultarsolicitudes.css' %}" />
-  <link rel="stylesheet" href="{% static 'css/reportes.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/reportes.css' %}" />
 
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="{% static "img/logoSena.png" %}" />
+    <link rel="icon" type="image/png" href="{% static 'img/logoSena.png' %}" />
   </head>
   <body>
     <!-- Contenedor principal de la aplicación -->
@@ -37,7 +37,11 @@
             </li>
             <!-- Opción Estado de Cursos -->
             <li class="elemento-menu">
-              <a href="{% url "consultas_instructor" %}" class="enlace-menu">Consultar Solicitudes</a>
+              <a href="{% url 'consultas_instructor' %}" class="enlace-menu">Consultar Solicitudes</a>
+            </li>
+            <!-- Opción Asignar un instructor para que cree el curso -->
+            <li class="elemento-menu">
+              <a href="{% url 'asignar_instructor' %}" class="enlace-menu">Asignar Instructores</a>
             </li>
             <!-- Opción Reportes -->
             <li class="elemento-menu">

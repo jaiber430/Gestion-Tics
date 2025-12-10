@@ -8,9 +8,13 @@
     {% if messages %}
       <div class="mensajes">
         {% for message in messages %}
-          <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %}">
-            {{ message }}
-          </div>
+          <div class="alert alert-{% if message.tags == 'error' %}
+              
+              danger
+
+            {% else %}
+              {{ message.tags }}
+            {% endif %}">{{ message }}</div>
         {% endfor %}
       </div>
     {% endif %}
@@ -19,6 +23,18 @@
       <form class="formulario-ficha" method="post" action="{% url 'verificar_usuario' usuario.idusuario %}" enctype="multipart/form-data" style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
         {% csrf_token %}
         <input type="text" class="entrada-texto" value="{{ usuario.nombre }}" readonly />
+        <!-- Selector de tipo de usuario -->
+        <div class="campo-entrada">
+          <label for="rol" class="etiqueta-campo">Rol*:</label>
+          <select id="rol" name="rol" class="selector-usuario" required>
+            <option value="">Seleccione su rol</option>
+            <option value="1">Instructor</option>
+            <option value="2">Coordinador</option>
+            <option value="3">Funcionario</option>
+            <option value="4">Administrador</option>
+            <option value="5">Curricular</option>
+          </select>
+        </div>
         <button type="button" class="boton-verificar" onclick="confirmarVerificacion('{{ usuario.nombre }}', this.form)">✔</button>
       </form>
     {% endfor %}
@@ -40,28 +56,28 @@
   </div>
 
   <script>
-    let formularioActual = null;
-
+    let formularioActual = null
+    
     function confirmarVerificacion(nombre, form) {
-      const modal = document.getElementById('modal-confirmacion');
-      const mensaje = document.getElementById('mensaje-confirmacion');
-      
-      mensaje.textContent = `¿Estás seguro de verificar a ${nombre}?`;
-      formularioActual = form;
-      modal.style.display = 'flex';
+      const modal = document.getElementById('modal-confirmacion')
+      const mensaje = document.getElementById('mensaje-confirmacion')
+    
+      mensaje.textContent = `¿Estás seguro de verificar a ${nombre}?`
+      formularioActual = form
+      modal.style.display = 'flex'
     }
-
+    
     function confirmar() {
       if (formularioActual) {
-        formularioActual.submit();
+        formularioActual.submit()
       }
-      cancelar();
+      cancelar()
     }
-
+    
     function cancelar() {
-      const modal = document.getElementById('modal-confirmacion');
-      modal.style.display = 'none';
-      formularioActual = null;
+      const modal = document.getElementById('modal-confirmacion')
+      modal.style.display = 'none'
+      formularioActual = null
     }
   </script>
 {% endblock %}

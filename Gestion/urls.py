@@ -86,6 +86,10 @@ urlpatterns = [
     # URLs para verificación de usuarios
     path('verificacion_usuario/', views.verificacion_usuario, name='verificacion_usuario'),
     path('verificar_usuario/<int:idusuario>/', views.verificar_usuario, name='verificar_usuario'),
+    # Asignar instructores para que creen solicitudes desde coordinación
+    path('asignar_instructor/', views.asignacionInstructor, name='asignar_instructor'),
+    path('asignar_instructor/<int:idusuario>/', views.asignar_instructor, name='asignacion_instructor'),
+
 ]
 # Poder almacenar archivos en la carpeta media
 if settings.DEBUG:

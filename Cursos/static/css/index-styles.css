@@ -344,3 +344,20 @@ body {
     color: #D84315;
     border-left-color: var(--color-advertencia);
 }
+
+.linkLogin {
+    color: var(--color-primario);      /* color del texto */
+    text-decoration: none; /* quitar subrayado */
+    font-weight: bold;   /* texto en negrita */
+}
+
+.linkLogin:hover {
+    color: var(--color-primario-hover);     /* color cuando pasas el mouse */
+    text-decoration: underline; /* subrayado al pasar */
+    cursor: pointer;
+}
+
+.center-link{
+    text-align: center;
+    font-size: 15px;
+}

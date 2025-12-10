@@ -49,19 +49,6 @@
               <input type="text" id="apellido" name="apellido" class="entrada-texto" placeholder="Ingrese su apellido" required />
             </div>
 
-            <!-- Selector de tipo de usuario -->
-            <div class="campo-entrada">
-              <label for="rol" class="etiqueta-campo">Tipo de Usuario*:</label>
-              <select id="rol" name="rol" class="selector-usuario" required>
-                <option value="">Seleccione su rol</option>
-                <option value="1">Instructor</option>
-                <option value="2">Coordinador</option>
-                <option value="3">Funcionario</option>
-                <option value="4">Administrador</option>
-                <option value="5">Curricular</option>
-              </select>
-            </div>
-
             <!-- Campo para el tipo de identificación -->
             <div class="campo-entrada">
             <label for="tipo_documento" class="etiqueta-campo">Tipos documento *</label>
@@ -109,6 +96,7 @@
 
             <!-- Botón de inicio de sesión -->
             <input type="submit" class="boton-ingresar" value="Registrarse"/>
+            <p class="center-link">¿Ya estas registrado?<a href="{% url 'login' %}" class="linkLogin"> Iniciar Sesión</a></p>
 
             <script>
               function mostrarNumeroContrato() {

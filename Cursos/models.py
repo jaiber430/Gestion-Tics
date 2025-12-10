@@ -114,7 +114,7 @@ class Usuario(models.Model):
     idusuario = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=100)
     apellido = models.CharField(max_length=100)
-    rol = models.ForeignKey(Rol, models.DO_NOTHING, db_column='rol')
+    rol = models.ForeignKey(Rol, models.DO_NOTHING, db_column='rol', blank=True, null=True)
     tipoidentificacion = models.ForeignKey(Tipoidentificacion, models.DO_NOTHING, db_column='tipoidentificacion')
     numeroidentificacion = models.IntegerField(unique=True)
     correo = models.CharField(unique=True, max_length=255)
@@ -122,10 +122,21 @@ class Usuario(models.Model):
     fecha = models.DateField()
     verificado = models.IntegerField(blank=True, null=True)
     contrato = models.ForeignKey(Tipocontrato, models.DO_NOTHING, db_column='contrato', blank=True, null=True)
+    numerocontrato = models.CharField(db_column='numeroContrato', max_length=50, blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
         db_table = 'usuario'
+
+class Usuariosasignados(models.Model):
+    idasignacion = models.AutoField(db_column='idAsignacion', primary_key=True)  # Field name made lowercase.
+    idinstructor = models.ForeignKey(Usuario, models.DO_NOTHING, db_column='idInstructor', blank=True, null=True)  # Field name made lowercase.
+    idusuariocoordinador = models.ForeignKey(Usuario, models.DO_NOTHING, db_column='idUsuarioCoordinador', related_name='usuariosasignados_idusuariocoordinador_set', blank=True, null=True)  # Field name made lowercase.
+    fechaasignacion = models.DateField(db_column='fechaAsignacion', blank=True, null=True)  # Field name made lowercase
+
+    class Meta:
+        managed = False
+        db_table = 'usuariosasignados'
 
 class Tiposolicitud(models.Model):
     idtiposolicitud = models.AutoField(primary_key=True)

@@ -1,0 +1,80 @@
+{% extends 'layout/layout_coordinador.html' %}
+
+{% block content %}
+<div class="seccion-formulario">
+    <h3 class="titulo-seccion-form">Asignación de Instructores</h3>
+
+    <!-- BLOQUE DE MENSAJES -->
+    {% if messages %}
+        <div class="mensajes">
+            {% for message in messages %}
+                <div class="alert alert-{% if message.tags == 'error' %}
+                    danger
+                {% else %}
+                    {{ message.tags }}
+                {% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- LISTA DE INSTRUCTORES A ASIGNAR -->
+    {% for usuario in designatedUser %}
+        <form class="formulario-ficha"
+              method="post"
+              action="{% url 'asignacion_instructor' usuario.idusuario %}"
+              enctype="multipart/form-data"
+              style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+
+            {% csrf_token %}
+
+            <input type="text" class="entrada-texto" value="{{ usuario.nombre }}" readonly />
+
+            <button type="button"
+                    class="boton-verificar"
+                    onclick="confirmarVerificacion('{{ usuario.nombre }}', this.form)">
+                ✔
+            </button>
+        </form>
+    {% endfor %}
+
+</div>
+
+<!-- Modal de confirmación -->
+<div id="modal-confirmacion" class="modal-confirmacion" style="display: none;">
+    <div class="modal-contenido-confirmacion">
+        <p id="mensaje-confirmacion"></p>
+        <div class="botones-modal">
+            <button class="boton-modal boton-confirmar" onclick="confirmar()">Asignar</button>
+            <button class="boton-modal boton-cancelar" onclick="cancelar()">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+let formularioActual = null
+
+function confirmarVerificacion(nombre, form) {
+    const modal = document.getElementById('modal-confirmacion')
+    const mensaje = document.getElementById('mensaje-confirmacion')
+
+    mensaje.textContent = `El instructor o instructora ${nombre} sera asignado por usted para crear una solicitud`
+    formularioActual = form
+    modal.style.display = 'flex'
+}
+
+function confirmar() {
+    if (formularioActual) {
+        formularioActual.submit()
+    }
+    cancelar()
+}
+
+function cancelar() {
+    const modal = document.getElementById('modal-confirmacion')
+    modal.style.display = 'none'
+    formularioActual = null
+}
+</script>
+{% endblock %}

@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from Cursos.models import Usuario, Solicitud, Ficha, Estados, EstadosCoordinador, Solicitudcoordinador, Aspirantes, Tipoidentificacion, Rol, Tipocontrato
+from Cursos.models import Usuario, Solicitud, Ficha, Estados, EstadosCoordinador, Solicitudcoordinador, Aspirantes, Tipoidentificacion, Rol, Tipocontrato, Usuariosasignados
 import string, secrets
 import datetime, calendar
 from functools import wraps
@@ -105,7 +105,7 @@ def cerrar_sesion(request):
     # Redirigir al inicio o al login
     return redirect("login")
 
-
+@login_required_custom
 def verificacion_usuario(request):
     # Trae todos los usuarios con verificado=0
     usuariosSinAprobar = Usuario.objects.filter(verificado=0)
@@ -113,27 +113,39 @@ def verificacion_usuario(request):
         'usuariosSinVerificar': usuariosSinAprobar,
     })
 
+@login_required_custom
 def verificar_usuario(request, idusuario):
     if request.method == "POST":
         try:
-            # Verifica que el usuario existe antes de actualizar
+            # 1. Obtener el valor del select "rol"
+            rol_id = request.POST.get('rol')
+
+            # 2. Validar que el usuario exista
             usuario = Usuario.objects.get(idusuario=idusuario)
-            # Actualiza solo el usuario seleccionado
+
+            # 3. Manejar si el rol viene vacío ("" -> None)
+            if not rol_id:
+                usuario.rol = None
+            else:
+                usuario.rol_id = int(rol_id)  # Asigna FK correctamente
+
+            # 4. Marcar como verificado
             usuario.verificado = 1
             usuario.save()
-            
-            # Mensaje si todo sale bien
-            messages.success(request, f'Usuario {usuario.nombre} ha sido verificado.')
-            
+
+            messages.success(request, f'Usuario {usuario.nombre} ha sido verificado correctamente.')
+
         except Usuario.DoesNotExist:
-            # Manejo de error si el usuario no existe
             messages.error(request, 'El usuario no existe.')
+
+        except Rol.DoesNotExist:
+            messages.error(request, 'El rol seleccionado no existe.')
+
         except Exception as e:
-            # Manejo de otros errores
             messages.error(request, f'Error al verificar usuario: {str(e)}')
 
-    # Redirige a la lista de usuarios sin verificar
     return redirect('verificacion_usuario')
+
 
 def registerUser(request):
     # Si es POST, procesa el registro
@@ -141,12 +153,13 @@ def registerUser(request):
         # Obtener datos del usuario
         nombreUser = request.POST.get('nombre')
         apellidoUser = request.POST.get('apellido')
-        rolUser = request.POST.get('rol')
+        rolUser = None
         tipoIdentificacionUser = request.POST.get('tipo_documento')
         numeroIdentificacionUser = request.POST.get('numeroCedula')
         correoUser = request.POST.get('correo')
         claveUser = request.POST.get('clave')
         contratoUser = request.POST.get('contrato')
+        numeroContrato = request.POST.get('numeroContrato') or None
 
         fechaRegistroUser = datetime.datetime.now()
         verificacionUser = 0
@@ -168,7 +181,7 @@ def registerUser(request):
             })
 
         # Verificacion de datos enviados con FK
-        rol_obj = Rol.objects.get(idrol=rolUser)
+        # rol_obj = Rol.objects.get(idrol=rolUser)
         tipo_obj = Tipoidentificacion.objects.get(idtipoidentificacion=tipoIdentificacionUser)
         contrato_obj = Tipocontrato.objects.get(idcontrato=contratoUser)
 
@@ -176,14 +189,15 @@ def registerUser(request):
         registrarUsuario = Usuario(
             nombre=nombreUser,
             apellido=apellidoUser,
-            rol=rol_obj,
+            rol=rolUser,
             tipoidentificacion=tipo_obj,
             numeroidentificacion=numeroIdentificacionUser,
             correo=correoUser,
             clave=claveUser,
             fecha=fechaRegistroUser,
             verificado=verificacionUser,
-            contrato=contrato_obj
+            contrato=contrato_obj,
+            numerocontrato=numeroContrato
         )
         
         registrarUsuario.save()
@@ -196,3 +210,42 @@ def registerUser(request):
         'title': 'Registro',
         'tipos_identificacion': tipo_documento,
     })
+    
+@login_required_custom
+def asignacionInstructor(request):
+    usuarios = Usuario.objects.filter(rol_id=1)
+    return render(request, "inicio/asignacionInstructores.html",{
+        'title':'Asignar instructor',
+        'designatedUser': usuarios
+    })
+    
+def asignar_instructor(request, idusuario):
+    if request.method == "POST":
+        try:
+            # Instructor seleccionado
+            instructor = Usuario.objects.get(idusuario=idusuario)
+
+            # Coordinador logueado (var global)
+            coordinador_id = request.session.get('user_id')
+
+            if not coordinador_id:
+                messages.error(request, "No se pudo identificar al coordinador logueado.")
+                return redirect('asignar_instructor')
+
+            coordinador = Usuario.objects.get(idusuario=coordinador_id)
+
+            # Crear asignación
+            Usuariosasignados.objects.create(
+                idinstructor=instructor,
+                idusuariocoordinador=coordinador,
+                fechaasignacion=datetime.datetime.now()
+            )
+
+            messages.success(request, f"Instructor {instructor.nombre} asignado correctamente.")
+
+        except Usuario.DoesNotExist:
+            messages.error(request, "El usuario no existe.")
+        except Exception as e:
+            messages.error(request, f"Error al asignar instructor: {str(e)}")
+
+    return redirect('asignar_instructor')
