@@ -1,0 +1,50 @@
+{% extends 'layout/layout_coordinador.html' %}
+
+{% block content %}
+
+<div class="seccion-formulario">
+
+    <h3 class="titulo-seccion-form">📋 Reporte de Notificaciones</h3>
+
+    <p>Bienvenido/a: <strong>{{ nombre_usuario }}</strong></p>
+
+    <div class="formulario-ficha">
+        <p>
+            Total de registros: <strong>{{ total_notificaciones }}</strong>
+        </p>
+    </div>
+
+    {% if notificaciones %}
+
+    <div class="formulario-ficha">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Fecha de asignación</th>
+                    <th>Instructor</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for notif in notificaciones %}
+                <tr class="{% if notif.pendiente %}fila-pendiente{% endif %}">
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ notif.fecha_asignacion }}</td>
+                    <td>{{ notif.instructor_nombre }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% else %}
+
+    <div class="formulario-ficha">
+        <p>No hay registros.</p>
+    </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

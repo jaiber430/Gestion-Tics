@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="{% static 'css/index-styles.css' %}" />
     <link rel="stylesheet" href="{% static 'css/consultarsolicitudes.css' %}" />
     <link rel="stylesheet" href="{% static 'css/reportes.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/notificaciones.css' %}" />
 
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="{% static 'img/logoSena.png' %}" />
@@ -42,6 +43,10 @@
             <!-- Opción Asignar un instructor para que cree el curso -->
             <li class="elemento-menu">
               <a href="{% url 'asignar_instructor' %}" class="enlace-menu">Asignar Instructores</a>
+            </li>
+            {% comment %} Opcion ver instructore asignados {% endcomment %}
+            <li class="elemento-menu">
+              <a href="{% url 'reporteNotificacion' %}" class="enlace-menu">Ver asignaciones</a>
             </li>
             <!-- Opción Reportes -->
             <li class="elemento-menu">

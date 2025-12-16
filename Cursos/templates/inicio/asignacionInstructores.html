@@ -22,14 +22,15 @@
     <!-- LISTA DE INSTRUCTORES A ASIGNAR -->
     {% for usuario in designatedUser %}
         <form class="formulario-ficha"
-              method="post"
-              action="{% url 'asignacion_instructor' usuario.idusuario %}"
-              enctype="multipart/form-data"
-              style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+            method="post"
+            action="{% url 'asignacion_instructor' usuario.idusuario %}"
+            enctype="multipart/form-data"
+            style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
 
             {% csrf_token %}
 
             <input type="text" class="entrada-texto" value="{{ usuario.nombre }}" readonly />
+            <textarea id="infoCurso" name="infoCurso" class="entrada-textarea" rows="3" required></textarea>
 
             <button type="button"
                     class="boton-verificar"

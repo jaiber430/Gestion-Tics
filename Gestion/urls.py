@@ -89,6 +89,12 @@ urlpatterns = [
     # Asignar instructores para que creen solicitudes desde coordinación
     path('asignar_instructor/', views.asignacionInstructor, name='asignar_instructor'),
     path('asignar_instructor/<int:idusuario>/', views.asignar_instructor, name='asignacion_instructor'),
+    # Notificaciones para los instructores
+    path('notificaciones/', views.notificacionCursos, name='notificaciones'),
+    # Marcar como recibida la notificación
+    path('notificacion/vista/<int:id_asignacion>/',views.marcar_notificacion_vista,name='marcar_notificacion_vista'),
+    # Ver instructores asignados
+    path('reporte-notificacion/', views.reporteNotificacion, name='reporteNotificacion'),
 
 ]
 # Poder almacenar archivos en la carpeta media

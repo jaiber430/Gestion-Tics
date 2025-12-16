@@ -133,6 +133,8 @@ class Usuariosasignados(models.Model):
     idinstructor = models.ForeignKey(Usuario, models.DO_NOTHING, db_column='idInstructor', blank=True, null=True)  # Field name made lowercase.
     idusuariocoordinador = models.ForeignKey(Usuario, models.DO_NOTHING, db_column='idUsuarioCoordinador', related_name='usuariosasignados_idusuariocoordinador_set', blank=True, null=True)  # Field name made lowercase.
     fechaasignacion = models.DateField(db_column='fechaAsignacion', blank=True, null=True)  # Field name made lowercase
+    vernotificacion = models.IntegerField(db_column='verNotificacion', blank=True, null=True)  # Field name made lowercase.
+    detallescurso = models.TextField(db_column='detallesCurso')  # Field name made lowercase
 
     class Meta:
         managed = False

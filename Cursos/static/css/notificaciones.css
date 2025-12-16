@@ -1,0 +1,199 @@
+/* ===============================
+   NOTIFICACIONES
+   =============================== */
+
+/* Contenedor general de notificaciones */
+.seccion-formulario {
+    max-width: 1000px;
+    margin: var(--espaciado-xl) auto;
+}
+
+/* Resumen de notificaciones */
+.seccion-formulario > p {
+    font-size: 1.4rem;
+    color: var(--color-texto-secundario);
+    margin-bottom: var(--espaciado-md);
+}
+
+/* Tarjetas reutilizando formulario-ficha */
+.seccion-formulario .formulario-ficha {
+    margin-bottom: var(--espaciado-lg);
+}
+
+/* Tabla de notificaciones */
+.formulario-ficha table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: var(--espaciado-md);
+    font-size: 1.3rem;
+}
+
+/* Encabezados */
+.formulario-ficha thead {
+    background-color: var(--color-primario-claro);
+    color: var(--color-secundario);
+}
+
+.formulario-ficha th {
+    padding: var(--espaciado-sm) var(--espaciado-md);
+    text-align: left;
+    font-weight: var(--peso-medio);
+}
+
+/* Celdas */
+.formulario-ficha td {
+    padding: var(--espaciado-sm) var(--espaciado-md);
+    border-bottom: 0.1rem solid var(--color-borde);
+    color: var(--color-texto-principal);
+}
+
+/* Filas */
+.formulario-ficha tbody tr:nth-child(even) {
+    background-color: #fafafa;
+}
+
+.formulario-ficha tbody tr:hover {
+    background-color: rgba(76, 175, 80, 0.08);
+}
+
+/* Mensaje sin notificaciones */
+.formulario-ficha p:only-child {
+    text-align: center;
+    font-size: 1.4rem;
+    color: var(--color-texto-secundario);
+}
+
+/* Botón volver */
+.formulario-ficha a.boton-verificar {
+    margin-top: var(--espaciado-sm);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+
+    .formulario-ficha table,
+    .formulario-ficha thead,
+    .formulario-ficha tbody,
+    .formulario-ficha th,
+    .formulario-ficha td,
+    .formulario-ficha tr {
+        display: block;
+    }
+
+    .formulario-ficha thead {
+        display: none;
+    }
+
+    .formulario-ficha tr {
+        margin-bottom: var(--espaciado-md);
+        border: 0.1rem solid var(--color-borde);
+        border-radius: var(--radio-borde);
+        padding: var(--espaciado-sm);
+        background-color: var(--color-secundario);
+    }
+
+    .formulario-ficha td {
+        border: none;
+        padding: var(--espaciado-xs) 0;
+        font-size: 1.3rem;
+    }
+
+    .formulario-ficha td::before {
+        content: attr(data-label);
+        font-weight: var(--peso-medio);
+        color: var(--color-primario);
+        display: block;
+        margin-bottom: 0.2rem;
+    }
+}
+
+.boton-visto {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--espaciado-xs);
+
+    padding: var(--espaciado-sm) var(--espaciado-md);
+    font-size: 1.3rem;
+    font-weight: var(--peso-medio);
+    font-family: var(--fuente-principal);
+
+    color: var(--color-secundario);
+    background-color: var(--color-primario);
+    border: none;
+    border-radius: var(--radio-borde);
+
+    cursor: pointer;
+    text-decoration: none;
+    white-space: nowrap;
+
+    transition: 
+        background-color 0.2s ease,
+        transform 0.1s ease,
+        box-shadow 0.2s ease;
+}
+
+/* Hover */
+.boton-visto:hover {
+    background-color: var(--color-primario-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--sombra-ligera);
+}
+
+/* Active (click) */
+.boton-visto:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+/* Estado deshabilitado (ya visto) */
+.boton-visto.desactivado,
+.boton-visto:disabled {
+    background-color: var(--color-borde);
+    color: var(--color-texto-secundario);
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* Variante secundaria (opcional) */
+.boton-visto.secundario {
+    background-color: var(--color-primario-claro);
+}
+
+.boton-visto.secundario:hover {
+    background-color: var(--color-primario-hover);
+}
+
+/* Tamaño pequeño (opcional) */
+.boton-visto.sm {
+    padding: var(--espaciado-xs) var(--espaciado-sm);
+    font-size: 1.2rem;
+}
+.entrada-textarea {
+    width: 250px;              /* similar al input */
+    height: 55px;              /* MISMO alto que el input */
+    padding: 8px 10px;
+    font-size: 14px;
+    font-family: inherit;
+    border: 1px solid #dcdcdc;
+    border-radius: 8px;
+    resize: none;              /* no redimensionable */
+    line-height: 22px;
+    box-sizing: border-box;
+}
+
+/* Para centrar el texto verticalmente */
+.entrada-textarea {
+    display: flex;
+    align-items: center;
+}
+
+/* Focus igual al input */
+.entrada-textarea:focus {
+    outline: none;
+    border-color: #2e7d32;     /* verde similar al botón ✔ */
+}
+
+.fila-pendiente {
+    background-color: #ffe5e5;
+}

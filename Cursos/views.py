@@ -225,6 +225,9 @@ def asignar_instructor(request, idusuario):
             # Instructor seleccionado
             instructor = Usuario.objects.get(idusuario=idusuario)
 
+            # Texto del textarea (detalles del curso)
+            detallescurso = request.POST.get('infoCurso')
+
             # Coordinador logueado (var global)
             coordinador_id = request.session.get('user_id')
 
@@ -238,10 +241,15 @@ def asignar_instructor(request, idusuario):
             Usuariosasignados.objects.create(
                 idinstructor=instructor,
                 idusuariocoordinador=coordinador,
-                fechaasignacion=datetime.datetime.now()
+                fechaasignacion=datetime.datetime.now(),
+                vernotificacion=0,
+                detallescurso=detallescurso
             )
 
-            messages.success(request, f"Instructor {instructor.nombre} asignado correctamente.")
+            messages.success(
+                request,
+                f"Instructor {instructor.nombre} asignado correctamente."
+            )
 
         except Usuario.DoesNotExist:
             messages.error(request, "El usuario no existe.")
@@ -249,3 +257,108 @@ def asignar_instructor(request, idusuario):
             messages.error(request, f"Error al asignar instructor: {str(e)}")
 
     return redirect('asignar_instructor')
+
+
+def notificacionCursos(request):
+
+    user_id = request.session.get("user_id")
+
+    if user_id is None:
+        return redirect('index') 
+    
+    notificacionAsignacion = Usuariosasignados.objects.filter(
+        idinstructor=user_id,
+        vernotificacion__in=[0, None]
+    ).select_related('idusuariocoordinador')
+
+    
+    try:
+        usuario_actual = Usuario.objects.get(idusuario=user_id)
+    except Usuario.DoesNotExist:
+        return redirect('index')
+    
+    notificaciones_detalladas = []
+
+    for asignacion in notificacionAsignacion:
+        if asignacion.idusuariocoordinador:
+            coordinador = asignacion.idusuariocoordinador  
+            nombre_coordinador = f"{coordinador.nombre} {coordinador.apellido}"
+        else:
+            nombre_coordinador = "Coordinador no asignado"
+
+        notificacion_info = {
+            'id_asignacion': asignacion.idasignacion,
+            'fecha_asignacion': asignacion.fechaasignacion,
+            'coordinador_nombre': nombre_coordinador,
+            'coordinador_id': asignacion.idusuariocoordinador.idusuario if asignacion.idusuariocoordinador else None,
+            'detalles_curso': asignacion.detallescurso,
+        }
+
+        notificaciones_detalladas.append(notificacion_info)
+    
+    total_notificaciones = len(notificaciones_detalladas)
+
+    return render(request, 'inicio/notificaciones.html', {
+        'usuario_actual': usuario_actual,
+        'nombre_usuario': f"{usuario_actual.nombre} {usuario_actual.apellido}",
+        'user_id': user_id,
+        'notificaciones': notificaciones_detalladas,
+        'total_notificaciones': total_notificaciones,
+        'notificacionAsignacion': notificacionAsignacion,
+    })
+
+def marcar_notificacion_vista(request, id_asignacion):
+    if request.method == "POST":
+        try:
+            notificacion = Usuariosasignados.objects.get(idasignacion=id_asignacion)
+            notificacion.vernotificacion = 1
+            notificacion.save()
+
+            messages.success(request, "Notificación marcada como vista.")
+        except Usuariosasignados.DoesNotExist:
+            messages.error(request, "La notificación no existe.")
+    else:
+        messages.error(request, "Solicitud no válida.")
+
+    return redirect('notificaciones')
+
+def reporteNotificacion(request):
+
+    user_id = request.session.get("user_id")
+
+    if user_id is None:
+        return redirect('index')
+
+    # Asignaciones DEL COORDINADOR EN SESIÓN
+    asignaciones = Usuariosasignados.objects.filter(
+        idusuariocoordinador_id=user_id
+    ).select_related('idinstructor')
+
+    try:
+        usuario_actual = Usuario.objects.get(idusuario=user_id)
+    except Usuario.DoesNotExist:
+        return redirect('index')
+
+    notificaciones_detalladas = []
+
+    for asignacion in asignaciones:
+
+        # Instructor asignado (YA FUNCIONA)
+        instructor = asignacion.idinstructor
+        nombre_instructor = (
+            f"{instructor.nombre} {instructor.apellido}"
+            if instructor else "Instructor no asignado"
+        )
+
+        notificaciones_detalladas.append({
+            'fecha_asignacion': asignacion.fechaasignacion,
+            'instructor_nombre': nombre_instructor,
+            'pendiente': asignacion.vernotificacion in [0, None],
+        })
+
+    return render(request, 'inicio/reporteNotificacion.html', {
+        'usuario_actual': usuario_actual,
+        'nombre_usuario': f"{usuario_actual.nombre} {usuario_actual.apellido}",
+        'total_notificaciones': len(notificaciones_detalladas),
+        'notificaciones': notificaciones_detalladas,
+    })
