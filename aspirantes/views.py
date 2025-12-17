@@ -119,10 +119,10 @@ def registro_aspirante(request):
                 nombre=nombres,
                 apellido=apellidos,
                 idcaracterizacion=id_tipo_caracterizacion,
-                telefono=telefono,
+                telefono=int(telefono),
                 pdf=ruta_relativa_pdf,  # ruta relativa para FileField
                 tipoidentificacion=id_tipo_documento,
-                numeroidentificacion=identificacion,
+                numeroidentificacion=int(identificacion),
                 correo=correo,
                 fecha=fecha_registro,
                 solicitudinscripcion=id_solicitud_preinscripcion,
@@ -240,7 +240,7 @@ def registro_aspirante(request):
                 nuevo_archivo.save(directorio_excel)
                 # -----------------------------------------------------------
 
-            messages.success(request, 'Te has registrado exitosamente')
+            messages.success(request, 'Te has preinscrito exitosamente')
             return redirect('formularioaspirantes', idsolicitud=solicitud_inscripcion)
 
         except Exception as e:

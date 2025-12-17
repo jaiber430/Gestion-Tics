@@ -9,13 +9,6 @@ class Tipocontrato(models.Model):
         managed = False
         db_table = 'tipocontrato'
 
-class Ambiente(models.Model):
-    idambiente = models.AutoField(primary_key=True)
-    ambiente = models.CharField(max_length=250)
-
-    class Meta:
-        db_table = 'ambiente'
-
 class Area(models.Model):
     idarea = models.AutoField(primary_key=True)
     area = models.CharField(max_length=150)

@@ -8,7 +8,7 @@ from django.db import transaction
 from datetime import datetime
 import json
 # Importar datos de los modulos requeridos
-from Cursos.models import (Ambiente, Area, Departamentos,
+from Cursos.models import (Area, Departamentos,
                             Empresa, Horario, Modalidad, Municipios,Programaespecial, 
                             Programaformacion, Solicitud, Tipoempresa, Tipoidentificacion, 
                             Tiposolicitud, Usuario)
@@ -28,7 +28,6 @@ def _get_common_context():
     Devuelve un diccionario con todos los objetos de DB necesarios para el formulario.
     """
     return {
-        'ambientes': Ambiente.objects.all(),
         'areas': Area.objects.all(),
         'empresas': Empresa.objects.all(),
         'departamentos': Departamentos.objects.all(),

@@ -56,14 +56,14 @@
             <tr>
               <th>Nombre del Programa</th>
               <th>Revisión realizada por</th>
+              <th>Ficha caracterización</th>
+              <th>Documento aspirantes</th>
+              <th>Carta solicitud</th>
+              <th>Formato masivo</th>
+              <th>Fecha Creación</th>
               <th>Estado</th>
               <th>Codigo de la ficha</th>
               <th>Codigo de solicitud</th>
-              <th>Descargar ficha de caracterización</th>
-              <th>Descargar documento de los aspirantes</th>
-              <th>Descargar carta de solicitud</th>
-              <th>Descargar formato inscripcion masivo</th>
-              <th>Fecha de Creación</th>
               <th>Observación</th>
               <th>Enviar</th>
             </tr>
@@ -84,40 +84,6 @@
                     {% comment %} {% else %}
                       Sin revisión aún {% endcomment %}
                     {% endif %}
-                  </td>
-
-                  <!-- Estado -->
-                  <td>
-                    <select name="estado" id="estado_{{ solicitud_consulta.idsolicitud }}">
-                      <option value="">-- Seleccione un estado --</option>
-                      {% for item in estado %}
-                        <option value="{{ item.idestado }}"
-                          {% if solicitud_consulta.estado_usuario == item.estados %}
-                            selected
-                          {% endif %}
-                        >
-                          {{ item.estados }}
-                        </option>
-                      {% endfor %}
-                    </select>
-                  </td>
-
-                  <!-- Código ficha -->
-                  <td>
-                    <input type="number" id="codigo_ficha_{{ solicitud_consulta.idsolicitud }}" name="codigo_ficha" class="entrada-texto"
-                          value="{{ solicitud_consulta.codigo_ficha}}"
-                          placeholder="Código de ficha"
-                          {% if solicitud_consulta.codigo_ficha %}readonly{% endif %}
-                          />
-                  </td>
-
-                  <!-- Código solicitud -->
-                  <td>
-                    <input type="number" id="codigo_solicitud_{{ solicitud_consulta.idsolicitud }}" name="codigo_solicitud" class="entrada-texto"
-                          value="{{ solicitud_consulta.codigo_solicitud}}"
-                          placeholder="Código de solicitud"
-                          {% if solicitud_consulta.codigo_solicitud %}readonly{% endif %}
-                           />
                   </td>
 
                   <!-- Descargas -->
@@ -141,7 +107,7 @@
                   <td>
                     {% if solicitud_consulta.excel_funcionario_disponible %}
                       <a href="{% url 'descargar_excel' solicitud_consulta.idsolicitud rol %}"
-                         class="link-excel boton-descargar" data-id="{{ solicitud_consulta.idsolicitud }}">Descargar excel</a>
+                        class="link-excel boton-descargar" data-id="{{ solicitud_consulta.idsolicitud }}">Descargar excel</a>
                       <div class="subida-reemplazo" data-id="{{ solicitud_consulta.idsolicitud }}" style="display: none;">
                         <input type="file" class="archivo-subida" name="actualizar_excel" id="actualizar_excel_{{ solicitud_consulta.idsolicitud }}" data-id="{{ solicitud_consulta.idsolicitud }}" />
                       </div>
@@ -153,6 +119,39 @@
                   <!-- Fecha solicitud -->
                   <td>{{ solicitud_consulta.fechasolicitud }}</td>
 
+                                    <!-- Estado -->
+                  <td>
+                    <select name="estado" id="estado_{{ solicitud_consulta.idsolicitud }}">
+                      <option value="">-- Seleccione un estado --</option>
+                      {% for item in estado %}
+                        <option value="{{ item.idestado }}"
+                          {% if solicitud_consulta.estado_usuario == item.estados %}
+                            selected
+                          {% endif %}
+                        >
+                          {{ item.estados }}
+                        </option>
+                      {% endfor %}
+                    </select>
+                  </td>
+
+                  <!-- Código ficha -->
+                  <td>
+                    <input type="text" id="codigo_ficha_{{ solicitud_consulta.idsolicitud }}" name="codigo_ficha" class="entrada-texto"
+                          value="{{ solicitud_consulta.codigo_ficha}}"
+                          placeholder="Código de ficha"
+                          {% if solicitud_consulta.codigo_ficha %}readonly{% endif %}
+                          />
+                  </td>
+
+                  <!-- Código solicitud -->
+                  <td>
+                    <input type="text" id="codigo_solicitud_{{ solicitud_consulta.idsolicitud }}" name="codigo_solicitud" class="entrada-texto"
+                          value="{{ solicitud_consulta.codigo_solicitud}}"
+                          placeholder="Código de solicitud"
+                          {% if solicitud_consulta.codigo_solicitud %}readonly{% endif %}
+                          />
+                  </td>
                   <!-- Observación -->
                   <td>
                     <textarea name="observacion" id="observacion_{{ solicitud_consulta.idsolicitud }}" class="entrada-texto">
@@ -161,7 +160,6 @@
                       {% elif solicitud_consulta.observacion_coordinador %}
                         {{ solicitud_consulta.observacion_coordinador }}
                       {% else %}
-                        Sin observación
                       {% endif %}
                     </textarea>
                   </td>

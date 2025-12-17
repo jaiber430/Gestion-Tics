@@ -44,7 +44,7 @@ def login_view(request):
         try:
             # Buscar usuario (SIN la clave)
             user = Usuario.objects.get(
-                numeroidentificacion=numero_identificacion,
+                numeroidentificacion=int(numero_identificacion),
                 rol=rol,
                 verificado=1
             )

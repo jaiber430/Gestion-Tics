@@ -3,7 +3,7 @@ from django.http import Http404, FileResponse,  HttpResponse
 from django.template.loader import render_to_string
 from Cursos.models import (
     Usuario, Solicitud, Programaformacion, Horario, Modalidad,
-    Departamentos, Municipios, Empresa, Programaespecial, Ambiente,
+    Departamentos, Municipios, Empresa, Programaespecial,
     Aspirantes, Caracterizacion, Tipoidentificacion, Estados, Ficha,
     Solicitudcoordinador, EstadosCoordinador, Area, Tipoempresa, Tiposolicitud, Usuariosasignados
 )

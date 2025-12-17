@@ -2,22 +2,109 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Carta de Solicitud</title>
+    <title>Carta de Aprobación - SENA</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            font-size: 14px;
-            margin: 40px;
+            font-size: 12px;
+            line-height: 1.4;
+            margin: 0;
+            padding: 20px;
+            color: #000;
         }
-        p {
-            line-height: 1.5;
+
+        .encabezado {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .regional {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .centro {
+            font-size: 12px;
+            margin-bottom: 30px;
+        }
+
+        .ciudad-fecha {
+            text-align: right;
+            margin-top: 20px;
+            font-size: 11px;
+        }
+
+        .asunto {
+            font-size: 12px;
+            font-weight: bold;
+            margin: 30px 0;
+            text-decoration: underline;
+        }
+
+        .cuerpo {
+            font-size: 12px;
+            text-align: justify;
+        }
+
+        .despedida {
+            margin-top: 60px;
+        }
+
+        .firma {
+            margin-top: 100px;
+            text-align: center;
+            font-size: 11px;
+        }
+
+        .firma-linea {
+            margin-top: 60px;
+            border-top: 1px solid #000;
+            display: inline-block;
+            padding-top: 5px;
+            min-width: 250px;
+        }
+
+        .pie-pagina {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 10px;
+            font-style: italic;
         }
     </style>
 </head>
 <body>
-    <p>
-        Yo <strong>{{ usuario.nombre }} {{ usuario.apellido }}</strong> apruebo la petición
-        para el programa de formación <strong>{{ solicitud.codigoprograma.nombreprograma }} solicitada por el convenio {{solicitud.convenio}}</strong>.
-    </p>
+
+    <div class="encabezado">
+        <div class="regional">Regional Distrito Capital</div>
+        <div class="centro">Centro de Gestión de Mercados, Logística y Tecnologías de la Información</div>
+        <div class="ciudad-fecha">Bogotá, {{ fecha }}</div>
+    </div>
+
+    <div class="asunto">Asunto: Aprobación de Solicitud</div>
+
+    <div class="cuerpo">
+        <p>
+            Yo <strong>{{ usuario.nombre }} {{ usuario.apellido }}</strong>, apruebo la petición
+            para el programa de formación
+            <strong>{{ solicitud.codigoprograma.nombreprograma }}</strong>,
+            solicitada por el convenio
+            <strong>{{ solicitud.convenio }}</strong>.
+        </p>
+    </div>
+
+    <div class="despedida">
+        <p>Cordialmente,</p>
+    </div>
+
+    <div class="firma">
+        <div class="firma-linea">
+            {{ usuario.nombre }} {{ usuario.apellido }}
+        </div>
+        <div>{{ usuario.rol.nombre }}</div>
+    </div>
+
+    <div class="pie-pagina">"SENA: DE CLASE MUNDIAL"</div>
+
 </body>
 </html>
