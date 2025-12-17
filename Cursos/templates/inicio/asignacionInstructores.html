@@ -29,12 +29,12 @@
 
             {% csrf_token %}
 
-            <input type="text" class="entrada-texto" value="{{ usuario.nombre }}" readonly />
+            <input type="text" class="entrada-texto" value="{{ usuario.nombre }} {{ usuario.apellido }}" readonly />
             <textarea id="infoCurso" name="infoCurso" class="entrada-textarea" rows="3" required></textarea>
 
             <button type="button"
                     class="boton-verificar"
-                    onclick="confirmarVerificacion('{{ usuario.nombre }}', this.form)">
+                    onclick="confirmarVerificacion('{{ usuario.nombre }} {{ usuario.apellido }}', this.form)">
                 ✔
             </button>
         </form>
@@ -60,7 +60,7 @@ function confirmarVerificacion(nombre, form) {
     const modal = document.getElementById('modal-confirmacion')
     const mensaje = document.getElementById('mensaje-confirmacion')
 
-    mensaje.textContent = `El instructor o instructora ${nombre} sera asignado por usted para crear una solicitud`
+    mensaje.textContent = `El instructor o instructora ${nombre} será asignado por usted para crear una solicitud`
     formularioActual = form
     modal.style.display = 'flex'
 }

@@ -2,7 +2,7 @@
 
 {% block content %}
 
-  {% comment %}Mostar esto solo al funcionario{% endcomment %}
+  {% comment %}Mostrar esto solo al funcionario{% endcomment %}
   {% if rol == 3 %}
     <!-- Sección principal - Consultar Fichas -->
     <main class="contenido-principal">
@@ -57,12 +57,9 @@
               <th>Nombre del Programa</th>
               <th>Revisión realizada por</th>
               <th>Estado</th>
-              <th>Codigo de la ficha</th>
-              <th>Codigo de solicitud</th>
-              <th>Descargar ficha de caracterización</th>
-              <th>Descargar documento de los aspirantes</th>
-              <th>Descargar carta de solicitud</th>
-              <th>Descargar formato inscripcion masivo</th>
+              <th>Código de la ficha</th>
+              <th>Código de solicitud</th>
+              <th>Descargas</th>
               <th>Fecha de Creación</th>
               <th>Observación</th>
               <th>Enviar</th>
@@ -106,7 +103,7 @@
                   <td>
                     <input type="number" id="codigo_ficha_{{ solicitud_consulta.idsolicitud }}" name="codigo_ficha" class="entrada-texto"
                           value="{{ solicitud_consulta.codigo_ficha}}"
-                          placeholder="Código de ficha"
+                          placeholder="Código de la ficha"
                           {% if solicitud_consulta.codigo_ficha %}readonly{% endif %}
                           />
                   </td>
@@ -115,39 +112,33 @@
                   <td>
                     <input type="number" id="codigo_solicitud_{{ solicitud_consulta.idsolicitud }}" name="codigo_solicitud" class="entrada-texto"
                           value="{{ solicitud_consulta.codigo_solicitud}}"
-                          placeholder="Código de solicitud"
+                          placeholder="Código de la solicitud"
                           {% if solicitud_consulta.codigo_solicitud %}readonly{% endif %}
                            />
                   </td>
 
                   <!-- Descargas -->
-                  <td>
-                    <a href="{% url 'ficha_caracterizacion_pdf' solicitud_consulta.idsolicitud %}" class="boton-descargar">Descargar PDF</a>
-                  </td>
-                  <td>
-                    <a href="{% url 'descargar_pdf' solicitud_consulta.idsolicitud rol %}" class="boton-descargar">Descargar PDF</a>
-                  </td>
-                  <td>
-                    {% if solicitud_consulta.boton_ver_carta_disabled %}
-                      <button class="boton-descargar" disabled>Ver Carta (No disponible)</button>
-                    {% elif solicitud_consulta.mostrar_boton_carta_funcionario %}
-                      <a href="{% url 'descargar_carta' solicitud_consulta.idsolicitud rol %}" class="boton-descargar">Descargar Carta</a>
-                    {% else %}
-                      <a href="{% url 'descargar_carta' solicitud_consulta.idsolicitud rol %}" class="boton-descargar" > Descargar carta </a>
-                    {% endif %}
-                  </td>
-
-                  <!-- Excel -->
-                  <td>
-                    {% if solicitud_consulta.excel_funcionario_disponible %}
-                      <a href="{% url 'descargar_excel' solicitud_consulta.idsolicitud rol %}"
-                         class="link-excel boton-descargar" data-id="{{ solicitud_consulta.idsolicitud }}">Descargar excel</a>
-                      <div class="subida-reemplazo" data-id="{{ solicitud_consulta.idsolicitud }}" style="display: none;">
-                        <input type="file" class="archivo-subida" name="actualizar_excel" id="actualizar_excel_{{ solicitud_consulta.idsolicitud }}" data-id="{{ solicitud_consulta.idsolicitud }}" />
-                      </div>
-                    {% else %}
-                      <a class="link-excel boton-descargar disabled-link" data-id="{{ solicitud_consulta.idsolicitud }}" tabindex="-1" aria-disabled="true">Descargar excel</a>
-                    {% endif %}
+                  <td style="min-height: 150px; vertical-align: top; padding: 10px;">
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                      <a href="{% url 'ficha_caracterizacion_pdf' solicitud_consulta.idsolicitud %}" class="boton-descargar" style="padding: 6px 10px; font-size: 12px;">Ficha de caracterización</a>
+                      <a href="{% url 'descargar_pdf' solicitud_consulta.idsolicitud rol %}" class="boton-descargar" style="padding: 6px 10px; font-size: 12px;">Documentos aspirantes</a>
+                      {% if solicitud_consulta.boton_ver_carta_disabled %}
+                        <button class="boton-descargar" disabled style="padding: 6px 10px; font-size: 12px;">Ver Carta (No disponible)</button>
+                      {% elif solicitud_consulta.mostrar_boton_carta_funcionario %}
+                        <a href="{% url 'descargar_carta' solicitud_consulta.idsolicitud rol %}" class="boton-descargar" style="padding: 6px 10px; font-size: 12px;">Carta de solicitud</a>
+                      {% else %}
+                        <a href="{% url 'descargar_carta' solicitud_consulta.idsolicitud rol %}" class="boton-descargar" style="padding: 6px 10px; font-size: 12px;">Carta de solicitud</a>
+                      {% endif %}
+                      {% if solicitud_consulta.excel_funcionario_disponible %}
+                        <a href="{% url 'descargar_excel' solicitud_consulta.idsolicitud rol %}"
+                           class="link-excel boton-descargar" data-id="{{ solicitud_consulta.idsolicitud }}" style="padding: 6px 10px; font-size: 12px;">Formato inscripción masivo</a>
+                        <div class="subida-reemplazo" data-id="{{ solicitud_consulta.idsolicitud }}" style="display: none;">
+                          <input type="file" class="archivo-subida" name="actualizar_excel" id="actualizar_excel_{{ solicitud_consulta.idsolicitud }}" data-id="{{ solicitud_consulta.idsolicitud }}" />
+                        </div>
+                      {% else %}
+                        <a class="link-excel boton-descargar disabled-link" data-id="{{ solicitud_consulta.idsolicitud }}" tabindex="-1" aria-disabled="true" style="padding: 6px 10px; font-size: 12px;">Formato inscripción masivo</a>
+                      {% endif %}
+                    </div>
                   </td>
 
                   <!-- Fecha solicitud -->
@@ -169,9 +160,9 @@
                   <!-- Botón enviar -->
                   <td>
                     {% if solicitud_consulta.estado_usuario == "Matriculada" %}
-                      <button type="submit" class="disabled" disabled>Enviar</button>
+                      <button type="submit" class="boton-enviar disabled" disabled>Enviar</button>
                     {% else %}
-                      <button type="submit">Enviar</button>
+                      <button type="submit" class="boton-enviar">Enviar</button>
                     {% endif %}
                   </td>
                 </form>
@@ -368,7 +359,7 @@
                 {% endif %}
               </td>
               <td>
-                <a href="{% url 'ver_formato' solicitud_consulta.idsolicitud %}" class="link-excel">Ver formato inscripción masivo</a>
+                <a href="{% url 'ver_formato' solicitud_consulta.idsolicitud %}" class="link-excel">Ver formato de inscripción masivo</a>
               </td>
               <!-- Fecha de la solicitud -->
               <td>{{ solicitud_consulta.fechasolicitud }}</td>
@@ -468,7 +459,7 @@
               <th>Observación dada por el funcionario</th>
               <th>Ficha de Caracterización</th>
               <th>Cantidad aspirantes Inscritos</th>
-              <th>Excel sofia plus</th>
+              <th>Excel SOFÍA plus</th>
               <th>Fecha de Creación</th>
               <th>Compartir</th>
             </tr>
@@ -522,9 +513,9 @@
                 </td>
                 <td>
                   {% if solicitud_consulta.estado_usuario in 'Matriculada Rechazada Creacion Creada Lista de espera' and solicitud_consulta.excel_masivo_disponible %}
-                    <a href="{% url 'sofia_plus_descarga' solicitud_consulta.idsolicitud %}" class="boton-descargar">Descargar excel</a>
+                    <a href="{% url 'sofia_plus_descarga' solicitud_consulta.idsolicitud %}" class="boton-descargar">Descargar Excel</a>
                   {% else %}
-                    <a class="boton-descargar disabled-link" tabindex="-1" aria-disabled="true">Descargar excel</a>
+                    <a class="boton-descargar disabled-link" tabindex="-1" aria-disabled="true">Descargar Excel</a>
                   {% endif %}
                 </td>
                 <td>{{ solicitud_consulta.fechasolicitud }}</td>
