@@ -5,7 +5,7 @@ from Cursos.models import (
     Usuario, Solicitud, Programaformacion, Horario, Modalidad,
     Departamentos, Municipios, Empresa, Programaespecial, Ambiente,
     Aspirantes, Caracterizacion, Tipoidentificacion, Estados, Ficha,
-    Solicitudcoordinador, EstadosCoordinador, Area, Tipoempresa, Tiposolicitud
+    Solicitudcoordinador, EstadosCoordinador, Area, Tipoempresa, Tiposolicitud, Usuariosasignados
 )
 # COnvertir ficha de caracterizacion a pdf
 from weasyprint import HTML, CSS
@@ -44,26 +44,16 @@ from django.template.loader import get_template
 # =====================================================================
 @login_required_custom
 def consultas_instructor(request):
-    """
-    Vista de consultas para Instructor, Coordinador, Funcionario y Administrador.
-    """
+    import secrets, string, os, calendar, datetime
+    from django.conf import settings
 
-    # ============================
-    # Generar código aleatorio
-    # ============================
     caracteres = string.ascii_letters + string.digits
     codigo = ''.join(secrets.choice(caracteres) for _ in range(5))
 
-    # ============================
-    # Usuario en sesión
-    # ============================
     user_id = request.session.get('user_id')
     usuario = Usuario.objects.select_related('rol').get(idusuario=user_id)
     id_rol = usuario.rol.idrol
 
-    # ============================
-    # Layout según rol
-    # ============================
     if id_rol == 1:
         layout = 'layout/layoutinstructor.html'
         rol_name = 'Instructor'
@@ -80,28 +70,26 @@ def consultas_instructor(request):
         layout = 'layout/layout_admin.html'
         rol_name = "Desconocido"
 
-    # ============================
-    # Obtener solicitudes
-    # ============================
-    if id_rol == 2:  # Coordinador: solicitudes del mes actual
+    # Solicitudes según rol
+    if id_rol == 2:  # Coordinador: solo solicitudes de instructores asignados
         hoy = datetime.date.today()
         primer_dia = datetime.date(hoy.year, hoy.month, 1)
         ultimo_dia = datetime.date(hoy.year, hoy.month, calendar.monthrange(hoy.year, hoy.month)[1])
 
-        # Obtener todas las solicitudes del mes
+        instructores_asignados = Usuariosasignados.objects.filter(
+            idusuariocoordinador=usuario
+        ).values_list('idinstructor', flat=True)
+
         solicitudes = Solicitud.objects.filter(
-            fechasolicitud__range=(primer_dia, ultimo_dia)
+            fechasolicitud__range=(primer_dia, ultimo_dia),
+            idusuario__in=instructores_asignados
         ).select_related('idusuario', 'idempresa').order_by('-fechasolicitud')
 
-        # Filtrar solo las que tienen la cantidad de aspirantes IGUAL al cupo
         solicitudes_con_cupo_completo = []
         for solicitud in solicitudes:
-            # Contar aspirantes para esta solicitud
             cantidad_aspirantes = Aspirantes.objects.filter(
                 solicitudinscripcion=solicitud.idsolicitud
             ).count()
-            
-            # Solo incluir si la cantidad de aspirantes es IGUAL al cupo
             if cantidad_aspirantes == solicitud.cupo:
                 solicitudes_con_cupo_completo.append(solicitud)
         
@@ -115,15 +103,12 @@ def consultas_instructor(request):
         solicitudes = Solicitud.objects.filter(
             idsolicitud__in=solicitudes_aprobadas
         ).select_related('idusuario', 'idempresa').order_by('-fechasolicitud')
-
-    else:  # Instructor o Admin: solo las suyas o todas
+    else:  # Instructor o Admin
         solicitudes = Solicitud.objects.select_related('idusuario', 'idempresa') \
             .filter(idusuario=user_id) \
             .order_by('-fechasolicitud')
 
-    # ============================
     # Estados según rol
-    # ============================
     if id_rol == 3:
         estado = Estados.objects.values('idestado', 'estados')
     elif id_rol == 2:
@@ -131,13 +116,7 @@ def consultas_instructor(request):
     else:
         estado = Estados.objects.none()
 
-    # ============================
-    # Procesar cada solicitud
-    # ============================
     for solicitud in solicitudes:
-        # ----------------------------
-        # Última revisión del coordinador
-        # ----------------------------
         ultima_revision = Solicitudcoordinador.objects.filter(
             idsolicitud=solicitud
         ).select_related('usuario_revisador', 'usuario_solicitud', 'idestado').order_by('-fecha').first()
@@ -149,9 +128,6 @@ def consultas_instructor(request):
             solicitud.estado_coordinador = None
             solicitud.observacion_coordinador = "Sin observación"
 
-        # ----------------------------
-        # Estados y observaciones del funcionario (ficha real)
-        # ----------------------------
         ficha = Ficha.objects.filter(idsolicitud=solicitud.idsolicitud).select_related('idestado', 'idusuario').first()
         if ficha:
             solicitud.estado_usuario = ficha.idestado.estados if ficha.idestado else None
@@ -162,52 +138,32 @@ def consultas_instructor(request):
             solicitud.observacion_usuario = solicitud.observacion_coordinador or ''
             solicitud.codigo_ficha = ''
 
-        # ----------------------------
-        # Siempre mostrar el código de solicitud
-        # ----------------------------
         solicitud.codigo_solicitud = solicitud.codigosolicitud
 
-        # ----------------------------
-        # Nombre visible por defecto: el creador de la solicitud
-        # ----------------------------
         if getattr(solicitud, 'idusuario', None):
             creador = solicitud.idusuario
             solicitud.visible_nombre = f"{creador.nombre} {creador.apellido}"
         else:
             solicitud.visible_nombre = "Creador desconocido"
 
-        # ----------------------------
-        # Sobrescribir visible_nombre según rol
-        # ----------------------------
         if id_rol == 2 and ultima_revision and ultima_revision.usuario_solicitud:
             solicitud.visible_nombre = f"{ultima_revision.usuario_solicitud.nombre} {ultima_revision.usuario_solicitud.apellido}"
         elif id_rol == 3 and ultima_revision and ultima_revision.idestado.estado == "Aprobado" and ultima_revision.usuario_revisador:
             solicitud.visible_nombre = f"{ultima_revision.usuario_revisador.nombre} {ultima_revision.usuario_revisador.apellido}"
-        elif id_rol == 1:  # Instructor: mostrar funcionario si existe
+        elif id_rol == 1:
             if ficha and ficha.idusuario:
                 funcionario = ficha.idusuario
                 solicitud.visible_nombre = f"{funcionario.nombre} {funcionario.apellido}"
             else:
                 solicitud.visible_nombre = "Sin aprobación aún"
 
-        # ----------------------------
-        # Verificar empresa nula para Coordinador
-        # ----------------------------
         solicitud.boton_ver_carta_disabled = (id_rol == 2 and solicitud.idempresa is None)
-        # ----------------------------------------------
-        # Verificar si la empresa es nula
-        # ----------------------------------------------
         solicitud.mostrar_boton_carta_funcionario = (id_rol == 3 and solicitud.idempresa is None)
 
-        # ----------------------------
-        # Flags de disponibilidad de Excel para deshabilitar botones en UI
-        # ----------------------------
         try:
-            # Excel generado por funcionario (ruta usada por la vista 'descargar_excel')
             ruta_excel_funcionario = os.path.join(settings.MEDIA_ROOT, 'excel', f'formato_inscripcion_{solicitud.idsolicitud}.xlsx')
             solicitud.excel_funcionario_disponible = os.path.exists(ruta_excel_funcionario)
 
-            # Excel masivo de Sofia Plus (ruta usada por 'descargar_excel_ficha' / 'sofia_plus_descarga')
             carpeta_excel_sofia = os.path.join(
                 settings.MEDIA_ROOT,
                 'Funcionario',
@@ -217,13 +173,9 @@ def consultas_instructor(request):
             ruta_excel_sofia = os.path.join(carpeta_excel_sofia, f'formato_inscripcion_{solicitud.idsolicitud}.xlsx')
             solicitud.excel_masivo_disponible = os.path.exists(ruta_excel_sofia)
         except Exception:
-            # En caso de cualquier problema al verificar, marcamos como no disponible
             solicitud.excel_funcionario_disponible = False
             solicitud.excel_masivo_disponible = False
 
-    # ============================
-    # Aspirantes para Instructor/Admin
-    # ============================
     if id_rol in [1, 4]:
         for solicitud in solicitudes:
             aspirantes = Aspirantes.objects.select_related(
@@ -231,9 +183,6 @@ def consultas_instructor(request):
             ).filter(solicitudinscripcion=solicitud.idsolicitud)
             solicitud.aspirantes = aspirantes
 
-    # ============================
-    # Renderizar template
-    # ============================
     return render(request, "consultas/consultas_instructor.html", {
         "layout": layout,
         "rol": id_rol,
@@ -242,7 +191,6 @@ def consultas_instructor(request):
         'solicitudes': solicitudes,
         'estado': estado
     })
-
 
 # =====================================================================
 # Reportes (página simple con layout según rol)
