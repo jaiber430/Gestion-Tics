@@ -13,7 +13,6 @@
     <link rel="stylesheet" href="{% static 'css/formulariosolicitud.css' %}" />
     <link rel="stylesheet" href="{% static 'css/index-styles.css' %}" />
     <link rel="stylesheet" href="{% static 'css/consultarsolicitudes.css' %}" />
-    <link rel="stylesheet" href="{% static "css/notificaciones.css" %}"/>
 
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="{% static 'img/logoSena.png' %}" />
@@ -43,15 +42,6 @@
             <!-- Opción Estado de Cursos -->
             <li class="elemento-menu">
               <a href="{% url 'consultas_instructor' %}" class="enlace-menu">Consultar Solicitudes</a>
-            </li>
-            <!-- Notificaciones -->
-            <li class="elemento-menu">
-              <a href="{% url 'notificaciones' %}" class="enlace-menu">Notificaciones
-              {% comment %} Mostrar el numero de Notificaciones {% endcomment %}
-              {% if total_notificaciones %}
-                <span class="badge">{{ total_notificaciones }}</span>
-              {% endif %}
-              </a>
             </li>
             <!-- Botón Cerrar Sesión -->
             <li class="elemento-menu">

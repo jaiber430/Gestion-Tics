@@ -5,6 +5,10 @@ import string, secrets
 import datetime, calendar
 from functools import wraps
 from django.contrib.auth import logout as django_logout
+# Encriptar => la contraseña
+from django.contrib.auth.hashers import make_password
+# Verificar Contraseña Encriptada
+from django.contrib.auth.hashers import check_password
 
 
 # ===============================
@@ -30,6 +34,7 @@ def index(request):
 # ===============================
 # Vista de login
 # ===============================
+
 def login_view(request):
     if request.method == "POST":
         numero_identificacion = request.POST.get("numeroCedula")
@@ -37,13 +42,20 @@ def login_view(request):
         rol = int(request.POST.get("rol"))
 
         try:
-            # Buscar usuario
+            # Buscar usuario (SIN la clave)
             user = Usuario.objects.get(
                 numeroidentificacion=numero_identificacion,
-                clave=clave,
                 rol=rol,
                 verificado=1
             )
+
+            # Validar contraseña
+            if not check_password(clave, user.clave):
+                messages.error(
+                    request,
+                    'Su usuario aun no ha sido verificado por un administrador o las credenciales son incorrectas'
+                )
+                return render(request, "inicio/index.html")
 
             # Guardar en sesión
             request.session['user_id'] = user.idusuario
@@ -79,11 +91,13 @@ def login_view(request):
             })
 
         except Usuario.DoesNotExist:
-            messages.error(request, 'Su usuario aun no ha sido verificado por un administardor o las credenciales son incorrectas')
+            messages.error(
+                request,
+                'Su usuario aun no ha sido verificado por un administrador o las credenciales son incorrectas'
+            )
             return render(request, "inicio/index.html")
 
     return render(request, "inicio/index.html")
-
 # ==============================================
 # Cerrar sesion
 # ==============================================
@@ -109,43 +123,49 @@ def cerrar_sesion(request):
 def verificacion_usuario(request):
     # Trae todos los usuarios con verificado=0
     usuariosSinAprobar = Usuario.objects.filter(verificado=0)
+    obtenerCoordinadores = Usuario.objects.filter(rol=2, verificado=1)
+    
     return render(request, 'inicio/verificarUsuarios.html',{
         'usuariosSinVerificar': usuariosSinAprobar,
+        'coordinadoresAsignacion': obtenerCoordinadores, 
     })
 
 @login_required_custom
 def verificar_usuario(request, idusuario):
     if request.method == "POST":
         try:
-            # 1. Obtener el valor del select "rol"
-            rol_id = request.POST.get('rol')
-
-            # 2. Validar que el usuario exista
+            # Obtener el usuario a verificar
             usuario = Usuario.objects.get(idusuario=idusuario)
-
-            # 3. Manejar si el rol viene vacío ("" -> None)
-            if not rol_id:
-                usuario.rol = None
-            else:
-                usuario.rol_id = int(rol_id)  # Asigna FK correctamente
-
-            # 4. Marcar como verificado
             usuario.verificado = 1
             usuario.save()
 
-            messages.success(request, f'Usuario {usuario.nombre} ha sido verificado correctamente.')
+            # Revisar si llegó un coordinador para asignar
+            idcoordinador = request.POST.get(f'coordinador_{usuario.idusuario}')
+            if idcoordinador:
+                coordinador = Usuario.objects.get(idusuario=idcoordinador)
+
+                Usuariosasignados.objects.create(
+                    idinstructor=usuario,
+                    idusuariocoordinador=coordinador,
+                    fechaasignacion=datetime.datetime.now()
+                )
+                messages.success(
+                    request,
+                    f'Usuario {usuario.nombre} verificado y asignado al coordinador {coordinador.nombre}.'
+                )
+            else:
+                # Solo verificación sin asignación
+                messages.success(
+                    request,
+                    f'Usuario {usuario.nombre} ha sido verificado correctamente.'
+                )
 
         except Usuario.DoesNotExist:
-            messages.error(request, 'El usuario no existe.')
-
-        except Rol.DoesNotExist:
-            messages.error(request, 'El rol seleccionado no existe.')
-
+            messages.error(request, 'Usuario no encontrado.')
         except Exception as e:
             messages.error(request, f'Error al verificar usuario: {str(e)}')
 
     return redirect('verificacion_usuario')
-
 
 def registerUser(request):
     # Si es POST, procesa el registro
@@ -153,7 +173,7 @@ def registerUser(request):
         # Obtener datos del usuario
         nombreUser = request.POST.get('nombre')
         apellidoUser = request.POST.get('apellido')
-        rolUser = None
+        rolUser = request.POST.get('rol')
         tipoIdentificacionUser = request.POST.get('tipo_documento')
         numeroIdentificacionUser = request.POST.get('numeroCedula')
         correoUser = request.POST.get('correo')
@@ -163,6 +183,14 @@ def registerUser(request):
 
         fechaRegistroUser = datetime.datetime.now()
         verificacionUser = 0
+
+        # Validar longitud mínima de contraseña
+        if len(claveUser) < 8:
+            messages.error(request, 'La contraseña debe tener mínimo 8 caracteres')
+            return render(request, "inicio/registro.html", {
+                'title': 'Registro',
+                'tipos_identificacion': Tipoidentificacion.objects.all(),
+            })
 
         # Validar si la cédula ya existe
         if Usuario.objects.filter(numeroidentificacion=numeroIdentificacionUser).exists():
@@ -181,7 +209,7 @@ def registerUser(request):
             })
 
         # Verificacion de datos enviados con FK
-        # rol_obj = Rol.objects.get(idrol=rolUser)
+        rol_obj = Rol.objects.get(idrol=rolUser)
         tipo_obj = Tipoidentificacion.objects.get(idtipoidentificacion=tipoIdentificacionUser)
         contrato_obj = Tipocontrato.objects.get(idcontrato=contratoUser)
 
@@ -189,11 +217,11 @@ def registerUser(request):
         registrarUsuario = Usuario(
             nombre=nombreUser,
             apellido=apellidoUser,
-            rol=rolUser,
+            rol=rol_obj,
             tipoidentificacion=tipo_obj,
-            numeroidentificacion=numeroIdentificacionUser,
+            numeroidentificacion=int(numeroIdentificacionUser),
             correo=correoUser,
-            clave=claveUser,
+            clave=make_password(claveUser),
             fecha=fechaRegistroUser,
             verificado=verificacionUser,
             contrato=contrato_obj,
@@ -209,156 +237,4 @@ def registerUser(request):
     return render(request, "inicio/registro.html", {
         'title': 'Registro',
         'tipos_identificacion': tipo_documento,
-    })
-    
-@login_required_custom
-def asignacionInstructor(request):
-    usuarios = Usuario.objects.filter(rol_id=1)
-    return render(request, "inicio/asignacionInstructores.html",{
-        'title':'Asignar instructor',
-        'designatedUser': usuarios
-    })
-    
-def asignar_instructor(request, idusuario):
-    if request.method == "POST":
-        try:
-            # Instructor seleccionado
-            instructor = Usuario.objects.get(idusuario=idusuario)
-
-            # Texto del textarea (detalles del curso)
-            detallescurso = request.POST.get('infoCurso')
-
-            # Coordinador logueado (var global)
-            coordinador_id = request.session.get('user_id')
-
-            if not coordinador_id:
-                messages.error(request, "No se pudo identificar al coordinador logueado.")
-                return redirect('asignar_instructor')
-
-            coordinador = Usuario.objects.get(idusuario=coordinador_id)
-
-            # Crear asignación
-            Usuariosasignados.objects.create(
-                idinstructor=instructor,
-                idusuariocoordinador=coordinador,
-                fechaasignacion=datetime.datetime.now(),
-                vernotificacion=0,
-                detallescurso=detallescurso
-            )
-
-            messages.success(
-                request,
-                f"Instructor {instructor.nombre} asignado correctamente."
-            )
-
-        except Usuario.DoesNotExist:
-            messages.error(request, "El usuario no existe.")
-        except Exception as e:
-            messages.error(request, f"Error al asignar instructor: {str(e)}")
-
-    return redirect('asignar_instructor')
-
-
-def notificacionCursos(request):
-
-    user_id = request.session.get("user_id")
-
-    if user_id is None:
-        return redirect('index') 
-    
-    notificacionAsignacion = Usuariosasignados.objects.filter(
-        idinstructor=user_id,
-        vernotificacion__in=[0, None]
-    ).select_related('idusuariocoordinador')
-
-    
-    try:
-        usuario_actual = Usuario.objects.get(idusuario=user_id)
-    except Usuario.DoesNotExist:
-        return redirect('index')
-    
-    notificaciones_detalladas = []
-
-    for asignacion in notificacionAsignacion:
-        if asignacion.idusuariocoordinador:
-            coordinador = asignacion.idusuariocoordinador  
-            nombre_coordinador = f"{coordinador.nombre} {coordinador.apellido}"
-        else:
-            nombre_coordinador = "Coordinador no asignado"
-
-        notificacion_info = {
-            'id_asignacion': asignacion.idasignacion,
-            'fecha_asignacion': asignacion.fechaasignacion,
-            'coordinador_nombre': nombre_coordinador,
-            'coordinador_id': asignacion.idusuariocoordinador.idusuario if asignacion.idusuariocoordinador else None,
-            'detalles_curso': asignacion.detallescurso,
-        }
-
-        notificaciones_detalladas.append(notificacion_info)
-    
-    total_notificaciones = len(notificaciones_detalladas)
-
-    return render(request, 'inicio/notificaciones.html', {
-        'usuario_actual': usuario_actual,
-        'nombre_usuario': f"{usuario_actual.nombre} {usuario_actual.apellido}",
-        'user_id': user_id,
-        'notificaciones': notificaciones_detalladas,
-        'total_notificaciones': total_notificaciones,
-        'notificacionAsignacion': notificacionAsignacion,
-    })
-
-def marcar_notificacion_vista(request, id_asignacion):
-    if request.method == "POST":
-        try:
-            notificacion = Usuariosasignados.objects.get(idasignacion=id_asignacion)
-            notificacion.vernotificacion = 1
-            notificacion.save()
-
-            messages.success(request, "Notificación marcada como vista.")
-        except Usuariosasignados.DoesNotExist:
-            messages.error(request, "La notificación no existe.")
-    else:
-        messages.error(request, "Solicitud no válida.")
-
-    return redirect('notificaciones')
-
-def reporteNotificacion(request):
-
-    user_id = request.session.get("user_id")
-
-    if user_id is None:
-        return redirect('index')
-
-    # Asignaciones DEL COORDINADOR EN SESIÓN
-    asignaciones = Usuariosasignados.objects.filter(
-        idusuariocoordinador_id=user_id
-    ).select_related('idinstructor')
-
-    try:
-        usuario_actual = Usuario.objects.get(idusuario=user_id)
-    except Usuario.DoesNotExist:
-        return redirect('index')
-
-    notificaciones_detalladas = []
-
-    for asignacion in asignaciones:
-
-        # Instructor asignado (YA FUNCIONA)
-        instructor = asignacion.idinstructor
-        nombre_instructor = (
-            f"{instructor.nombre} {instructor.apellido}"
-            if instructor else "Instructor no asignado"
-        )
-
-        notificaciones_detalladas.append({
-            'fecha_asignacion': asignacion.fechaasignacion,
-            'instructor_nombre': nombre_instructor,
-            'pendiente': asignacion.vernotificacion in [0, None],
-        })
-
-    return render(request, 'inicio/reporteNotificacion.html', {
-        'usuario_actual': usuario_actual,
-        'nombre_usuario': f"{usuario_actual.nombre} {usuario_actual.apellido}",
-        'total_notificaciones': len(notificaciones_detalladas),
-        'notificaciones': notificaciones_detalladas,
     })

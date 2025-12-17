@@ -23,9 +23,16 @@
           <h1 class="titulo-principal">Sistema de Gestión SENA</h1>
         </div>
       </header>
-
       <!-- Sección principal - Formulario de inicio de sesión -->
       <main class="contenido-principal">
+          {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-success">
+                  {{message}}
+                </div>
+              {% endfor %}
+            {% endif %} 
+          {{error}}
         <!-- Contenedor del formulario de login -->
         <div class="formulario-contenedor">
           <!-- Título del formulario -->
@@ -48,7 +55,18 @@
               <label for="numeroCedula" class="etiqueta-campo">Apellidos*:</label>
               <input type="text" id="apellido" name="apellido" class="entrada-texto" placeholder="Ingrese su apellido" required />
             </div>
-
+            <!-- Selector de tipo de usuario -->
+            <div class="campo-entrada">
+              <label for="rol" class="etiqueta-campo">Rol*:</label>
+              <select id="rol" name="rol" class="selector-usuario" required>
+                <option value="">Seleccione su rol</option>
+                <option value="1">Instructor</option>
+                <option value="2">Coordinador</option>
+                <option value="3">Funcionario</option>
+                <option value="4">Administrador</option>
+                <option value="5">Curricular</option>
+              </select>
+            </div>
             <!-- Campo para el tipo de identificación -->
             <div class="campo-entrada">
             <label for="tipo_documento" class="etiqueta-campo">Tipos documento *</label>
@@ -63,19 +81,20 @@
             <!-- Campo para número de cédula -->
             <div class="campo-entrada">
               <label for="numeroCedula" class="etiqueta-campo">Número de Cédula*:</label>
-              <input type="number" id="numeroCedula" name="numeroCedula" class="entrada-texto" placeholder="Ingrese su número de cédula" required />
+              <input type="text" id="numeroCedula" name="numeroCedula" class="entrada-texto" placeholder="Ingrese su número de cédula" required />
             </div>
 
             <!-- Campo para número de cédula -->
             <div class="campo-entrada">
               <label for="numeroCedula" class="etiqueta-campo">Correo*:</label>
-              <input type="email" id="correo" name="correo" class="entrada-texto" placeholder="Ingrese su número de cédula" required />
+              <input type="email" id="correo" name="correo" class="entrada-texto" placeholder="Ingrese su correo electronico" required />
             </div>
 
             <!-- Campo para contraseña -->
             <div class="campo-entrada">
               <label for="clave" class="etiqueta-campo">Contraseña*:</label>
               <input type="password" id="clave" name="clave" class="entrada-texto" placeholder="Ingrese su contraseña" required />
+              <span>La contraseña debe tener minimo 8 caracteres</span>
             </div>
 
             {% comment %} Tipo de contrato {% endcomment %}
@@ -115,14 +134,6 @@
               }
             </script>
           </form>
-          {% if messages %}
-            {% for message in messages %}
-              <div class="alert alert-success">
-                {{message}}
-              </div>
-            {% endfor %}
-          {% endif %} 
-          {{error}}
       </main>
     </div>
   </body>

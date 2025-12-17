@@ -9,7 +9,9 @@
       <div class="mensajes">
         {% for message in messages %}
           <div class="alert alert-{% if message.tags == 'error' %}
+              
               danger
+
             {% else %}
               {{ message.tags }}
             {% endif %}">{{ message }}</div>
@@ -20,19 +22,29 @@
     {% for usuario in usuariosSinVerificar %}
       <form class="formulario-ficha" method="post" action="{% url 'verificar_usuario' usuario.idusuario %}" enctype="multipart/form-data" style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
         {% csrf_token %}
-        <input type="text" class="entrada-texto" value="{{ usuario.nombre }}" readonly />
-        <!-- Selector de tipo de usuario -->
-        <div class="campo-entrada">
-          <label for="rol" class="etiqueta-campo">Rol*:</label>
-          <select id="rol" name="rol" class="selector-usuario" required>
-            <option value="">Seleccione su rol</option>
-            <option value="1">Instructor</option>
-            <option value="2">Coordinador</option>
-            <option value="3">Funcionario</option>
-            <option value="4">Administrador</option>
-            <option value="5">Curricular</option>
-          </select>
+
+        <div class="entrada-texto">
+          <strong>Nombre:</strong> {{ usuario.nombre }} {{ usuario.apellido }}<br />
+          <strong>Numero documento:</strong> {{ usuario.numeroidentificacion }}<br />
+          {% if usuario.numerocontrato %}
+            <strong>Numero contrato:</strong> {{ usuario.numerocontrato }}<br />
+          {% endif %}
+          <hr />
+
+          {% comment %}Mostrar este campo para asignación cuando se verfiquen otros cargos{% endcomment %}
+          {% if usuario.rol.idrol != 2 %}
+            <label for="coordinador_{{ usuario.idusuario }}" class="etiqueta-campo">Asignar coordinador para este instructor:</label>
+            <select id="coordinador_{{ usuario.idusuario }}" name="coordinador_{{ usuario.idusuario }}" class="selector-usuario" required>
+              <option value="">Seleccione al coordinador</option>
+              {% for coordinador in coordinadoresAsignacion %}
+                <option value="{{ coordinador.idusuario }}">{{ coordinador.nombre }} {{ coordinador.apellido }}</option>
+              {% endfor %}
+            </select>
+          {% endif %}
         </div>
+
+        {% comment %} <div class="campo-entrada"></div> {% endcomment %}
+
         <button type="button" class="boton-verificar" onclick="confirmarVerificacion('{{ usuario.nombre }}', this.form)">✔</button>
       </form>
     {% endfor %}
