@@ -59,9 +59,7 @@
               <th>Estado</th>
               <th>Codigo de la ficha</th>
               <th>Codigo de solicitud</th>
-              <th>Descargar ficha de caracterización</th>
-              <th>Descargar documento de los aspirantes</th>
-              <th>Descargar carta de solicitud</th>
+              <th>Descargas</th>
               <th>Descargar formato inscripcion masivo</th>
               <th>Fecha de Creación</th>
               <th>Observación</th>
@@ -121,20 +119,18 @@
                   </td>
 
                   <!-- Descargas -->
-                  <td>
-                    <a href="{% url 'ficha_caracterizacion_pdf' solicitud_consulta.idsolicitud %}" class="boton-descargar">Descargar PDF</a>
-                  </td>
-                  <td>
-                    <a href="{% url 'descargar_pdf' solicitud_consulta.idsolicitud rol %}" class="boton-descargar">Descargar PDF</a>
-                  </td>
-                  <td>
-                    {% if solicitud_consulta.boton_ver_carta_disabled %}
-                      <button class="boton-descargar" disabled>Ver Carta (No disponible)</button>
-                    {% elif solicitud_consulta.mostrar_boton_carta_funcionario %}
-                      <a href="{% url 'descargar_carta' solicitud_consulta.idsolicitud rol %}" class="boton-descargar">Descargar Carta</a>
-                    {% else %}
-                      <a href="{% url 'descargar_carta' solicitud_consulta.idsolicitud rol %}" class="boton-descargar" > Descargar carta </a>
-                    {% endif %}
+                  <td style="min-height: 150px; vertical-align: top; padding: 10px;">
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                      <a href="{% url 'ficha_caracterizacion_pdf' solicitud_consulta.idsolicitud %}" class="boton-descargar" style="padding: 6px 10px; font-size: 12px;">Ficha de caracterización</a>
+                      <a href="{% url 'descargar_pdf' solicitud_consulta.idsolicitud rol %}" class="boton-descargar" style="padding: 6px 10px; font-size: 12px;">Documentos aspirantes</a>
+                      {% if solicitud_consulta.boton_ver_carta_disabled %}
+                        <button class="boton-descargar" disabled style="padding: 6px 10px; font-size: 12px;">Ver Carta (No disponible)</button>
+                      {% elif solicitud_consulta.mostrar_boton_carta_funcionario %}
+                        <a href="{% url 'descargar_carta' solicitud_consulta.idsolicitud rol %}" class="boton-descargar" style="padding: 6px 10px; font-size: 12px;">Carta de solicitud</a>
+                      {% else %}
+                        <a href="{% url 'descargar_carta' solicitud_consulta.idsolicitud rol %}" class="boton-descargar" style="padding: 6px 10px; font-size: 12px;">Carta de solicitud</a>
+                      {% endif %}
+                    </div>
                   </td>
 
                   <!-- Excel -->
@@ -169,9 +165,9 @@
                   <!-- Botón enviar -->
                   <td>
                     {% if solicitud_consulta.estado_usuario == "Matriculada" %}
-                      <button type="submit" class="disabled" disabled>Enviar</button>
+                      <button type="submit" class="boton-enviar disabled" disabled>Enviar</button>
                     {% else %}
-                      <button type="submit">Enviar</button>
+                      <button type="submit" class="boton-enviar">Enviar</button>
                     {% endif %}
                   </td>
                 </form>
