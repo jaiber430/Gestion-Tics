@@ -109,14 +109,6 @@ CREATE TABLE IF NOT EXISTS `aspirantes` (
   CONSTRAINT `FK_aspirantes_tipoidentificacion` FOREIGN KEY (`tipoidentificacion`) REFERENCES `tipoidentificacion` (`idtipoidentificacion`)
 ) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_spanish2_ci;
 
--- Volcando datos para la tabla complementario.aspirantes: ~6 rows (aproximadamente)
-INSERT INTO `aspirantes` (`idaspirante`, `nombre`, `apellido`, `idcaracterizacion`, `telefono`, `pdf`, `tipoidentificacion`, `numeroidentificacion`, `correo`, `fecha`, `solicitudinscripcion`) VALUES
-	(1, 'Giovanny', 'Ladino Gonzales', 12, '3176201222', _binary 0x7064665c736f6c6963697475645f315c5044465f312e706466, 3, 1089478347, 'giovanny@gmail.com', '2025-09-25', 1),
-	(2, 'Edwin Alejandro', 'Capote Garzon', 2, '3206482013', _binary 0x7064665c736f6c6963697475645f315c5044465f322e706466, 2, 1002961566, 'edwin@gmail.com', '2025-09-25', 1),
-	(3, 'Luis Eduardo', 'Hurtado Hormiga', 15, '3188011371', _binary 0x7064665c736f6c6963697475645f315c5044465f332e706466, 2, 1061696516, 'luis@gmail.com', '2025-09-25', 1),
-	(4, 'Andres Felipe', 'Cometa Pillimue', 18, '3155844757', _binary 0x7064665c736f6c6963697475645f315c5044465f342e706466, 2, 1062774339, 'andres@gmail.com', '2025-09-25', 1),
-	(9, 'Wilmer', 'Velasco', 1, '3136646290', _binary 0x7064665c736f6c6963697475645f345c5044465f312e706466, 2, 1061738624, 'wilmerfelipe66@gmail.com', '2025-10-16', 4);
-
 -- Volcando estructura para tabla complementario.auth_group
 CREATE TABLE IF NOT EXISTS `auth_group` (
   `id` int NOT NULL AUTO_INCREMENT,
@@ -652,11 +644,6 @@ CREATE TABLE IF NOT EXISTS `empresa` (
   KEY `idtipoempresa` (`idtipoempresa`),
   CONSTRAINT `empresa_ibfk_1` FOREIGN KEY (`idtipoempresa`) REFERENCES `tipoempresa` (`idtipoempresa`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_spanish2_ci;
-
--- Volcando datos para la tabla complementario.empresa: ~0 rows (aproximadamente)
-INSERT INTO `empresa` (`idempresa`, `nombreempresa`, `representanteempresa`, `correoempresa`, `nitempresa`, `idtipoempresa`) VALUES
-	(1, 'Sena', 'Moises', 'sena@gmail.com', 171172, 6);
-
 -- Volcando estructura para tabla complementario.estados
 CREATE TABLE IF NOT EXISTS `estados` (
   `idestado` int NOT NULL AUTO_INCREMENT,
@@ -703,10 +690,6 @@ CREATE TABLE IF NOT EXISTS `ficha` (
   CONSTRAINT `FK_ficha_usuario` FOREIGN KEY (`idusuario`) REFERENCES `usuario` (`idusuario`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_spanish2_ci;
 
--- Volcando datos para la tabla complementario.ficha: ~1 rows (aproximadamente)
-INSERT INTO `ficha` (`idficha`, `codigoficha`, `idsolicitud`, `idestado`, `idusuario`, `observacion`, `opinion_instructor`) VALUES
-	(2, 5555, 4, 4, 1, '                      \r\n                         Todo bien\r\n                      \r\n                    \r\n                      \r\n                    ', NULL);
-
 -- Volcando estructura para tabla complementario.horario
 CREATE TABLE IF NOT EXISTS `horario` (
   `idhorario` int NOT NULL AUTO_INCREMENT,
@@ -718,13 +701,6 @@ CREATE TABLE IF NOT EXISTS `horario` (
   `diassemana` varchar(60) CHARACTER SET utf8mb3 COLLATE utf8mb3_spanish2_ci DEFAULT NULL,
   PRIMARY KEY (`idhorario`)
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_spanish2_ci;
-
--- Volcando datos para la tabla complementario.horario: ~4 rows (aproximadamente)
-INSERT INTO `horario` (`idhorario`, `fechainicio`, `fechafin`, `mes1`, `mes2`, `horas`, `diassemana`) VALUES
-	(1, '2025-09-26', '2025-11-01', '29, 30, 01, 06, 08', '14, 16, 20, 22, 28', '08:00-12:00', '1, 2, 3, 4'),
-	(2, '2025-09-26', '2025-11-01', '29', '06, 13', '08:00-12:00', '1'),
-	(3, '2025-09-26', '2025-11-01', '29', '06, 13', '08:00-12:00', '1, 2, 3, 4, 5'),
-	(4, '2025-10-17', '2025-10-31', '17, 20', '22, 24, 29', '08:00-12:00', '1, 2, 3, 5');
 
 -- Volcando estructura para tabla complementario.modalidad
 CREATE TABLE IF NOT EXISTS `modalidad` (
@@ -5029,13 +5005,6 @@ CREATE TABLE IF NOT EXISTS `solicitud` (
   CONSTRAINT `FK_solicitud_usuario` FOREIGN KEY (`idusuario`) REFERENCES `usuario` (`idusuario`)
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_spanish2_ci;
 
--- Volcando datos para la tabla complementario.solicitud: ~4 rows (aproximadamente)
-INSERT INTO `solicitud` (`idsolicitud`, `idtiposolicitud`, `codigosolicitud`, `codigoprograma`, `idhorario`, `cupo`, `idmodalidad`, `codigomunicipio`, `direccion`, `idusuario`, `idempresa`, `subsectoreconomico`, `idespecial`, `convenio`, `ambiente`, `fechasolicitud`) VALUES
-	(1, 1, 0, 52510024, 1, 5, 1, 19100, 'Sena centro regional cauca', 1, NULL, 'Sena', 11, 'Sena', 'Tics 2', '2025-10-16'),
-	(2, 1, NULL, 62230002, 2, 25, 1, 19318, 'Prueba', 1, NULL, 'Prueba', 8, 'Prueba', 'Tics 2', '2025-09-25'),
-	(3, 2, NULL, 84810059, 3, 25, 1, 19130, 'Biblioteca sena', 1, NULL, 'Sena', 8, 'Prueba ', 'Tics 2', '2025-09-25'),
-	(4, 1, 66667, 52410153, 4, 1, 1, 19001, 'Sena centro agropecuario', 1, 1, 'Sena', 10, NULL, 'Tics 2', '2025-10-16');
-
 -- Volcando estructura para tabla complementario.solicitudcoordinador
 CREATE TABLE IF NOT EXISTS `solicitudcoordinador` (
   `idsolicitudcoordinador` int NOT NULL AUTO_INCREMENT,
@@ -5055,11 +5024,6 @@ CREATE TABLE IF NOT EXISTS `solicitudcoordinador` (
   CONSTRAINT `FK_solicitudcoordinador_usuario` FOREIGN KEY (`usuario_revisador`) REFERENCES `usuario` (`idusuario`),
   CONSTRAINT `FK_solicitudcoordinador_usuario_2` FOREIGN KEY (`usuario_solicitud`) REFERENCES `usuario` (`idusuario`)
 ) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish2_ci;
-
--- Volcando datos para la tabla complementario.solicitudcoordinador: ~2 rows (aproximadamente)
-INSERT INTO `solicitudcoordinador` (`idsolicitudcoordinador`, `usuario_revisador`, `usuario_solicitud`, `idsolicitud`, `idestado`, `observacion`, `fecha`) VALUES
-	(5, 2, 1, 4, 1, 'Probando adno', '2025-10-16'),
-	(6, 2, 1, 1, 1, 'Prueba de carta', '2025-10-16');
 
 -- Volcando estructura para tabla complementario.tipocontrato
 CREATE TABLE IF NOT EXISTS `tipocontrato` (
@@ -5155,23 +5119,12 @@ CREATE TABLE IF NOT EXISTS `usuario` (
   CONSTRAINT `usuario_ibfk_2` FOREIGN KEY (`tipoidentificacion`) REFERENCES `tipoidentificacion` (`idtipoidentificacion`)
 ) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_spanish2_ci;
 
--- Volcando datos para la tabla complementario.usuario: ~6 rows (aproximadamente)
-INSERT INTO `usuario` (`idusuario`, `nombre`, `apellido`, `rol`, `tipoidentificacion`, `numeroidentificacion`, `correo`, `clave`, `fecha`, `verificado`, `contrato`, `numeroContrato`) VALUES
-	(1, 'ANGELA PATRICIA ', 'OBANDO PALECHOR', 1, 2, 310487659, 'APOBANDO@SENA.EDU.CO', '12345678', '2025-09-24', 1, NULL, NULL),
-	(2, 'JONNY EDWIN', 'RIOS DELGADO', 2, 2, 303733375, 'jonnyriosdelgado@gmail.com', '12345678', '2025-09-24', 1, NULL, NULL),
-	(3, 'JUAN DAVID ', 'ORDOÑEZ RIVERA', 3, 2, 312665164, 'jdordonezr@sena.edu.co', '12345678', '2025-09-24', 1, NULL, NULL),
-	(4, 'GLORIA ELCY ', 'TELLO RAMIREZ', 4, 2, 317620122, 'tgloriaelcy@gmail.com', '12345678', '2025-09-25', 1, NULL, NULL),
-	(5, 'CLARA MARCELA ', 'QUILINDO MARTINEZ', 5, 2, 305258427, 'cquilindomartinez@gmail.com', '12345678', '2025-09-25', 1, NULL, NULL),
-	(12, 'Jaiber', 'Almeida', 1, 2, 1061720628, 'jaiber4302@gmail.com', '12345678', '2025-12-10', 1, 2, '3071104');
-
 -- Volcando estructura para tabla complementario.usuariosasignados
 CREATE TABLE IF NOT EXISTS `usuariosasignados` (
   `idAsignacion` int NOT NULL AUTO_INCREMENT,
   `idInstructor` int DEFAULT NULL,
   `idUsuarioCoordinador` int DEFAULT NULL,
   `fechaAsignacion` date DEFAULT NULL,
-  `verNotificacion` int DEFAULT NULL,
-  `detallesCurso` mediumtext COLLATE utf8mb4_spanish2_ci NOT NULL,
   PRIMARY KEY (`idAsignacion`),
   KEY `FK_usuariosasignados_usuario` (`idInstructor`),
   KEY `FK_usuariosasignados_usuario_2` (`idUsuarioCoordinador`),

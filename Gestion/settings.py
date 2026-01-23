@@ -9,8 +9,9 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
-import pymysql
-pymysql.install_as_MySQLdb()
+# import pymysql
+# pymysql.install_as_MySQLdb()
+
 from pathlib import Path
 import os   # Usado para manejar rutas dinámicas
 # Si vas a usar django-crontab, debe estar instalado y agregado a INSTALLED_APPS
@@ -86,7 +87,7 @@ WSGI_APPLICATION = 'Gestion.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'complementario2',
+        'NAME': 'complementario',
         'USER': 'root',
         'PASSWORD': '',
         'HOST': 'localhost',

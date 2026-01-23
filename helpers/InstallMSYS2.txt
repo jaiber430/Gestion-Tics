@@ -1,0 +1,185 @@
+🔥 **LISTO. Aquí tienes el resumen limpio y ordenado de TODO el proceso**
+(guárdalo, porque esto te va a salvar horas en el futuro 😎)
+
+---
+
+# ✅ GUÍA FINAL – Django + MySQL + PyMySQL + MSYS2 (Windows + Laragon)
+
+## 🎯 Objetivo
+
+Tener **Django funcionando con MySQL** en Windows **sin errores de mysqlclient**, usando **PyMySQL** y con las **DLL necesarias del sistema correctamente cargadas**.
+
+---
+
+## 1️⃣ MySQL (Laragon)
+
+Laragon ya trae MySQL instalado.
+
+Ruta típica:
+
+```text
+C:\laragon\bin\mysql\mysql-8.4.3-winx64\
+```
+
+✔ No hace falta tocar `include` ni compilar nada
+✔ MySQL corre como servicio desde Laragon
+
+---
+
+## 2️⃣ Python (IMPORTANTE)
+
+Versión usada:
+
+```text
+Python 3.14 (64 bits)
+```
+
+Verificar:
+
+```powershell
+python --version
+```
+
+---
+
+## 3️⃣ Instalación de dependencias Python
+
+### 🔹 Instalar PyMySQL
+
+```powershell
+pip install pymysql
+```
+
+🚫 **NO usar mysqlclient en Windows**
+
+Si existe:
+
+```powershell
+pip uninstall mysqlclient
+```
+
+---
+
+## 4️⃣ Configuración Django (`__init__.py`) => Gestion (Carpeta Principal)
+
+### 🔹 Forzar PyMySQL como MySQLdb
+
+Arriba del archivo:
+
+```python
+import pymysql
+pymysql.install_as_MySQLdb()
+```
+
+---
+
+### 🔹 Base de datos
+
+```python
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'complementario',
+        'USER': 'root',
+        'PASSWORD': '',
+        'HOST': 'localhost',
+        'PORT': '3306',
+    }
+}
+```
+
+---
+
+## 5️⃣ Instalación MSYS2 (DLLs necesarias)
+
+### 🔹 Instalar MSYS2
+
+```powershell
+winget install --id=MSYS2.MSYS2
+```
+
+---
+
+### 🔹 Abrir terminal **MSYS2 MinGW64**
+
+(esto es clave, NO usar UCRT ni MSYS)
+
+---
+
+### 🔹 Instalar librerías necesarias
+
+```bash
+pacman -S --needed --noconfirm \
+mingw-w64-x86_64-gtk3 \
+mingw-w64-x86_64-pango \
+mingw-w64-x86_64-cairo \
+mingw-w64-x86_64-gdk-pixbuf \
+mingw-w64-x86_64-glib
+```
+
+---
+
+## 6️⃣ Exponer DLLs al sistema (PATH)
+
+En **PowerShell como usuario normal**:
+
+```powershell
+setx PATH "$env:PATH;C:\msys64\mingw64\bin"
+```
+
+(Reabrir la terminal)
+
+---
+
+## 7️⃣ Verificación crítica (DLL)
+
+```powershell
+where.exe libgobject-2.0-0.dll
+```
+
+Salida esperada:
+
+```text
+C:\msys64\mingw64\bin\libgobject-2.0-0.dll
+```
+
+✔ Si aparece → sistema OK
+
+---
+
+## 8️⃣ Verificación Django
+
+Desde el proyecto:
+
+```powershell
+py manage.py check
+```
+
+Luego:
+
+```powershell
+py manage.py migrate
+py manage.py runserver
+```
+
+---
+
+## ✅ Resultado final
+
+✔ Django levanta sin errores
+✔ MySQL conecta correctamente
+✔ Sin `mysqlclient`
+✔ Sin errores de DLL
+✔ Entorno estable en Windows
+
+---
+
+## 🧠 REGLAS DE ORO (para el futuro)
+
+❌ No intentes compilar mysqlclient en Windows
+✅ PyMySQL es la solución correcta
+❌ No mezclar MSYS / UCRT / MinGW
+✅ Siempre usar **MSYS2 MinGW64**
+✅ PATH solo a `C:\msys64\mingw64\bin`
+
+---
