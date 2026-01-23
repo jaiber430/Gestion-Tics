@@ -2,7 +2,7 @@
 
 {% block content %}
 
-  {% comment %}Mostar esto solo al funcionario{% endcomment %}
+  {% comment %}Mostrar esto solo al funcionario{% endcomment %}
   {% if rol == 3 %}
     <!-- Sección principal - Consultar Fichas -->
     <main class="contenido-principal">
@@ -62,8 +62,10 @@
               <th>Formato masivo</th>
               <th>Fecha Creación</th>
               <th>Estado</th>
-              <th>Codigo de la ficha</th>
-              <th>Codigo de solicitud</th>
+              <th>Código de la ficha</th>
+              <th>Código de solicitud</th>
+              <th>Descargas</th>
+              <th>Fecha de Creación</th>
               <th>Observación</th>
               <th>Enviar</th>
             </tr>
@@ -86,34 +88,62 @@
                     {% endif %}
                   </td>
 
-                  <!-- Descargas -->
+                  <!-- Estado -->
                   <td>
-                    <a href="{% url 'ficha_caracterizacion_pdf' solicitud_consulta.idsolicitud %}" class="boton-descargar">Descargar PDF</a>
-                  </td>
-                  <td>
-                    <a href="{% url 'descargar_pdf' solicitud_consulta.idsolicitud rol %}" class="boton-descargar">Descargar PDF</a>
-                  </td>
-                  <td>
-                    {% if solicitud_consulta.boton_ver_carta_disabled %}
-                      <button class="boton-descargar" disabled>Ver Carta (No disponible)</button>
-                    {% elif solicitud_consulta.mostrar_boton_carta_funcionario %}
-                      <a href="{% url 'descargar_carta' solicitud_consulta.idsolicitud rol %}" class="boton-descargar">Descargar Carta</a>
-                    {% else %}
-                      <a href="{% url 'descargar_carta' solicitud_consulta.idsolicitud rol %}" class="boton-descargar" > Descargar carta </a>
-                    {% endif %}
+                    <select name="estado" id="estado_{{ solicitud_consulta.idsolicitud }}">
+                      <option value="">-- Seleccione un estado --</option>
+                      {% for item in estado %}
+                        <option value="{{ item.idestado }}"
+                          {% if solicitud_consulta.estado_usuario == item.estados %}
+                            selected
+                          {% endif %}
+                        >
+                          {{ item.estados }}
+                        </option>
+                      {% endfor %}
+                    </select>
                   </td>
 
-                  <!-- Excel -->
+                  <!-- Código ficha -->
                   <td>
-                    {% if solicitud_consulta.excel_funcionario_disponible %}
-                      <a href="{% url 'descargar_excel' solicitud_consulta.idsolicitud rol %}"
-                        class="link-excel boton-descargar" data-id="{{ solicitud_consulta.idsolicitud }}">Descargar excel</a>
-                      <div class="subida-reemplazo" data-id="{{ solicitud_consulta.idsolicitud }}" style="display: none;">
-                        <input type="file" class="archivo-subida" name="actualizar_excel" id="actualizar_excel_{{ solicitud_consulta.idsolicitud }}" data-id="{{ solicitud_consulta.idsolicitud }}" />
-                      </div>
-                    {% else %}
-                      <a class="link-excel boton-descargar disabled-link" data-id="{{ solicitud_consulta.idsolicitud }}" tabindex="-1" aria-disabled="true">Descargar excel</a>
-                    {% endif %}
+                    <input type="number" id="codigo_ficha_{{ solicitud_consulta.idsolicitud }}" name="codigo_ficha" class="entrada-texto"
+                          value="{{ solicitud_consulta.codigo_ficha}}"
+                          placeholder="Código de la ficha"
+                          {% if solicitud_consulta.codigo_ficha %}readonly{% endif %}
+                          />
+                  </td>
+
+                  <!-- Código solicitud -->
+                  <td>
+                    <input type="number" id="codigo_solicitud_{{ solicitud_consulta.idsolicitud }}" name="codigo_solicitud" class="entrada-texto"
+                          value="{{ solicitud_consulta.codigo_solicitud}}"
+                          placeholder="Código de la solicitud"
+                          {% if solicitud_consulta.codigo_solicitud %}readonly{% endif %}
+                           />
+                  </td>
+
+                  <!-- Descargas -->
+                  <td style="min-height: 150px; vertical-align: top; padding: 10px;">
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                      <a href="{% url 'ficha_caracterizacion_pdf' solicitud_consulta.idsolicitud %}" class="boton-descargar" style="padding: 6px 10px; font-size: 12px;">Ficha de caracterización</a>
+                      <a href="{% url 'descargar_pdf' solicitud_consulta.idsolicitud rol %}" class="boton-descargar" style="padding: 6px 10px; font-size: 12px;">Documentos aspirantes</a>
+                      {% if solicitud_consulta.boton_ver_carta_disabled %}
+                        <button class="boton-descargar" disabled style="padding: 6px 10px; font-size: 12px;">Ver Carta (No disponible)</button>
+                      {% elif solicitud_consulta.mostrar_boton_carta_funcionario %}
+                        <a href="{% url 'descargar_carta' solicitud_consulta.idsolicitud rol %}" class="boton-descargar" style="padding: 6px 10px; font-size: 12px;">Carta de solicitud</a>
+                      {% else %}
+                        <a href="{% url 'descargar_carta' solicitud_consulta.idsolicitud rol %}" class="boton-descargar" style="padding: 6px 10px; font-size: 12px;">Carta de solicitud</a>
+                      {% endif %}
+                      {% if solicitud_consulta.excel_funcionario_disponible %}
+                        <a href="{% url 'descargar_excel' solicitud_consulta.idsolicitud rol %}"
+                           class="link-excel boton-descargar" data-id="{{ solicitud_consulta.idsolicitud }}" style="padding: 6px 10px; font-size: 12px;">Formato inscripción masivo</a>
+                        <div class="subida-reemplazo" data-id="{{ solicitud_consulta.idsolicitud }}" style="display: none;">
+                          <input type="file" class="archivo-subida" name="actualizar_excel" id="actualizar_excel_{{ solicitud_consulta.idsolicitud }}" data-id="{{ solicitud_consulta.idsolicitud }}" />
+                        </div>
+                      {% else %}
+                        <a class="link-excel boton-descargar disabled-link" data-id="{{ solicitud_consulta.idsolicitud }}" tabindex="-1" aria-disabled="true" style="padding: 6px 10px; font-size: 12px;">Formato inscripción masivo</a>
+                      {% endif %}
+                    </div>
                   </td>
 
                   <!-- Fecha solicitud -->
@@ -167,9 +197,9 @@
                   <!-- Botón enviar -->
                   <td>
                     {% if solicitud_consulta.estado_usuario == "Matriculada" %}
-                      <button type="submit" class="disabled" disabled>Enviar</button>
+                      <button type="submit" class="boton-enviar disabled" disabled>Enviar</button>
                     {% else %}
-                      <button type="submit">Enviar</button>
+                      <button type="submit" class="boton-enviar">Enviar</button>
                     {% endif %}
                   </td>
                 </form>
@@ -194,10 +224,10 @@
           // Seleccionar los elementos relacionados
           const subida = document.querySelector(`.subida-reemplazo[data-id="${id}"]`)
           const inputArchivo = document.querySelector(`.archivo-subida[data-id="${id}"]`)
-      
+
           // Revisamos el estado guardado en localStorage
           const estado = localStorage.getItem('estadoExcel_' + id)
-          
+
           // Mostrar/ocultar elementos según el estado
           if (estado === 'descargado') {
             enlace.style.display = 'none'
@@ -206,15 +236,15 @@
             enlace.style.display = 'block'
             subida.style.display = 'none'
           }
-      
+
           // Cuando se hace clic en el enlace (DESCARGAR)
           enlace.addEventListener('click', function () {
             enlace.style.display = 'none'
             subida.style.display = 'block'
             localStorage.setItem('estadoExcel_' + id, 'descargado')
           })
-      
-          // Cuando se sube un archivo (CAMBIAR) 
+
+          // Cuando se sube un archivo (CAMBIAR)
           inputArchivo.addEventListener('change', function () {
             enlace.style.display = 'block'
             subida.style.display = 'none'
@@ -222,7 +252,7 @@
           })
         })
       })
-      
+
       // Funciones de filtrado para funcionarios
       function aplicarFiltrosFuncionario() {
         // Obtener los valores de los filtros
@@ -230,7 +260,7 @@
         const filtroTipo = document.getElementById('filtro-tipo-funcionario').value
         const filtroFecha = document.getElementById('filtro-fecha').value // formato yyyy-mm-dd
         const filas = document.querySelectorAll('.tabla-fichas tbody tr')
-      
+
         filas.forEach((fila) => {
           const programa = fila.cells[0].textContent.toLowerCase()
           // Obtener la fecha desde el atributo data-fecha
@@ -242,7 +272,7 @@
           const esCampesina = tipoNombre === 'campesina' || tipoId === '2'
           const esRegular = tipoNombre === 'regular' || tipoId === '1'
           let mostrar = true
-      
+
           // Programa
           if (filtroPrograma && !programa.includes(filtroPrograma)) mostrar = false
           // Tipo Regular/Campesina (se infiere del nombre del programa)
@@ -252,11 +282,11 @@
           }
           // Fecha exacta
           if (filtroFecha && fecha !== filtroFecha) mostrar = false
-      
+
           fila.style.display = mostrar ? '' : 'none'
         })
       }
-      
+
       function filtrarPorProgramaFuncionario() {
         aplicarFiltrosFuncionario()
       }
@@ -276,7 +306,7 @@
                 background-color: #d4edda; color: #155724; border-color: #c3e6cb;
             {% elif message.tags == 'error' %}
                       background-color: #f8d7da; color: #721c24; border-color: #f5c6cb;
-            {% else %}              
+            {% else %}
                       background-color: #d1ecf1; color: #0c5460; border-color: #bee5eb;
             {% endif %}">{{ message }}</div>
         {% endfor %}
@@ -357,7 +387,7 @@
               </td>
               <td>
                 {% if solicitud_consulta.boton_ver_carta_disabled %}
-                  <a class="boton-descargar disabled" style="pointer-events: none; opacity: 0.5;" 
+                  <a class="boton-descargar disabled" style="pointer-events: none; opacity: 0.5;"
                     title="No hay empresa asociada">Ver carta de solicitud</a>
                 {% else %}
                   <a href="{% url 'ver_pdf_carta' solicitud_consulta.idsolicitud %}" class="boton-descargar">
@@ -366,7 +396,7 @@
                 {% endif %}
               </td>
               <td>
-                <a href="{% url 'ver_formato' solicitud_consulta.idsolicitud %}" class="link-excel">Ver formato inscripción masivo</a>
+                <a href="{% url 'ver_formato' solicitud_consulta.idsolicitud %}" class="link-excel">Ver formato de inscripción masivo</a>
               </td>
               <!-- Fecha de la solicitud -->
               <td>{{ solicitud_consulta.fechasolicitud }}</td>
@@ -397,7 +427,7 @@
         const filtroTipo = document.getElementById('filtro-tipo-coordinador').value
         const filtroFecha = document.getElementById('filtro-fecha-coord').value
         const filas = document.querySelectorAll('.tabla-fichas tbody tr')
-      
+
         filas.forEach((fila) => {
           const programa = fila.cells[0].textContent.toLowerCase()
           const fecha = fila.getAttribute('data-fecha')
@@ -465,8 +495,8 @@
               <th>Estado</th>
               <th>Observación funcionario</th>
               <th>Ficha de Caracterización</th>
-              <th>aspirantes Inscritos</th>
-              <th>Excel sofia plus</th>
+              <th>Cantidad aspirantes Inscritos</th>
+              <th>Excel SOFÍA plus</th>
               <th>Fecha de Creación</th>
               <th>Compartir</th>
             </tr>
@@ -520,9 +550,9 @@
                 </td>
                 <td>
                   {% if solicitud_consulta.estado_usuario in 'Matriculada Rechazada Creacion Creada Lista de espera' and solicitud_consulta.excel_masivo_disponible %}
-                    <a href="{% url 'sofia_plus_descarga' solicitud_consulta.idsolicitud %}" class="boton-descargar">Descargar excel</a>
+                    <a href="{% url 'sofia_plus_descarga' solicitud_consulta.idsolicitud %}" class="boton-descargar">Descargar Excel</a>
                   {% else %}
-                    <a class="boton-descargar disabled-link" tabindex="-1" aria-disabled="true">Descargar excel</a>
+                    <a class="boton-descargar disabled-link" tabindex="-1" aria-disabled="true">Descargar Excel</a>
                   {% endif %}
                 </td>
                 <td>{{ solicitud_consulta.fechasolicitud }}</td>
@@ -597,7 +627,7 @@
         // Obtener el valor del filtro y las filas de la tabla
         const filtro = document.getElementById('filtro-programa').value.toLowerCase()
         const filas = document.querySelectorAll('.tabla-fichas tbody tr')
-      
+
         filas.forEach((fila) => {
           const programa = fila.cells[0].textContent.toLowerCase()
           if (programa.includes(filtro)) {
@@ -607,12 +637,12 @@
           }
         })
       }
-      
+
       // Filtrar por tipo de ficha (Regular o Campesina)
       function filtrarPorTipo() {
         const filtro = document.getElementById('filtro-tipo').value
         const filas = document.querySelectorAll('.tabla-fichas tbody tr')
-      
+
         filas.forEach((fila) => {
           const programa = fila.cells[0].textContent
           if (filtro === '') {
@@ -628,7 +658,7 @@
           }
         })
       }
-      
+
       // Función combinada que aplica ambos filtros
       function aplicarFiltros() {
         // Obtener los valores de los filtros
@@ -636,7 +666,7 @@
         const filtroTipo = document.getElementById('filtro-tipo').value
         const filtroFecha = document.getElementById('filtro-fecha-general').value
         const filas = document.querySelectorAll('.tabla-fichas tbody tr')
-      
+
         filas.forEach((fila) => {
           const programa = fila.cells[0].textContent.toLowerCase()
           const fecha = fila.getAttribute('data-fecha')
@@ -645,7 +675,7 @@
           const esCampesina = tipoNombre === 'campesina' || tipoId === '2'
           const esRegular = tipoNombre === 'regular' || tipoId === '1'
           let mostrarFila = true
-      
+
           if (filtroPrograma && !programa.includes(filtroPrograma)) mostrarFila = false
           if (filtroTipo) {
             if (filtroTipo === 'Regular' && !esRegular) mostrarFila = false
@@ -656,12 +686,12 @@
           fila.style.display = mostrarFila ? '' : 'none'
         })
       }
-      
+
       // Actualizar las funciones individuales para usar la función combinada
       function filtrarPorPrograma() {
         aplicarFiltros()
       }
-      
+
       // Actualizar la función de filtro por tipo para usar la función combinada
       function filtrarPorTipo() {
         aplicarFiltros()

@@ -205,8 +205,8 @@ body {
     color: var(--color-primario);
     text-decoration: none;
     font-size: 1.4rem;
-    display: block;
-    margin: var(--espaciado-sm) 0;
+    display: inline;
+    margin: 0;
     transition: color 0.3s ease;
     font-weight: var(--peso-medio);
 }
@@ -215,6 +215,13 @@ body {
 .enlace-registro:hover {
     color: var(--color-primario-hover);
     text-decoration: underline;
+}
+
+.texto-registro {
+    text-align: center;
+    font-size: 1.2rem;
+    color: var(--color-texto-secundario);
+    margin-top: var(--espaciado-md);
 }
 
 /* 

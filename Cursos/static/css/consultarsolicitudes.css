@@ -20,13 +20,15 @@
     --color-disponible: #4CAF50;
     --color-iniciado: #2196F3;
     --color-registrado: #FF9800;
-    --color-espera: #9C27B0;
-    --color-rechazado: #F44336;
-    --color-aprobado: #4CAF50;
+    --color-espera: #000000;           /* En espera - Negro */
+    --color-rechazado: #F44336;        /* Rechazada - Rojo */
+    --color-aprobado: #4CAF50;         /* Aprobada - Verde */
     --color-revision: #FF9800;
     --color-pendiente: #FFC107;
     --color-aceptada: #4CAF50;
-    --color-Matriculada: #104712;
+    --color-Matriculada: #4CAF50;     /* Matriculada - Verde */
+    --color-creacion: #2196F3;         /* Proceso de creación - Azul */
+    --color-creada: #FFC107;           /* Ficha creada - Amarillo */
     
     /* Configuración de tipografía */
     --fuente-principal: 'Poppins', Arial, sans-serif;
@@ -452,7 +454,9 @@ body {
 .estado-rechazado { color: var(--color-rechazado); font-weight: var(--peso-medio); }
 .estado-aprobado { color: var(--color-aprobado); font-weight: var(--peso-medio); }
 .estado-revision { color: var(--color-revision); font-weight: var(--peso-medio); }
-.estado-Matriculada {color: var(--color-Matriculada); font-weight: var(--peso-medio);}
+.estado-Matriculada { color: var(--color-Matriculada); font-weight: var(--peso-medio); }
+.estado-creacion { color: var(--color-creacion); font-weight: var(--peso-medio); }
+.estado-creada { color: var(--color-creada); font-weight: var(--peso-medio); }
 
 .boton-descargar {
     background-color: var(--color-primario);
