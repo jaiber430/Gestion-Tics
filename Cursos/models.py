@@ -211,7 +211,7 @@ class Solicitudcoordinador(models.Model):
     usuario_solicitud = models.ForeignKey('Usuario', models.DO_NOTHING, db_column='usuario_solicitud', related_name='solicitudes_revisadas')
     idsolicitud = models.ForeignKey(Solicitud, models.DO_NOTHING, db_column='idsolicitud')
     idestado = models.ForeignKey(EstadosCoordinador, models.DO_NOTHING, db_column='idestado')
-    observacion = models.TextField()
+    observacion = models.TextField(null=True, blank=True)
     fecha = models.DateField(blank=True, null=True)
 
     class Meta:

@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import Http404
 
-import os 
+import os
 from django.conf import settings
 from aspirantes.utils import eliminar_carpetas_vencidas, combinar_pdfs
 
@@ -14,11 +14,11 @@ from Cursos.models import Aspirantes, Solicitud, Caracterizacion, Tipoidentifica
 
 from datetime import datetime
 
-# Libreria de Django para generar un excel
+# IMPORTS LOCALES PARA NO MODIFICAR EL TOPE DEL ARCHIVO
 from openpyxl import Workbook
+from openpyxl.styles import Font, PatternFill, Alignment
 
 from django.contrib import messages
-# Create your views here.
 
 def formulario_aspirantes(request, idsolicitud):
 
@@ -47,9 +47,9 @@ def formulario_aspirantes(request, idsolicitud):
 
 def registro_aspirante(request):
     if request.method == "POST":
-        
+
         try:
-            nombres = request.POST.get('nombres')
+            nombres = request.POST.get('nombres').upper()
             apellidos = request.POST.get('apellidos')
             caracterizacion_id = request.POST.get('tipo_caracterizacion')
             telefono = request.POST.get('telefono')
@@ -91,7 +91,7 @@ def registro_aspirante(request):
             id_tipo_documento = Tipoidentificacion.objects.get(idtipoidentificacion=tipo_documento_id)
             id_solicitud_preinscripcion = Solicitud.objects.get(idsolicitud=solicitud_inscripcion)
 
-            # Crear carpeta con la solicitud para almacenar los pdf 
+            # Crear carpeta con la solicitud para almacenar los pdf
             instructor = id_solicitud_preinscripcion
 
             # Subcarpeta con el id de la solicitud
@@ -139,25 +139,21 @@ def registro_aspirante(request):
             if total_aspirantes >= id_solicitud_preinscripcion.cupo:
                 combinar_pdfs(pdf_aspirantes)
 
-                # ============================================================== 
+                # ==============================================================
                 # Generar archivo Excel con base en los aspirantes
                 # ==============================================================
-
-                # IMPORTS LOCALES PARA NO MODIFICAR EL TOPE DEL ARCHIVO
-                from openpyxl import Workbook
-                from openpyxl.styles import Font, PatternFill, Alignment
 
                 # Asegurarse de que el id este siendo enviado cuando se oprima el boton de descargar
                 solicitud = id_solicitud_preinscripcion
 
-                # Consulta para obtener el nombre del programa relacionado con la solicitud 
+                # Consulta para obtener el nombre del programa relacionado con la solicitud
                 programa = solicitud.codigoprograma  # Ya tienes la solicitud, accedes directo al FK
                 nombre_programa = programa.nombreprograma  # Mostrar el nombre del programa
 
                 # Crear un nuevo archivo de excel en blanco
                 nuevo_archivo = Workbook()
                 hoja = nuevo_archivo.active  # Seleccionar la hoja del excel (Primera por defecto)
-                hoja.title = f"Aspirantes Inscritos"  # Colocar nombre a esa hoja 
+                hoja.title = f"Aspirantes Inscritos"  # Colocar nombre a esa hoja
 
                 # 🔹 Insertar campo de título que abarca todas las columnas (A1:G1)
                 hoja.merge_cells("A1:G1")  # Unir desde A1 hasta G1
@@ -195,7 +191,7 @@ def registro_aspirante(request):
                     cell.font = Font(bold=True)
                     cell.alignment = Alignment(horizontal="center", vertical="center")
 
-                # Consulta para obtener los aspirantes relacionados con la solicitud 
+                # Consulta para obtener los aspirantes relacionados con la solicitud
                 aspirantes = Aspirantes.objects.filter(solicitudinscripcion=solicitud).order_by("idaspirante")
 
                 # Agregar filas de datos (7 columnas por fila) para cada aspirante

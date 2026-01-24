@@ -13,7 +13,7 @@ from weasyprint import HTML, CSS
 import secrets
 # Convertir todo a cadena
 import string
-import os 
+import os
 # Poder buscar la ruta para descargar el PDF
 from django.conf import settings
 # Importar las fechas
@@ -92,7 +92,7 @@ def consultas_instructor(request):
             ).count()
             if cantidad_aspirantes == solicitud.cupo:
                 solicitudes_con_cupo_completo.append(solicitud)
-        
+
         solicitudes = solicitudes_con_cupo_completo
 
     elif id_rol == 3:  # Funcionario: solicitudes aprobadas por coordinador
@@ -123,10 +123,10 @@ def consultas_instructor(request):
 
         if ultima_revision:
             solicitud.estado_coordinador = ultima_revision.idestado.estado
-            solicitud.observacion_coordinador = ultima_revision.observacion or "Sin observación"
+            solicitud.observacion_coordinador = ultima_revision.observacion or ''
         else:
             solicitud.estado_coordinador = None
-            solicitud.observacion_coordinador = "Sin observación"
+            solicitud.observacion_coordinador = ''
 
         ficha = Ficha.objects.filter(idsolicitud=solicitud.idsolicitud).select_related('idestado', 'idusuario').first()
         if ficha:
@@ -135,8 +135,9 @@ def consultas_instructor(request):
             solicitud.codigo_ficha = ficha.codigoficha or ''
         else:
             solicitud.estado_usuario = None
-            solicitud.observacion_usuario = solicitud.observacion_coordinador or ''
+            solicitud.observacion_usuario = ''  # NO heredar observación del coordinador
             solicitud.codigo_ficha = ''
+
 
         solicitud.codigo_solicitud = solicitud.codigosolicitud
 
@@ -422,13 +423,13 @@ def ficha_caracterizacion(request, solicitud_id):
     # Obtener el usuario actual desde la sesión
     user_id = request.session.get('user_id')
     usuario_actual = get_object_or_404(Usuario.objects.select_related('rol'), idusuario=user_id)
-    
+
     # Obtener la solicitud con todas las relaciones necesarias
     # 🔹 select_related solo con ForeignKey / OneToOne
     solicitud = get_object_or_404(
         Solicitud.objects.select_related(
             'codigoprograma',
-            'idhorario', 
+            'idhorario',
             'idmodalidad',
             'codigomunicipio__codigodepartamento',
             'idusuario',
@@ -437,7 +438,7 @@ def ficha_caracterizacion(request, solicitud_id):
         ),
         idsolicitud=solicitud_id
     )
-    
+
     # Obtener todas las variables que necesita el template
     programa = solicitud.codigoprograma
     horario = solicitud.idhorario
@@ -448,7 +449,7 @@ def ficha_caracterizacion(request, solicitud_id):
     empresa = solicitud.idempresa
     programa_especial = solicitud.idespecial
     ambiente = solicitud.ambiente  #Campo de texto, se usa directo
-    
+
     # Definir layout según rol del usuario actual
     id_rol = usuario_actual.rol.idrol
     if id_rol == 1:
@@ -461,7 +462,7 @@ def ficha_caracterizacion(request, solicitud_id):
         layout = 'layout/layout_admin.html'
     else:
         layout = 'layout/layout_admin.html'
-    
+
     # Contexto que se envía al template
     context = {
         'layout': layout,
@@ -477,7 +478,7 @@ def ficha_caracterizacion(request, solicitud_id):
         'programa_especial': programa_especial,
         'ambiente': ambiente,  # Se pasa al template como texto
     }
-    
+
     # Renderizar template con datos
     return render(request, 'fichacaracterizacion/fichacaracterizacion.html', context)
 
@@ -657,7 +658,7 @@ def descargar_excel(request, id, idrol):
 # Descargar la carta de solicitud de la empresa
 # ========================================================================
 @login_required_custom
-def descargar_carta(request, id, idrol): 
+def descargar_carta(request, id, idrol):
     # ============================
     # Buscar la solicitud
     # ============================
@@ -847,7 +848,7 @@ def revision_fichas(request, id):
 def descargar_excel_ficha(request, id):
     # Nombre del archivo esperado
     excel_archivo = f"formato_inscripcion_{id}.xlsx"
-    
+
     # Ruta completa donde debe estar almacenado el archivo
     carpeta_excel = os.path.join(settings.MEDIA_ROOT, 'Funcionario', f"solicitud_{id}", 'Masivos_sofia_plus')
     directorio_excel = os.path.join(carpeta_excel, excel_archivo)
@@ -916,7 +917,7 @@ def revision_coordinador(request, id_solicitud):
             # ----------------------------
             # Usuario que creó la solicitud
             # ----------------------------
-            usuario_solicitud = solicitud.idusuario  
+            usuario_solicitud = solicitud.idusuario
 
             # ----------------------------
             # Buscar si ya existe una revisión previa para esta solicitud
