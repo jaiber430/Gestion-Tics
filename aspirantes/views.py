@@ -44,7 +44,6 @@ def formulario_aspirantes(request, idsolicitud):
         'cupo_completo': False,
     })
 
-
 def registro_aspirante(request):
     if request.method == "POST":
 
@@ -99,14 +98,14 @@ def registro_aspirante(request):
             pdf_aspirantes = os.path.join(settings.MEDIA_ROOT, 'pdf', carpeta_solicitud)
             os.makedirs(pdf_aspirantes, exist_ok=True)
 
-            # Contador para el nombre del archivo
-            contador = 1
-            while True:
-                nombre_archivo = f"PDF_{contador}.pdf"
-                direccion_archivo = os.path.join(pdf_aspirantes, nombre_archivo)
-                if not os.path.exists(direccion_archivo):
-                    break
-                contador += 1
+            # Nombre del archivo usando el número de identificación
+            nombre_archivo = f"{identificacion}.pdf"
+            direccion_archivo = os.path.join(pdf_aspirantes, nombre_archivo)
+
+            # Validar que no exista ya un PDF con ese documento
+            if os.path.exists(direccion_archivo):
+                messages.error(request, 'Ya existe un aspirante registrado con este documento.')
+                return redirect('formularioaspirantes', idsolicitud=solicitud_inscripcion)
 
             # Guardar PDF manualmente en la carpeta creada
             with open(direccion_archivo, 'wb+') as destino:
@@ -192,7 +191,10 @@ def registro_aspirante(request):
                     cell.alignment = Alignment(horizontal="center", vertical="center")
 
                 # Consulta para obtener los aspirantes relacionados con la solicitud
-                aspirantes = Aspirantes.objects.filter(solicitudinscripcion=solicitud).order_by("idaspirante")
+                aspirantes = Aspirantes.objects.filter(
+                    solicitudinscripcion=solicitud
+                ).order_by("numeroidentificacion")
+
 
                 # Agregar filas de datos (7 columnas por fila) para cada aspirante
                 for agregar in aspirantes:

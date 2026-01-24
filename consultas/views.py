@@ -749,8 +749,12 @@ def revision_fichas(request, id):
             # Capturar datos enviados
             # ----------------------------
             estados = request.POST.get('estado')
-            numero_solicitud = request.POST.get('codigo_solicitud', None)
-            numero_ficha = request.POST.get('codigo_ficha', None)
+            numero_solicitud = request.POST.get('codigo_solicitud')
+            numero_ficha = request.POST.get('codigo_ficha')
+
+            numero_solicitud = int(numero_solicitud) if numero_solicitud else None
+            numero_ficha = int(numero_ficha) if numero_ficha else None
+
             observacion = request.POST.get('observacion')
             nuevo_archivo = request.FILES.get('actualizar_excel', None)
 
