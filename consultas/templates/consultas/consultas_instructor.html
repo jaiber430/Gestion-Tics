@@ -545,6 +545,11 @@
                               <span class="documento-aprendiz">{{ aspirante.tipoidentificacion.tipoidentificacion }} {{ aspirante.numeroidentificacion }}</span>
                               <span class="documento-aprendiz">Teléfono: {{ aspirante.telefono }}</span>
                               <span class="documento-aprendiz">Correo: {{ aspirante.correo }}</span>
+                              {% comment %} Ver Pdf de los aspirantes {% endcomment %}
+                              <a href="{% url 'seePdfForapplicants' solicitud_consulta.idsolicitud aspirante.numeroidentificacion %}"
+                                target="_blank">
+                                Ver documento 📄
+                              </a>
                             </div>
                           </div>
                         {% empty %}
@@ -554,6 +559,11 @@
                             </div>
                           </div>
                         {% endfor %}
+                      </div>
+                      {% comment %} Botones ver combinado de PDF y excel {% endcomment %}
+                      <div>
+                        <a href="{%url 'viewCombinedPdf' solicitud_consulta.idsolicitud%}">Ver Pdf combinado 📄</a>
+                        <a href="{%url 'seeExcelCandidates' solicitud_consulta.idsolicitud%}">Ver Excel </a>
                       </div>
                     </div>
                   </div>

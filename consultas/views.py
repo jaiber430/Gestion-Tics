@@ -37,13 +37,80 @@ from django.template.loader import get_template
 # from io import BytesIO
 
 # import pandas as pd
-# Create your views here.
+
+# Ver pdf aspirante en especifico
+
+def showPdfApplicants(request, id, numDoc):
+    # Verificar que el aspirante existe
+    if not Aspirantes.objects.filter(numeroidentificacion=numDoc).exists():
+        raise Http404("El aspirante no existe")
+
+    pdf_path = os.path.join(
+        settings.MEDIA_ROOT,
+        'pdf',
+        f'solicitud_{id}',
+        f'{numDoc}.pdf'
+    )
+
+    if not os.path.exists(pdf_path):
+        raise Http404("El archivo no existe")
+
+    return FileResponse(
+        open(pdf_path, 'rb'),
+        content_type='application/pdf'
+    )
+
+# Ver pdf combinado
+def viewCombinedPdf (request,  pdfFolder):
+
+    pdfPath = os.path.join(
+        settings.MEDIA_ROOT,
+        'pdf',
+        f'solicitud_{pdfFolder}',
+        'combinado.pdf'
+    )
+
+    if not os.path.exists(pdfPath):
+        raise Http404('El archivo no existe')
+
+    return FileResponse(
+        open(pdfPath, 'rb'),
+        content_type='application/pdf'
+    )
+
+def showExcelApprentices(request, excelFolder ):
+    # Nombre del archivo
+    folder_name = f'formato_inscripcion_{excelFolder}.xlsx'
+    ruta_archivo = os.path.join(settings.MEDIA_ROOT, "excel", folder_name)
+
+    datos = []
+    error = None
+
+    try:
+        # Cargar el archivo Excel
+        wb = load_workbook(ruta_archivo)
+        ws = wb.active  # primera hoja
+
+        # Recorrer todas las filas y columnas
+        for row in ws.iter_rows(values_only=True):
+            fila = []
+            for celda in row:
+                fila.append("" if celda is None else str(celda))
+            datos.append(fila)
+
+    except Exception as e:
+            error = f"Error al abrir el archivo: {e}"
+
+    return render(request, "fichacaracterizacion/formato_inscripcion.html", {
+        "datos": datos,
+        "error": error
+    })
 
 # =====================================================================
 # Consultas dependiendo del rol
 # =====================================================================
 @login_required_custom
-def consultas_instructor(request):
+def consultas_todos(request):
     import secrets, string, os, calendar, datetime
     from django.conf import settings
 
@@ -85,15 +152,7 @@ def consultas_instructor(request):
             idusuario__in=instructores_asignados
         ).select_related('idusuario', 'idempresa').order_by('-fechasolicitud')
 
-        solicitudes_con_cupo_completo = []
-        for solicitud in solicitudes:
-            cantidad_aspirantes = Aspirantes.objects.filter(
-                solicitudinscripcion=solicitud.idsolicitud
-            ).count()
-            if cantidad_aspirantes == solicitud.cupo:
-                solicitudes_con_cupo_completo.append(solicitud)
-
-        solicitudes = solicitudes_con_cupo_completo
+        solicitudes = solicitudes.filter(revisado=1)
 
     elif id_rol == 3:  # Funcionario: solicitudes aprobadas por coordinador
         solicitudes_aprobadas = Solicitudcoordinador.objects.filter(

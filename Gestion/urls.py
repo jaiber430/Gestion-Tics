@@ -44,7 +44,7 @@ urlpatterns = [
     path('formulario_solicitud_regular/', views_solicitud.solicitud_regular, name="crearregular"),
     path('formulario_solicitud_campesina/', views_solicitud.solicitud_campesina, name="crearcampesina"),
     # Realizar las consultas dependiendo el rol que este en el sistema
-    path('Consultas_instructor/', views_consultas.consultas_instructor, name="consultas_instructor"),
+    path('Consultas/', views_consultas.consultas_todos, name="consultas_instructor"),
     # Ver la ficha de caracterización como admin e instructor
     path('ficha_caracterizacion/<int:solicitud_id>/', views_consultas.ficha_caracterizacion, name="ficha_caracterizacion"),
     # Descargar  ficha de caracterización en PDF
@@ -65,7 +65,7 @@ urlpatterns = [
     path('descargar_formato_sofia_plus/<int:id>', views_consultas.descargar_excel_ficha, name='sofia_plus_descarga'),
     # Enviar esatdo y observación del coordinador
     path('revision_coordinador/<int:id_solicitud>/', views_consultas.revision_coordinador, name='revision_coordinador'),
-    # Ver excel 
+    # Ver excel
     path('ver_formato/<int:id_solicitud>/', views_consultas.ver_formato_inscripcion, name='ver_formato'),
     # Ver PDF aspirantes
     path('ver_pdf_aspirantes/<int:id_solicitud>/', views_consultas.ver_pdf_aspirantes, name="ver_pdf_aspirantes"),
@@ -73,19 +73,23 @@ urlpatterns = [
     path('ver_pdf_carta/<int:id_solicitud>/', views_consultas.ver_pdf_carta, name='ver_pdf_carta'),
     # Reportes
     path('reportes/', views_consultas.reportes, name='reportes'),
-    # Cerrar sesión    
+    # Cerrar sesión
     path('cerrar_sesion/', views.cerrar_sesion, name='salir'),
     # Buscar programa
     path('buscar_programa/', views_programas.buscar_programas, name='buscar_programa'),
     # Crear programa
     path('crear_programa/', views_programas.crear_programa, name='crear_programa'),
-    # Editar programa 
+    # Editar programa
     path('editar_programa', views_programas.editar_programa, name="actualizar_programa"),
     #Borrar programa
     path("borrar/<str:codigo>/", views_programas.borrar_programa, name="borrar_programa"),
     # URLs para verificación de usuarios
     path('verificacion_usuario/', views.verificacion_usuario, name='verificacion_usuario'),
     path('verificar_usuario/<int:idusuario>/', views.verificar_usuario, name='verificar_usuario'),
+    # Ver pdf aspirantes
+    path('pdfAspirantes/<int:id>/<str:numDoc>/', views_consultas.showPdfApplicants, name='seePdfForapplicants'),
+    path('combinedPdf/<int:combinedId>/', views_consultas.viewCombinedPdf, name='viewCombinedPdf'),
+    path('seeExcelCandidates/<int:excelFolder>/', views_consultas.showExcelApprentices, name='seeExcelCandidates')
 ]
 # Poder almacenar archivos en la carpeta media
 if settings.DEBUG:

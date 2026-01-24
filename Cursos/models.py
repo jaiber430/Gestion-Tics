@@ -165,7 +165,7 @@ class Solicitud(models.Model):
     convenio = models.CharField(max_length=20, blank=True, null=True)
     ambiente = models.CharField(max_length=255, blank=True, null=True)
     fechasolicitud = models.DateField()
-
+    revisado = models.IntegerField(blank=True, null=True)
     class Meta:
         db_table = 'solicitud'
 
