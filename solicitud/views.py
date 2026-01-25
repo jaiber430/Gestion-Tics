@@ -4,17 +4,17 @@ from django.contrib import messages
 from django.utils import timezone
 # Juntar datos que deben completarse para la Db (transaction) y trabajar con los campos de los modelos (models)
 from django.db import transaction
-# Importar fechas 
+# Importar fechas
 from datetime import datetime
 import json
 # Importar datos de los modulos requeridos
 from Cursos.models import (Area, Departamentos,
-                            Empresa, Horario, Modalidad, Municipios,Programaespecial, 
-                            Programaformacion, Solicitud, Tipoempresa, Tipoidentificacion, 
+                            Empresa, Horario, Modalidad, Municipios,Programaespecial,
+                            Programaformacion, Solicitud, Tipoempresa, Tipoidentificacion,
                             Tiposolicitud, Usuario)
 
 # Requerido para crear carpetas en rutas especificas
-import os 
+import os
 from django.conf import settings
 
 # Importar decorador personalizado
@@ -47,7 +47,7 @@ def crear_solicitud(request):
     """
     Página para decidir qué ficha crear: regular o campesina
     """
-    # Llamar el id del usuario 
+    # Llamar el id del usuario
     user_id = request.session.get('user_id')
     if not user_id:
         messages.error(request, "Debes iniciar sesión para acceder.")
@@ -137,17 +137,17 @@ def _crear_solicitud_base(request, tipo_solicitud_id, template_name, mensaje_exi
                 # ===============================
                 tiene_empresa = request.POST.get('tieneEmpresa')
                 nombre_programa_codigo = request.POST.get('nombrePrograma_codigo')
-                version_programa = request.POST.get('versionPrograma') 
+                version_programa = request.POST.get('versionPrograma')
                 subsector_economico = request.POST.get('subsectorEconomico')
                 fecha_inicio = request.POST.get('fechaInicio')
                 fecha_finalizacion = request.POST.get('fechaFinalizacion')
                 cupo_aprendices = request.POST.get('cupoAprendices')
                 municipio_formacion = request.POST.get('municipioFormacion')
                 direccion_formacion = request.POST.get('direccionFormacion')
-                dias_semana = request.POST.getlist('diasSemana[]')  
+                dias_semana = request.POST.getlist('diasSemana[]')
                 hora_inicio = request.POST.get('horario_inicio') or request.POST.get('horarioInicio')
                 hora_fin = request.POST.get('horario_fin') or request.POST.get('horarioFin')
-                fechas_calendario_raw = request.POST.get('fechas_calendario')  
+                fechas_calendario_raw = request.POST.get('fechas_calendario')
 
                 try:
                     fechas_calendario = json.loads(fechas_calendario_raw) if fechas_calendario_raw else []
@@ -233,7 +233,7 @@ def _crear_solicitud_base(request, tipo_solicitud_id, template_name, mensaje_exi
                 # Crear la solicitud
                 # ===============================
                 programa_formacion = Programaformacion.objects.get(codigoprograma=nombre_programa_codigo)
-                modalidad = Modalidad.objects.get(idmodalidad=1)  
+                modalidad = Modalidad.objects.get(idmodalidad=1)
                 municipio = Municipios.objects.get(codigomunicipio=municipio_formacion)
                 programa_especial_obj = Programaespecial.objects.get(idespecial=programa_especial)
                 tipo_solicitud = Tiposolicitud.objects.get(idtiposolicitud=tipo_solicitud_id)
@@ -252,7 +252,8 @@ def _crear_solicitud_base(request, tipo_solicitud_id, template_name, mensaje_exi
                     idespecial=programa_especial_obj,
                     convenio=convenio or None,
                     ambiente=nombre_ambiente,
-                    fechasolicitud=timezone.now().date()
+                    fechasolicitud=timezone.now().date(),
+                    revisado=0
                 )
 
                 # ===============================
@@ -269,7 +270,7 @@ def _crear_solicitud_base(request, tipo_solicitud_id, template_name, mensaje_exi
 
                     # Guardar archivo en disco
                     with open(ruta_guardado, 'wb') as f:
-                        for chunk in carta_solicitud.chunks(): 
+                        for chunk in carta_solicitud.chunks():
                             f.write(chunk)
 
 
@@ -283,15 +284,15 @@ def _crear_solicitud_base(request, tipo_solicitud_id, template_name, mensaje_exi
 
     return render(request, template_name, context)
 
-    
+
 # ===============================
 # Vista: Solicitud Regular
 # ===============================
 @login_required_custom
 def solicitud_regular(request):
     return _crear_solicitud_base(
-        request, 
-        tipo_solicitud_id=1, 
+        request,
+        tipo_solicitud_id=1,
         template_name='forms/crearsolicitudregular.html',
         mensaje_exito='Solicitud de ficha regular creada exitosamente.'
     )
@@ -303,8 +304,8 @@ def solicitud_regular(request):
 @login_required_custom
 def solicitud_campesina(request):
     return _crear_solicitud_base(
-        request, 
-        tipo_solicitud_id=2, 
+        request,
+        tipo_solicitud_id=2,
         template_name='forms/crearsolicitudcampesina.html',
         mensaje_exito='Solicitud de ficha campesina creada exitosamente.'
     )

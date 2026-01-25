@@ -33,7 +33,6 @@ from django.http import HttpResponseNotFound
 # from xhtml2pdf import pisa
 from io import BytesIO
 from django.template.loader import get_template
-
 # from io import BytesIO
 
 # import pandas as pd
@@ -106,13 +105,26 @@ def showExcelApprentices(request, excelFolder ):
         "error": error
     })
 
+def reviewedByInstructor(request, idSolicitud):
+    user_id = request.session.get('user_id')
+
+    usuario = Usuario.objects.select_related('rol').get(idusuario=user_id)
+    id_rol = usuario.rol.idrol
+
+    if id_rol != 1:
+        return redirect('consultas_instructor')
+
+    solicitud = get_object_or_404(Solicitud, idsolicitud=idSolicitud)
+    solicitud.revisado = 1
+    solicitud.save()
+
+    return redirect('consultas_instructor')
+
 # =====================================================================
 # Consultas dependiendo del rol
 # =====================================================================
 @login_required_custom
 def consultas_todos(request):
-    import secrets, string, os, calendar, datetime
-    from django.conf import settings
 
     caracteres = string.ascii_letters + string.digits
     codigo = ''.join(secrets.choice(caracteres) for _ in range(5))

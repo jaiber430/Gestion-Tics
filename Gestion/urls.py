@@ -86,10 +86,11 @@ urlpatterns = [
     # URLs para verificación de usuarios
     path('verificacion_usuario/', views.verificacion_usuario, name='verificacion_usuario'),
     path('verificar_usuario/<int:idusuario>/', views.verificar_usuario, name='verificar_usuario'),
-    # Ver pdf aspirantes
+    # Ver Docs Aspirantes
     path('pdfAspirantes/<int:id>/<str:numDoc>/', views_consultas.showPdfApplicants, name='seePdfForapplicants'),
     path('combinedPdf/<int:combinedId>/', views_consultas.viewCombinedPdf, name='viewCombinedPdf'),
-    path('seeExcelCandidates/<int:excelFolder>/', views_consultas.showExcelApprentices, name='seeExcelCandidates')
+    path('seeExcelCandidates/<int:excelFolder>/', views_consultas.showExcelApprentices, name='seeExcelCandidates'),
+    path('submitRevised/<int:idSolicitud>/', views_consultas.reviewedByInstructor, name="reviewedByInstructor")
 ]
 # Poder almacenar archivos en la carpeta media
 if settings.DEBUG:
