@@ -280,29 +280,29 @@ def consultas_todos(request):
             ).filter(solicitudinscripcion=solicitud.idsolicitud)
             solicitud.aspirantes = aspirantes
 
-        # Por defecto NO mostrar nada
-    solicitud.mostrar_pdf = False
-    solicitud.mostrar_excel = False
+    for solicitud in solicitudes:
 
-    # SOLO ROL 1
-    if id_rol == 1:
-        # PDF combinado (creado con ID)
-        ruta_pdf = os.path.join(
-            settings.MEDIA_ROOT,
-            'pdf',
-            f'solicitud_{solicitud.idsolicitud}',
-            'combinado.pdf'
-        )
+        # Por defecto
+        solicitud.mostrar_pdf = False
+        solicitud.mostrar_excel = False
 
-        # Excel (creado con ID)
-        ruta_excel = os.path.join(
-            settings.MEDIA_ROOT,
-            'excel',
-            f'formato_inscripcion_{solicitud.idsolicitud}.xlsx'
-        )
+        # SOLO ROL 1
+        if id_rol == 1:
+            ruta_pdf = os.path.join(
+                settings.MEDIA_ROOT,
+                'pdf',
+                f'solicitud_{solicitud.idsolicitud}',
+                'combinado.pdf'
+            )
 
-        solicitud.mostrar_pdf = os.path.exists(ruta_pdf)
-        solicitud.mostrar_excel = os.path.exists(ruta_excel)
+            ruta_excel = os.path.join(
+                settings.MEDIA_ROOT,
+                'excel',
+                f'formato_inscripcion_{solicitud.idsolicitud}.xlsx'
+            )
+
+            solicitud.mostrar_pdf = os.path.exists(ruta_pdf)
+            solicitud.mostrar_excel = os.path.exists(ruta_excel)
 
     return render(request, "consultas/consultas_instructor.html", {
         "layout": layout,
