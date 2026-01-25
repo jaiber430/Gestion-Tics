@@ -554,6 +554,10 @@
                                 target="_blank">
                                 Editar datos
                               </a>
+                              {% comment %} href="{% url 'editApplicantData' solicitud_consulta.idsolicitud aspirante.numeroidentificacion %}" {% endcomment %}
+                              <a href="{%url "removeApplicant" solicitud_consulta.idsolicitud aspirante.numeroidentificacion %}"  target="_blank">
+                                Borrar Aspirante
+                              </a>
                             </div>
                           </div>
                         {% empty %}

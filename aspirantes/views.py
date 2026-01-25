@@ -19,6 +19,8 @@ from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment
 
 from django.contrib import messages
+# Importar path desde pathlib para elimnar archivos (Forma moderna)
+from pathlib import Path
 
 def formulario_aspirantes(request, idsolicitud):
 
@@ -266,23 +268,76 @@ def updateCandidate(request, idSolicitud, numDoc):
     )
 
     try:
+        # Documento antiguo
+        doc_antiguo = aspirante.numeroidentificacion
+
+        # Documento nuevo
+        doc_nuevo = int(request.POST.get('numero_identificacion'))
+
         aspirante.nombre = request.POST.get('nombres').upper()
         aspirante.apellido = request.POST.get('apellidos').upper()
-        aspirante.tipoidentificacion_id = request.POST.get('tipo_documento')
-        aspirante.numeroidentificacion = int(
-            request.POST.get('numero_identificacion')
-        )
+        aspirante.tipoidentificacion_id = int(request.POST.get('tipo_documento'))
+        aspirante.numeroidentificacion = doc_nuevo
 
+        # Guardar solo los campos editados (NO el pdf)
         aspirante.save(update_fields=[
             'nombre',
             'apellido',
             'tipoidentificacion',
             'numeroidentificacion'
         ])
+        # Ruta del pdf
+        basePath = Path(settings.MEDIA_ROOT)
+        folderPdf = basePath / "pdf" / f"solicitud_{idSolicitud}"
+
+        pdfOld = folderPdf / f"{doc_antiguo}.pdf"
+        newPdf = folderPdf / f"{doc_nuevo}.pdf"
+
+        # Renombrar solo el pdf del aspirante relacionado
+        if doc_antiguo != doc_nuevo and pdfOld.exists():
+            pdfOld.rename(newPdf)
 
         messages.success(request, "Aspirante actualizado correctamente")
 
     except Exception as e:
         messages.error(request, f"Error al actualizar aspirante: {e}")
+
+    return redirect('consultas_instructor')
+
+# Eliminar aspirante
+def removeApplicant(request, idSolicitud, numDoc):
+
+    folderName = Path(settings.MEDIA_ROOT)
+
+    try:
+        # Eliminar pdf del aspirante
+        deleteDocumentFile = folderName / "pdf" / f"solicitud_{idSolicitud}" / f"{numDoc}.pdf"
+        if deleteDocumentFile.exists():
+            deleteDocumentFile.unlink()
+
+        # Eliminar aspirante de la DB
+        eliminado, _ = Aspirantes.objects.filter(
+            numeroidentificacion=numDoc,
+            solicitudinscripcion=idSolicitud
+        ).delete()
+
+        if eliminado == 0:
+            messages.warning(request, "No se encontró el aspirante para eliminar")
+            return redirect('consultas_instructor')
+
+        # Eliminar pdf combinado
+        deleteCombinedPdf = folderName / "pdf" / f"solicitud_{idSolicitud}" / "combinado.pdf"
+        if deleteCombinedPdf.exists():
+            deleteCombinedPdf.unlink()
+
+        # Eliminar masivo excel
+        deleteExcel = folderName / "excel" / f"formato_inscripcion_{idSolicitud}.xlsx"
+        if deleteExcel.exists():
+            deleteExcel.unlink()
+
+        messages.success(request, "Aspirante eliminado correctamente")
+
+    except Exception as e:
+        messages.error(request, f"Error al eliminar aspirante: {e}")
 
     return redirect('consultas_instructor')
