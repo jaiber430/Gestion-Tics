@@ -253,3 +253,36 @@ def registro_aspirante(request):
         'tipos_identificacion': tipo_documento,
         'caracterizaciones': caracterizacion,
     })
+
+def updateCandidate(request, idSolicitud, numDoc):
+
+    if request.method != "POST":
+        raise Http404()
+
+    aspirante = get_object_or_404(
+        Aspirantes,
+        numeroidentificacion=numDoc,
+        solicitudinscripcion=idSolicitud
+    )
+
+    try:
+        aspirante.nombre = request.POST.get('nombres').upper()
+        aspirante.apellido = request.POST.get('apellidos').upper()
+        aspirante.tipoidentificacion_id = request.POST.get('tipo_documento')
+        aspirante.numeroidentificacion = int(
+            request.POST.get('numero_identificacion')
+        )
+
+        aspirante.save(update_fields=[
+            'nombre',
+            'apellido',
+            'tipoidentificacion',
+            'numeroidentificacion'
+        ])
+
+        messages.success(request, "Aspirante actualizado correctamente")
+
+    except Exception as e:
+        messages.error(request, f"Error al actualizar aspirante: {e}")
+
+    return redirect('consultas_instructor')

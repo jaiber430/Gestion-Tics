@@ -120,6 +120,31 @@ def reviewedByInstructor(request, idSolicitud):
 
     return redirect('consultas_instructor')
 
+def editApplicantData(request, idSolicitud, numDoc):
+
+    user_id = request.session.get('user_id')
+    if not user_id:
+        raise Http404()
+
+    usuario = Usuario.objects.select_related('rol').get(idusuario=user_id)
+
+    # SOLO instructor puede editar
+    if usuario.rol.idrol != 1:
+        raise Http404()
+
+    aspirante = get_object_or_404(
+        Aspirantes,
+        numeroidentificacion=numDoc,
+        solicitudinscripcion=idSolicitud
+    )
+
+    tipoIdentificacion = Tipoidentificacion.objects.all()
+
+    return render(request, 'forms/editApplicant.html', {
+        "aspirante": aspirante,
+        "tipoIdentificacion":tipoIdentificacion
+    })
+
 # =====================================================================
 # Consultas dependiendo del rol
 # =====================================================================
@@ -254,6 +279,30 @@ def consultas_todos(request):
                 'tipoidentificacion', 'idcaracterizacion'
             ).filter(solicitudinscripcion=solicitud.idsolicitud)
             solicitud.aspirantes = aspirantes
+
+        # Por defecto NO mostrar nada
+    solicitud.mostrar_pdf = False
+    solicitud.mostrar_excel = False
+
+    # SOLO ROL 1
+    if id_rol == 1:
+        # PDF combinado (creado con ID)
+        ruta_pdf = os.path.join(
+            settings.MEDIA_ROOT,
+            'pdf',
+            f'solicitud_{solicitud.idsolicitud}',
+            'combinado.pdf'
+        )
+
+        # Excel (creado con ID)
+        ruta_excel = os.path.join(
+            settings.MEDIA_ROOT,
+            'excel',
+            f'formato_inscripcion_{solicitud.idsolicitud}.xlsx'
+        )
+
+        solicitud.mostrar_pdf = os.path.exists(ruta_pdf)
+        solicitud.mostrar_excel = os.path.exists(ruta_excel)
 
     return render(request, "consultas/consultas_instructor.html", {
         "layout": layout,

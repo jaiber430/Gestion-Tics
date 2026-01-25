@@ -90,7 +90,10 @@ urlpatterns = [
     path('pdfAspirantes/<int:id>/<str:numDoc>/', views_consultas.showPdfApplicants, name='seePdfForapplicants'),
     path('combinedPdf/<int:combinedId>/', views_consultas.viewCombinedPdf, name='viewCombinedPdf'),
     path('seeExcelCandidates/<int:excelFolder>/', views_consultas.showExcelApprentices, name='seeExcelCandidates'),
-    path('submitRevised/<int:idSolicitud>/', views_consultas.reviewedByInstructor, name="reviewedByInstructor")
+    path('submitRevised/<int:idSolicitud>/', views_consultas.reviewedByInstructor, name="reviewedByInstructor"),
+    path('fromEditApplicant/<int:idSolicitud>/<int:numDoc>/', views_consultas.editApplicantData, name="editApplicantData"),
+    path( 'aspirante/editar/<int:idSolicitud>/<int:numDoc>/',views_aspirantes.updateCandidate,name='updateCandidate')
+
 ]
 # Poder almacenar archivos en la carpeta media
 if settings.DEBUG:

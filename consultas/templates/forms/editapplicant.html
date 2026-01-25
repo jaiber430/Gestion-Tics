@@ -1,0 +1,91 @@
+{% extends 'layout/layoutinstructor.html' %}
+
+{% block content %}
+<main class="contenido-principal">
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="POST"
+        action="{% url 'updateCandidate' aspirante.solicitudinscripcion_id aspirante.numeroidentificacion %}">
+
+        {% csrf_token %}
+
+        <div class="seccion-formulario">
+            <h3 class="titulo-seccion-form">Editar aspirante</h3>
+
+            <!-- NOMBRES -->
+            <div class="campo-entrada">
+                <label class="etiqueta-campo">Nombres</label>
+                <input type="text"
+                    name="nombres"
+                    class="entrada-texto"
+                    required
+                    value="{{ aspirante.nombre }}">
+            </div>
+
+            <!-- APELLIDOS -->
+            <div class="campo-entrada">
+                <label class="etiqueta-campo">Apellidos</label>
+                <input type="text"
+                    name="apellidos"
+                    class="entrada-texto"
+                    required
+                    value="{{ aspirante.apellido }}">
+            </div>
+
+            <!-- TIPO DOCUMENTO -->
+            <div class="campo-entrada">
+                <label class="etiqueta-campo">Tipo de documento</label>
+                <select name="tipo_documento" class="entrada-select" required>
+                    {% for tipo in tipoIdentificacion %}
+                        <option value="{{ tipo.idtipoidentificacion }}"
+                            {% if aspirante.tipoidentificacion_id == tipo.idtipoidentificacion %}
+                                selected
+                            {% endif %}>
+                            {{ tipo.tipoidentificacion }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- NÚMERO DOCUMENTO -->
+            <div class="campo-entrada">
+                <label class="etiqueta-campo">Número de identificación</label>
+                <input type="text"
+                    name="numero_identificacion"
+                    class="entrada-texto"
+                    required
+                    value="{{ aspirante.numeroidentificacion }}">
+            </div>
+
+    <!-- CORREO -->
+    <div class="campo-entrada">
+        <label class="etiqueta-campo">Correo*</label>
+        <input type="email" name="correo" class="entrada-texto" required value="{{ aspirante.correo }}" readonly>
+    </div>
+    <!-- TELÉFONO -->
+    <div class="campo-entrada">
+        <label class="etiqueta-campo">Teléfono*</label>
+        <input type="text" name="telefono" class="entrada-texto" required value="{{ aspirante.telefono }}" readonly>
+    </div>
+
+            <input type="hidden" name="idsolicitud" value="{{ solicitud.idsolicitud }}">
+
+        </div>
+
+        <div class="contenedor-botones-formulario">
+            <a href="{% url 'consultas_instructor' %}" class="boton-cancelar">
+                Cancelar
+            </a>
+            <button type="submit" class="boton-enviar"> Actualizar aspirante</button>
+        </div>
+
+    </form>
+</main>
+{% endblock %}

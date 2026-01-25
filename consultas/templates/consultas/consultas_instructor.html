@@ -550,6 +550,10 @@
                                 target="_blank">
                                 Ver documento 📄
                               </a>
+                              <a href="{% url 'editApplicantData' solicitud_consulta.idsolicitud aspirante.numeroidentificacion %}"
+                                target="_blank">
+                                Editar datos
+                              </a>
                             </div>
                           </div>
                         {% empty %}
@@ -562,21 +566,33 @@
                       </div>
                       {% comment %} Botones ver combinado de PDF y excel {% endcomment %}
                       <div>
-                        <a href="{%url 'viewCombinedPdf' solicitud_consulta.idsolicitud%}">Ver Pdf combinado 📄</a>
-                        <a href="{%url 'seeExcelCandidates' solicitud_consulta.idsolicitud%}">Ver Excel </a>
+                        {% if solicitud.mostrar_pdf %}
+                          <a href="{% url 'viewCombinedPdf' solicitud.idsolicitud %}">
+                            Ver Pdf combinado 📄
+                          </a>
+                        {% endif %}
+
+                        {% if solicitud.mostrar_excel %}
+                          <a href="{% url 'seeExcelCandidates' solicitud.idsolicitud %}">
+                            Ver Excel
+                          </a>
+                        {% endif %}
                       </div>
+
                       <div>
-                        {% if solicitud_consulta.revisado %}
-                          <button class="boton-compartir" disabled>
-                            ✔ Ya revisado
-                          </button>
-                        {% else %}
-                          <form action="{% url 'reviewedByInstructor' solicitud_consulta.idsolicitud %}" method="post">
-                            {% csrf_token %}
-                            <button type="submit" class="boton-compartir">
-                              Revisado
+                        {% if solicitud.mostrar_pdf and solicitud.mostrar_excel %}
+                          {% if solicitud.revisado %}
+                            <button class="boton-compartir" disabled>
+                              ✔ Ya revisado
                             </button>
-                          </form>
+                          {% else %}
+                            <form action="{% url 'reviewedByInstructor' solicitud.idsolicitud %}" method="post">
+                              {% csrf_token %}
+                              <button type="submit" class="boton-compartir">
+                                Revisado
+                              </button>
+                            </form>
+                          {% endif %}
                         {% endif %}
                       </div>
                     </div>
