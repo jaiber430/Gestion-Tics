@@ -166,6 +166,7 @@ class Solicitud(models.Model):
     ambiente = models.CharField(max_length=255, blank=True, null=True)
     fechasolicitud = models.DateField()
     revisado = models.IntegerField(blank=True, null=True)
+    linkpreinscripcion = models.IntegerField(db_column='linkPreinscripcion', blank=True, null=True)
     class Meta:
         db_table = 'solicitud'
 

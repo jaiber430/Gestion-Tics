@@ -88,7 +88,7 @@ urlpatterns = [
     path('verificar_usuario/<int:idusuario>/', views.verificar_usuario, name='verificar_usuario'),
     # Ver Docs Aspirantes
     path('pdfAspirantes/<int:id>/<str:numDoc>/', views_consultas.showPdfApplicants, name='seePdfForapplicants'),
-    path('combinedPdf/<int:combinedId>/', views_consultas.viewCombinedPdf, name='viewCombinedPdf'),
+    path('combinedPdf/<int:pdfFolder>/', views_consultas.viewCombinedPdf, name='viewCombinedPdf'),
     path('seeExcelCandidates/<int:excelFolder>/', views_consultas.showExcelApprentices, name='seeExcelCandidates'),
     path('submitRevised/<int:idSolicitud>/', views_consultas.reviewedByInstructor, name="reviewedByInstructor"),
     path('fromEditApplicant/<int:idSolicitud>/<int:numDoc>/', views_consultas.editApplicantData, name="editApplicantData"),

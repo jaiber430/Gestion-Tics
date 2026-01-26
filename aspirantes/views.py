@@ -27,13 +27,24 @@ def formulario_aspirantes(request, idsolicitud):
     solicitud = get_object_or_404(Solicitud, idsolicitud=idsolicitud)
 
     # Asegurarse de que no se puedan voler a registrar aspirantes una vez se cumpla la cantidad
-    cerrar_inscripciones = Aspirantes.objects.filter(solicitudinscripcion=solicitud).count()
+    cerrar_inscripciones = Aspirantes.objects.filter(
+        solicitudinscripcion=solicitud
+    ).count()
+
+    # Si el link fue desactivado manualmente → 404 directo
+    if solicitud.linkpreinscripcion == 1:
+        raise Http404
+
+    # Si se alcanza o supera el cupo
     if cerrar_inscripciones >= solicitud.cupo:
-        # En lugar de un 404, mostrar un mensaje en la misma vista y ocultar el formulario
-        messages.error(request, 'Los cupos ya están completos para esta solicitud.')
+        solicitud.linkpreinscripcion = 1
+        solicitud.save(update_fields=['linkpreinscripcion'])
+
+        # ⚠ Mostrar mensaje primero y luego redirigir a 404
         return render(request, 'forms/formulario_aspirantes.html', {
             'solicitud': solicitud,
             'cupo_completo': True,
+            'redirect_404': True,  # bandera para JS
         })
 
     caracterizacion = Caracterizacion.objects.all()
@@ -44,6 +55,7 @@ def formulario_aspirantes(request, idsolicitud):
         'caracterizaciones': caracterizacion,
         'solicitud': solicitud,
         'cupo_completo': False,
+        'redirect_404': False,
     })
 
 def registro_aspirante(request):

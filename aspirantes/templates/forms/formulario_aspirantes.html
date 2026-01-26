@@ -2,35 +2,51 @@
 
 {% block content %}
   <main class="contenido-principal">
-        <!-- Mensajes de Django -->
+    <!-- Mensajes de Django -->
     {% if not cupo_completo %}
       {% if messages %}
         {% for message in messages %}
           <div class="alert"
             style="padding: 12px; margin: 15px 0; border-radius: 6px; font-size: 14px; border: 1px solid;
                       {% if message.tags == 'success' %}
+
+
+
                         background-color: #d4edda; color: #155724; border-color: #c3e6cb;
+
+
+
             {% elif message.tags == 'error' %}
+
+
+
                         background-color: #f8d7da; color: #721c24; border-color: #f5c6cb;
+
+
+
             {% else %}
+
+
+
                         background-color: #d1ecf1; color: #0c5460; border-color: #bee5eb;
+
+
+
             {% endif %}">{{ message }}</div>
         {% endfor %}
       {% endif %}
     {% endif %}
 
     <!-- Formulario Principal -->
-    <form class="formulario-ficha" action="{% url 'Registroaspirantes'  %}" method="post" enctype="multipart/form-data" id="formulario-aspirantes" onsubmit="return validarCupos()">
+    <form class="formulario-ficha" action="{% url 'Registroaspirantes' %}" method="post" enctype="multipart/form-data" id="formulario-aspirantes" onsubmit="return validarCupos()">
       {% csrf_token %}
 
       <!-- Sección 1: Información del Programa -->
       <div class="seccion-formulario">
         <h3 class="titulo-seccion-form">Datos personales</h3>
-        {% comment %} cuando ya no hay cupos {% endcomment %}
+        {% comment %}cuando ya no hay cupos{% endcomment %}
         {% if cupo_completo %}
-        <div class="alert" id="alerta-cupos" style="padding: 12px; margin: 15px 0; border-radius: 6px; font-size: 14px; border: 1px solid; background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; display: block;">
-          Los cupos ya están completos para esta solicitud.
-        </div>
+          <div class="alert" id="alerta-cupos" style="padding: 12px; margin: 15px 0; border-radius: 6px; font-size: 14px; border: 1px solid; background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; display: block;">Los cupos ya están completos para esta solicitud.</div>
         {% endif %}
 
         <div class="campo-entrada">
@@ -48,8 +64,8 @@
           <select id="tipo_caracterizacion" name="tipo_caracterizacion" class="entrada-select" required>
             <option value="">Seleccione una opción</option>
             {% comment %}Codigo que traiga eso{% endcomment %}
-            {% for caracterizacion  in caracterizaciones %}
-            <option value="{{caracterizacion.idcaracterizacion}}">{{caracterizacion.caracterizacion}}</option>
+            {% for caracterizacion in caracterizaciones %}
+              <option value="{{ caracterizacion.idcaracterizacion }}">{{ caracterizacion.caracterizacion }}</option>
             {% endfor %}
           </select>
         </div>
@@ -68,8 +84,8 @@
           <label for="tipo_documento" class="etiqueta-campo">Tipos documento *</label>
           <select id="tipo_documento" name="tipo_documento" class="entrada-select" required>
             <option value="">Seleccione una opción</option>
-            {% for tipo_identificacion in tipos_identificacion  %}
-            <option value="{{tipo_identificacion.idtipoidentificacion}}">{{tipo_identificacion.tipoidentificacion}}</option>
+            {% for tipo_identificacion in tipos_identificacion %}
+              <option value="{{ tipo_identificacion.idtipoidentificacion }}">{{ tipo_identificacion.tipoidentificacion }}</option>
             {% endfor %}
           </select>
         </div>
@@ -83,7 +99,7 @@
           <label for="correo" class="etiqueta-campo">Correo*</label>
           <input type="text" id="correo" name="correo" class="entrada-texto" placeholder="Escriba su correo" required />
         </div>
-        <input type="hidden" name="idsolicitud" value="{{solicitud.idsolicitud}}">
+        <input type="hidden" name="idsolicitud" value="{{ solicitud.idsolicitud }}" />
       </div>
       <div class="contenedor-botones-formulario">
         <a href="#" class="boton-cancelar">Cancelar</a>
@@ -91,7 +107,7 @@
       </div>
     </form>
   </main>
-  {% comment %} bloquea el envio de datos cuando ya no hay cupos {% endcomment %}
+  {% comment %}bloquea el envio de datos cuando ya no hay cupos{% endcomment %}
   <script>
     function validarCupos() {
       var cupoCompleto = {{ cupo_completo|lower }};
@@ -104,5 +120,12 @@
       return true;
     }
   </script>
-  {% comment %}  {% endcomment %}
+  <!-- Script de redirect 404 después de 5 segundos si se acabó el cupo -->
+  {% if redirect_404 %}
+    <script>
+        setTimeout(function () {
+            window.location.href = "/404";  // Ajusta a tu URL de 404 si es diferente
+        }, 5000);
+    </script>
+  {% endif %}
 {% endblock %}

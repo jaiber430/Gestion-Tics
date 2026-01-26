@@ -525,9 +525,18 @@
                     <!-- Enlace con href correcto -->
                     <div class="opcion-compartir">
                       <h4>Compartir con enlace</h4>
-                      <div class="grupo-link">
-                        <a href="{% url 'formularioaspirantes' solicitud_consulta.idsolicitud %}">https://preinscripcion/{{ codigo }}</a>
-                      </div>
+                        <div class="grupo-link">
+                          {% if solicitud_consulta.linkpreinscripcion == 0 %}
+                            <a href="{% url 'formularioaspirantes' solicitud_consulta.idsolicitud %}">
+                              https://preinscripcion/{{ codigo }}
+                            </a>
+                          {% else %}
+                          <h4 style="color: red;">El link ha sido deshabilitado</h4>
+                            <span class="link-deshabilitado ">
+                              https://preinscripcion/{{ codigo }}
+                            </span>
+                          {% endif %}
+                        </div>
                     </div>
 
                     <div class="separador-modal">

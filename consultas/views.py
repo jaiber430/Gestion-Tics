@@ -199,7 +199,8 @@ def consultas_todos(request):
         solicitudes = Solicitud.objects.filter(
             idsolicitud__in=solicitudes_aprobadas
         ).select_related('idusuario', 'idempresa').order_by('-fechasolicitud')
-    else:  # Instructor o Admin
+    else:
+        # Instructor o Admin
         solicitudes = Solicitud.objects.select_related('idusuario', 'idempresa') \
             .filter(idusuario=user_id) \
             .order_by('-fechasolicitud')
