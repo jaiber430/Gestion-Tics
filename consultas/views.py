@@ -885,6 +885,17 @@ def revision_fichas(request, id):
             id_estado = Estados.objects.get(idestado=estados)
             creado_por = solicitud.idusuario
 
+            idRechazadoByFuncionario = 2
+
+            if id_rol == 3 and id_estado.idestado == idRechazadoByFuncionario:
+
+                Solicitudcoordinador.objects.filter(
+                    idsolicitud=solicitud
+                ).delete()
+
+                solicitud.revisado = 0
+                solicitud.save(update_fields=['revisado'])
+
             # ----------------------------
             # Buscar si ya existe ficha para esta solicitud
             # ----------------------------
