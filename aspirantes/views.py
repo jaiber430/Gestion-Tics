@@ -337,6 +337,11 @@ def removeApplicant(request, idSolicitud, numDoc):
             messages.warning(request, "No se encontró el aspirante para eliminar")
             return redirect('consultas_instructor')
 
+        # Reactivar link de preinscripción (si se eliminó al menos un aspirante)
+        Solicitud.objects.filter(idsolicitud=idSolicitud).update(
+            linkpreinscripcion=0
+        )
+
         # Eliminar pdf combinado
         deleteCombinedPdf = folderName / "pdf" / f"solicitud_{idSolicitud}" / "combinado.pdf"
         if deleteCombinedPdf.exists():

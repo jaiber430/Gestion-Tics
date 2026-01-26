@@ -253,7 +253,8 @@ def _crear_solicitud_base(request, tipo_solicitud_id, template_name, mensaje_exi
                     convenio=convenio or None,
                     ambiente=nombre_ambiente,
                     fechasolicitud=timezone.now().date(),
-                    revisado=0
+                    revisado=0,
+                    linkpreinscripcion=0
                 )
 
                 # ===============================
