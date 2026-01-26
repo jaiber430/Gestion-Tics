@@ -286,35 +286,82 @@ def updateCandidate(request, idSolicitud, numDoc):
         # Documento nuevo
         doc_nuevo = int(request.POST.get('numero_identificacion'))
 
-        aspirante.nombre = request.POST.get('nombres').upper()
-        aspirante.apellido = request.POST.get('apellidos').upper()
-        aspirante.tipoidentificacion_id = int(request.POST.get('tipo_documento'))
-        aspirante.numeroidentificacion = doc_nuevo
+        nombre = request.POST.get('nombres').upper()
+        apellido = request.POST.get('apellidos').upper()
+        tipo_documento = int(request.POST.get('tipo_documento'))
 
-        # Guardar solo los campos editados (NO el pdf)
-        aspirante.save(update_fields=[
-            'nombre',
-            'apellido',
-            'tipoidentificacion',
-            'numeroidentificacion'
-        ])
-        # Ruta del pdf
+        # ===============================
+        # 1. ACTUALIZAR SOLO DB (CLAVE)
+        # ===============================
+        Aspirantes.objects.filter(
+            idaspirante=aspirante.idaspirante
+        ).update(
+            nombre=nombre,
+            apellido=apellido,
+            tipoidentificacion_id=tipo_documento,
+            numeroidentificacion=doc_nuevo
+        )
+
+        # ===============================
+        # 2. RENOMBRAR PDF DEL ASPIRANTE
+        # ===============================
         basePath = Path(settings.MEDIA_ROOT)
         folderPdf = basePath / "pdf" / f"solicitud_{idSolicitud}"
 
         pdfOld = folderPdf / f"{doc_antiguo}.pdf"
-        newPdf = folderPdf / f"{doc_nuevo}.pdf"
+        pdfNew = folderPdf / f"{doc_nuevo}.pdf"
 
-        # Renombrar solo el pdf del aspirante relacionado
         if doc_antiguo != doc_nuevo and pdfOld.exists():
-            pdfOld.rename(newPdf)
+            pdfOld.rename(pdfNew)
 
-        messages.success(request, "Aspirante actualizado correctamente")
+        # ===============================
+        # 3. REGENERAR EXCEL
+        # ===============================
+        aspirantes = Aspirantes.objects.filter(
+            solicitudinscripcion=idSolicitud
+        ).order_by("numeroidentificacion")
+
+        excelPath = basePath / "excel" / f"formato_inscripcion_{idSolicitud}.xlsx"
+        excelPath.parent.mkdir(parents=True, exist_ok=True)
+
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Aspirantes Inscritos"
+
+        ws.append([
+            "Resultado",
+            "Tipo identificación",
+            "Número identificación",
+            "Código ficha",
+            "Tipo población",
+            "",
+            "Código empresa"
+        ])
+
+        for cell in ws[1]:
+            cell.font = Font(bold=True)
+            cell.alignment = Alignment(horizontal="center")
+
+        for asp in aspirantes:
+            ws.append([
+                "",
+                asp.tipoidentificacion.tipoidentificacion if asp.tipoidentificacion else "",
+                asp.numeroidentificacion,
+                "",
+                asp.idcaracterizacion.caracterizacion if asp.idcaracterizacion else "",
+                "",
+                asp.solicitudinscripcion.idempresa.nitempresa if asp.solicitudinscripcion.idempresa else ""
+            ])
+
+        wb.save(excelPath)
+
+        messages.success(request, "Aspirante actualizado y Excel regenerado correctamente")
 
     except Exception as e:
         messages.error(request, f"Error al actualizar aspirante: {e}")
 
     return redirect('consultas_instructor')
+
 
 # Eliminar aspirante
 def removeApplicant(request, idSolicitud, numDoc):
