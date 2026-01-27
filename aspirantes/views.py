@@ -62,13 +62,13 @@ def registro_aspirante(request):
     if request.method == "POST":
 
         try:
-            nombres = request.POST.get('nombres').upper()
+            nombres = request.POST.get('nombres')
             apellidos = request.POST.get('apellidos')
             caracterizacion_id = request.POST.get('tipo_caracterizacion')
-            telefono = request.POST.get('telefono')
+            telefono = int(request.POST.get('telefono'))
             pdf = request.FILES.get('pdf_documento')
             tipo_documento_id = request.POST.get('tipo_documento')
-            identificacion = request.POST.get('numero_identificacion')
+            identificacion = int(request.POST.get('numero_identificacion'))
             correo = request.POST.get('correo')
             solicitud_inscripcion = request.POST.get('idsolicitud')
 
@@ -168,7 +168,7 @@ def registro_aspirante(request):
                 hoja = nuevo_archivo.active  # Seleccionar la hoja del excel (Primera por defecto)
                 hoja.title = f"Aspirantes Inscritos"  # Colocar nombre a esa hoja
 
-                # 🔹 Insertar campo de título que abarca todas las columnas (A1:G1)
+                #  Insertar campo de título que abarca todas las columnas (A1:G1)
                 hoja.merge_cells("A1:G1")  # Unir desde A1 hasta G1
                 celda = hoja["A1"]
                 celda.value = "FORMATO PARA LA INSCRIPCIÓN DE ASPIRANTES EN SOFIA PLUS v1.0"
@@ -319,7 +319,7 @@ def updateCandidate(request, idSolicitud, numDoc):
         # ===============================
         aspirantes = Aspirantes.objects.filter(
             solicitudinscripcion=idSolicitud
-        ).order_by("numeroidentificacion")
+        ).order_by("-idaspirante")
 
         excelPath = basePath / "excel" / f"formato_inscripcion_{idSolicitud}.xlsx"
         excelPath.parent.mkdir(parents=True, exist_ok=True)
@@ -328,20 +328,35 @@ def updateCandidate(request, idSolicitud, numDoc):
         ws = wb.active
         ws.title = "Aspirantes Inscritos"
 
-        ws.append([
-            "Resultado",
-            "Tipo identificación",
-            "Número identificación",
-            "Código ficha",
-            "Tipo población",
+        # ===== TÍTULO =====
+        ws.merge_cells("A1:G1")
+        celda = ws["A1"]
+        celda.value = "FORMATO PARA LA INSCRIPCIÓN DE ASPIRANTES EN SOFIA PLUS v1.0"
+        celda.font = Font(bold=True, color="FFFFFF")
+        celda.fill = PatternFill(start_color="66BB6A", end_color="66BB6A", fill_type="solid")
+        celda.alignment = Alignment(horizontal="center", vertical="center")
+        ws.row_dimensions[1].height = 28.5
+
+        # ===== ENCABEZADOS =====
+        encabezados = [
+            "Resultado del Registro (Reservado para el sistema)",
+            "Tipo de identificación",
+            "Número de identificación",
+            "Código de ficha",
+            "Tipo población aspirantes",
             "",
-            "Código empresa"
-        ])
+            "Código empresa (solo si la ficha es cerrada)"
+        ]
 
-        for cell in ws[1]:
+        ws.append(encabezados)
+        ws.row_dimensions[2].height = 51
+
+        for col_idx in range(1, len(encabezados) + 1):
+            cell = ws.cell(row=2, column=col_idx)
             cell.font = Font(bold=True)
-            cell.alignment = Alignment(horizontal="center")
+            cell.alignment = Alignment(horizontal="center", vertical="center")
 
+        # ===== DATOS =====
         for asp in aspirantes:
             ws.append([
                 "",
