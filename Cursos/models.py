@@ -195,6 +195,7 @@ class Ficha(models.Model):
     idestado = models.ForeignKey(Estados, on_delete=models.CASCADE, db_column='idestado')
     idusuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, db_column='idusuario')
     observacion = models.TextField()
+    excel = models.IntegerField(blank=True, null=True)
 
     class Meta:
         db_table = 'ficha'

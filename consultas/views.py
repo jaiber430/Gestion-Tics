@@ -225,16 +225,24 @@ def consultas_todos(request):
             solicitud.estado_coordinador = None
             solicitud.observacion_coordinador = ''
 
-        ficha = Ficha.objects.filter(idsolicitud=solicitud.idsolicitud).select_related('idestado', 'idusuario').first()
+        ficha = Ficha.objects.filter(
+            idsolicitud=solicitud.idsolicitud
+        ).select_related('idestado', 'idusuario').first()
+
         if ficha:
             solicitud.estado_usuario = ficha.idestado.estados if ficha.idestado else None
             solicitud.observacion_usuario = ficha.observacion or ''
             solicitud.codigo_ficha = ficha.codigoficha or ''
+            solicitud.ficha_excel = ficha.excel or 0
         else:
             solicitud.estado_usuario = None
-            solicitud.observacion_usuario = ''  # NO heredar observación del coordinador
+            solicitud.observacion_usuario = ''
             solicitud.codigo_ficha = ''
+            solicitud.ficha_excel = 0
 
+        # Regla clara
+        solicitud.mostrar_descarga_excel = solicitud.ficha_excel == 0
+        solicitud.mostrar_subida_excel = solicitud.ficha_excel == 1
 
         solicitud.codigo_solicitud = solicitud.codigosolicitud
 
@@ -311,7 +319,7 @@ def consultas_todos(request):
         "user": rol_name,
         'codigo': codigo,
         'solicitudes': solicitudes,
-        'estado': estado
+        'estado': estado,
     })
 
 # =====================================================================
@@ -767,6 +775,11 @@ def descargar_excel(request, id, idrol):
         # Copiar el archivo original al nuevo destino
         shutil.copy2(buscar_excel, guardar_excel)
 
+        ficha = Ficha.objects.filter(idsolicitud=id).first()
+        if ficha:
+            ficha.excel = 1
+            ficha.save(update_fields=['excel'])
+
     # Descargar el archivo original
     return FileResponse(
         open(buscar_excel, 'rb'),
@@ -951,6 +964,11 @@ def revision_fichas(request, id):
                 with open(ruta_excel, 'wb+') as destino:
                     for chunk in nuevo_archivo.chunks():
                         destino.write(chunk)
+
+                ficha = Ficha.objects.filter(idsolicitud=solicitud).first()
+                if ficha:
+                    ficha.excel = 0
+                    ficha.save(update_fields=['excel'])
             else:
                 # Si no se envía archivo nuevo, mantiene el anterior
                 pass
