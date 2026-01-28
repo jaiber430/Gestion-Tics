@@ -124,10 +124,10 @@ def verificacion_usuario(request):
     # Trae todos los usuarios con verificado=0
     usuariosSinAprobar = Usuario.objects.filter(verificado=0)
     obtenerCoordinadores = Usuario.objects.filter(rol=2, verificado=1)
-
+    
     return render(request, 'inicio/verificarUsuarios.html',{
         'usuariosSinVerificar': usuariosSinAprobar,
-        'coordinadoresAsignacion': obtenerCoordinadores,
+        'coordinadoresAsignacion': obtenerCoordinadores, 
     })
 
 @login_required_custom
@@ -171,8 +171,8 @@ def registerUser(request):
     # Si es POST, procesa el registro
     if request.method == 'POST':
         # Obtener datos del usuario
-        nombreUser = request.POST.get('nombre').upper()
-        apellidoUser = request.POST.get('apellido').upper()
+        nombreUser = request.POST.get('nombre')
+        apellidoUser = request.POST.get('apellido')
         rolUser = request.POST.get('rol')
         tipoIdentificacionUser = request.POST.get('tipo_documento')
         numeroIdentificacionUser = request.POST.get('numeroCedula')
@@ -227,7 +227,7 @@ def registerUser(request):
             contrato=contrato_obj,
             numerocontrato=numeroContrato
         )
-
+        
         registrarUsuario.save()
         messages.success(request, 'Te has registrado exitosamente. Espera verificación.')
         return redirect('index')

@@ -38,25 +38,13 @@ def eliminar_carpetas_vencidas(base_path=None):
 # Combinar PDFs en un solo archivo cuando se llena el cupo
 def combinar_pdfs(carpeta_path, output_filename="combinado.pdf"):
     """
-    Combina todos los PDFs dentro de una carpeta en un solo archivo,
-    ordenados por número de identificación (nombre del archivo sin extensión).
+    Combina todos los PDFs dentro de una carpeta en un solo archivo.
     """
     merger = PdfWriter()
+    for archivo in os.listdir(carpeta_path):
+        if archivo.endswith(".pdf") and archivo != output_filename:
+            merger.append(os.path.join(carpeta_path, archivo))
 
-    # Obtener solo los PDFs y excluir el archivo de salida
-    pdf_files = [
-        archivo for archivo in os.listdir(carpeta_path)
-        if archivo.endswith(".pdf") and archivo != output_filename
-    ]
-
-    # Ordenar los archivos por el número del documento (nombre del archivo)
-    pdf_files.sort(key=lambda x: int(os.path.splitext(x)[0]))
-
-    # Agregar cada PDF al merger
-    for archivo in pdf_files:
-        merger.append(os.path.join(carpeta_path, archivo))
-
-    # Guardar el PDF combinado
     if merger.pages:
         output_path = os.path.join(carpeta_path, output_filename)
         with open(output_path, "wb") as f_out:

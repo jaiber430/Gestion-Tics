@@ -62,8 +62,8 @@ def registro_aspirante(request):
     if request.method == "POST":
 
         try:
-            nombres = request.POST.get('nombres').upper()
-            apellidos = request.POST.get('apellidos').upper()
+            nombres = request.POST.get('nombres')
+            apellidos = request.POST.get('apellidos')
             caracterizacion_id = request.POST.get('tipo_caracterizacion')
             telefono = int(request.POST.get('telefono'))
             pdf = request.FILES.get('pdf_documento')
@@ -314,14 +314,12 @@ def updateCandidate(request, idSolicitud, numDoc):
         if doc_antiguo != doc_nuevo and pdfOld.exists():
             pdfOld.rename(pdfNew)
 
-        combinar_pdfs(folderPdf)
-
         # ===============================
         # 3. REGENERAR EXCEL
         # ===============================
         aspirantes = Aspirantes.objects.filter(
             solicitudinscripcion=idSolicitud
-        ).order_by("numeroidentificacion")
+        ).order_by("-idaspirante")
 
         excelPath = basePath / "excel" / f"formato_inscripcion_{idSolicitud}.xlsx"
         excelPath.parent.mkdir(parents=True, exist_ok=True)
