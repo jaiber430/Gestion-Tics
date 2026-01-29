@@ -28,7 +28,7 @@ def login_required_custom(view_func):
 # ===============================
 def index(request):
     return render(request, "inicio/index.html", {
-        'Title': 'Hi',
+        'Title': 'Inicio sesión',
     })
 
 # ===============================

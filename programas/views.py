@@ -32,12 +32,12 @@ def editar_programa(request):
         codigo = request.POST.get("codigo")  # Viene oculto desde el modal
         programa = get_object_or_404(Programaformacion, codigoprograma=codigo)
 
-        # 🔹 Actualizar campos básicos
+        # Actualizar campos básicos
         programa.verision = request.POST.get("version", programa.verision)
         programa.nombreprograma = request.POST.get("nombre", programa.nombreprograma)
         programa.horas = request.POST.get("horas", programa.horas)
 
-        # 🔹 Actualizar relaciones (Area y Modalidad)
+        #  Actualizar relaciones (Area y Modalidad)
         area_id = request.POST.get("area")
         modalidad_id = request.POST.get("modalidad")
 
@@ -46,7 +46,7 @@ def editar_programa(request):
         if modalidad_id:
             programa.idmodalidad = get_object_or_404(Modalidad, idmodalidad=modalidad_id)
 
-        # 🔹 Guardar cambios
+        # Guardar cambios
         programa.save()
         messages.success(request, "Programa actualizado correctamente.")
         return redirect("buscar_programa")  # Redirige al listado después de editar

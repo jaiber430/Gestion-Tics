@@ -554,7 +554,7 @@ def ficha_caracterizacion(request, solicitud_id):
     usuario_actual = get_object_or_404(Usuario.objects.select_related('rol'), idusuario=user_id)
 
     # Obtener la solicitud con todas las relaciones necesarias
-    # 🔹 select_related solo con ForeignKey / OneToOne
+    #  select_related solo con ForeignKey / OneToOne
     solicitud = get_object_or_404(
         Solicitud.objects.select_related(
             'codigoprograma',
@@ -627,7 +627,7 @@ def ficha_caracterizacion_pdf(request, solicitud_id):
         idusuario=user_id
     )
 
-    # 🔹 Quitar 'ambiente' porque es CharField (no relacional)
+    # Quitar 'ambiente' porque es CharField (no relacional)
     solicitud = get_object_or_404(
         Solicitud.objects.select_related(
             'codigoprograma',
@@ -650,7 +650,7 @@ def ficha_caracterizacion_pdf(request, solicitud_id):
     usuario = solicitud.idusuario
     empresa = solicitud.idempresa
     programa_especial = solicitud.idespecial
-    ambiente = solicitud.ambiente  # ✅ Se accede directo porque es CharField
+    ambiente = solicitud.ambiente  #  Se accede directo porque es CharField
 
     # Definir layout según rol
     id_rol = usuario_actual.rol.idrol
@@ -710,7 +710,7 @@ def ficha_caracterizacion_pdf(request, solicitud_id):
         response_file = open(ruta_guardado, 'rb')
     else:
         # Para otros roles: no guardar en disco, usar los bytes directamente
-        response_file = BytesIO(pdf_bytes)  # 🔹 Usar BytesIO para respuesta directa
+        response_file = BytesIO(pdf_bytes)  #  Usar BytesIO para respuesta directa
 
     # Descargar el archivo
     return FileResponse(
