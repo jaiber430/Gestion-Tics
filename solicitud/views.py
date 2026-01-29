@@ -192,11 +192,12 @@ def _crear_solicitud_base(request, tipo_solicitud_id, template_name, mensaje_exi
                     idhorario__fechainicio=datetime.strptime(fecha_inicio, '%Y-%m-%d').date(),
                     idhorario__fechafin=datetime.strptime(fecha_finalizacion, '%Y-%m-%d').date(),
                     idhorario__horas=f"{hora_inicio}-{hora_fin}",
-                    idhorario__diassemana=', '.join(dias_semana)
+                    idhorario__diassemana=', '.join(dias_semana),
+                    codigomunicipio_id=municipio_formacion
                 ).exists():
                     messages.error(
                         request,
-                        "Ya existe una solicitud con este ambiente, fechas y horario."
+                        "Ya existe una solicitud en este municipio con ese ambiente, fechas y horario."
                     )
                     return redirect('Crearsolicitud')
 

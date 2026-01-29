@@ -9,7 +9,7 @@
       <div class="mensajes">
         {% for message in messages %}
           <div class="alert alert-{% if message.tags == 'error' %}
-              
+
               danger
 
             {% else %}
@@ -29,10 +29,11 @@
           {% if usuario.numerocontrato %}
             <strong>Numero contrato:</strong> {{ usuario.numerocontrato }}<br />
           {% endif %}
+          <strong>Rol:</strong> {{ usuario.rol.nombrerol }}<br />
           <hr />
 
           {% comment %}Mostrar este campo para asignación cuando se verfiquen otros cargos{% endcomment %}
-          {% if usuario.rol.idrol != 2 %}
+          {% if usuario.rol.idrol != 2 and usuario.rol.idrol ==  1 %}
             <label for="coordinador_{{ usuario.idusuario }}" class="etiqueta-campo">Asignar coordinador para este instructor:</label>
             <select id="coordinador_{{ usuario.idusuario }}" name="coordinador_{{ usuario.idusuario }}" class="selector-usuario" required>
               <option value="">Seleccione al coordinador</option>
@@ -67,23 +68,23 @@
 
   <script>
     let formularioActual = null
-    
+
     function confirmarVerificacion(nombre, form) {
       const modal = document.getElementById('modal-confirmacion')
       const mensaje = document.getElementById('mensaje-confirmacion')
-    
+
       mensaje.textContent = `¿Estás seguro de verificar a ${nombre}?`
       formularioActual = form
       modal.style.display = 'flex'
     }
-    
+
     function confirmar() {
       if (formularioActual) {
         formularioActual.submit()
       }
       cancelar()
     }
-    
+
     function cancelar() {
       const modal = document.getElementById('modal-confirmacion')
       modal.style.display = 'none'

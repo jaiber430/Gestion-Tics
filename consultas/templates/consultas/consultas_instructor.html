@@ -80,16 +80,23 @@
                       <a href="{% url 'descargar_carta' solicitud_consulta.idsolicitud rol %}" class="boton-descargar" style="padding: 6px 10px; font-size: 12px;">Carta de solicitud</a>
                     {% endif %}
 
-                  {% if solicitud_consulta.mostrar_descarga_excel %}
-                    <a href="{% url 'descargar_excel' solicitud_consulta.idsolicitud rol %}"
-                      class="boton-descargar link-excel-recarga">
-                      Formato inscripción masivo
-                    </a>
-                  {% elif solicitud_consulta.mostrar_subida_excel %}
-                    <input type="file"
-                          name="actualizar_excel"
-                          class="archivo-subida">
-                  {% endif %}
+                    <div id="excel-container-{{ solicitud_consulta.idsolicitud }}">
+
+                      {% if solicitud_consulta.ficha_excel == 0 %}
+                        <!-- ESTADO: SUBIR -->
+                        <input type="file"
+                              name="actualizar_excel"
+                              class="archivo-subida">
+                      {% else %}
+                        <!-- ESTADO: DESCARGAR -->
+                        <a href="{% url 'descargar_excel' solicitud_consulta.idsolicitud rol %}"
+                          class="boton-descargar excel-toggle"
+                          data-id="{{ solicitud_consulta.idsolicitud }}">
+                          Formato inscripción masivo
+                        </a>
+                      {% endif %}
+
+                    </div>
 
                 </div>
               </td>
@@ -118,7 +125,7 @@
               <td>
                 <input type="text"
                       name="codigo_solicitud"
-                      value="{{ solicitud_consulta.codigo_solicitud }}">
+                      value="{{ solicitud_consulta.codigosolicitud|default_if_none:'' }}">
               </td>
 
               <td>
@@ -141,18 +148,30 @@
     </div>
   </main>
 
-  <!-- JS SIMPLE: RECARGAR DESPUÉS DE DESCARGAR -->
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      document.querySelectorAll('.link-excel-recarga').forEach((link) => {
-        link.addEventListener('click', function () {
-          setTimeout(() => {
-            window.location.reload()
-          }, 700)
-        })
-      })
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+  document.querySelectorAll('.excel-toggle').forEach(link => {
+    link.addEventListener('click', function () {
+
+      const id = this.dataset.id
+      const container = document.getElementById(`excel-container-${id}`)
+
+      // Cambia visualmente el campo
+      setTimeout(() => {
+        container.innerHTML = `
+          <input type="file"
+                 name="actualizar_excel"
+                 class="archivo-subida">
+        `
+      }, 300)
+
     })
-  </script>
+  })
+
+})
+</script>
+
 
   {% elif rol == 2 %}
     {% comment %}Mostrar esto solo al Coordinador{% endcomment %}

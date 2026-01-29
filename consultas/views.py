@@ -238,7 +238,7 @@ def consultas_todos(request):
             solicitud.estado_usuario = None
             solicitud.observacion_usuario = ''
             solicitud.codigo_ficha = ''
-            solicitud.ficha_excel = 0
+            solicitud.ficha_excel = 1
 
         # Regla clara
         solicitud.mostrar_descarga_excel = solicitud.ficha_excel == 0
@@ -775,11 +775,6 @@ def descargar_excel(request, id, idrol):
         # Copiar el archivo original al nuevo destino
         shutil.copy2(buscar_excel, guardar_excel)
 
-        ficha = Ficha.objects.filter(idsolicitud=id).first()
-        if ficha:
-            ficha.excel = 1
-            ficha.save(update_fields=['excel'])
-
     # Descargar el archivo original
     return FileResponse(
         open(buscar_excel, 'rb'),
@@ -934,7 +929,9 @@ def revision_fichas(request, id):
                     idestado=id_estado,
                     idusuario=creado_por,
                     observacion=observacion,
+                    excel=0  # ← ESTADO INICIAL: DESCARGAR
                 )
+
 
             # ----------------------------
             # Actualizar la solicitud con el número/código
@@ -967,7 +964,7 @@ def revision_fichas(request, id):
 
                 ficha = Ficha.objects.filter(idsolicitud=solicitud).first()
                 if ficha:
-                    ficha.excel = 0
+                    ficha.excel = 1
                     ficha.save(update_fields=['excel'])
             else:
                 # Si no se envía archivo nuevo, mantiene el anterior
@@ -1031,6 +1028,11 @@ def revision_coordinador(request, id_solicitud):
     # Obtener el usuario en sesión (el que revisa)
     # ============================
     user_id = request.session.get('user_id')
+
+    if not user_id:
+        messages.error(request, 'Sesión expirada')
+        return redirect('index')
+
     usuario_revisador = Usuario.objects.select_related('rol').get(idusuario=user_id)
     id_rol = usuario_revisador.rol.idrol
 
@@ -1091,7 +1093,12 @@ def revision_coordinador(request, id_solicitud):
             # Generar carta PDF internamente SOLO SI la revisión fue exitosa
             # ============================
             try:
-                if solicitud.idempresa is None:
+
+                if estado_obj.id == 2:
+                    solicitud.revisado = 0
+                    solicitud.save()
+
+                if estado_obj.id == 1 and solicitud.idempresa is None:
                     # Renderizar template HTML
                     template = get_template('fichacaracterizacion/carta_coordinador.html')
                     contexto = {
