@@ -1097,6 +1097,7 @@ def revision_coordinador(request, id_solicitud):
                     contexto = {
                         'solicitud': solicitud,
                         'usuario': usuario_revisador,
+                        "fecha": datetime.date.today(),
                     }
                     html_string = template.render(contexto)
 

@@ -22,9 +22,9 @@ USE `complementario`;
 -- Volcando estructura para tabla complementario.ambiente
 CREATE TABLE IF NOT EXISTS `ambiente` (
   `idambiente` int NOT NULL AUTO_INCREMENT,
-  `ambiente` varchar(250) CHARACTER SET utf8mb3 COLLATE utf8mb3_spanish2_ci NOT NULL,
+  `ambiente` varchar(250) CHARACTER SET utf8mb3 COLLATE utf8mb4_spanish2_ci NOT NULL,
   PRIMARY KEY (`idambiente`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_spanish2_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb4_spanish2_ci;
 
 -- Volcando datos para la tabla complementario.ambiente: ~10 rows (aproximadamente)
 INSERT INTO `ambiente` (`idambiente`, `ambiente`) VALUES
@@ -42,9 +42,9 @@ INSERT INTO `ambiente` (`idambiente`, `ambiente`) VALUES
 -- Volcando estructura para tabla complementario.area
 CREATE TABLE IF NOT EXISTS `area` (
   `idarea` int NOT NULL AUTO_INCREMENT,
-  `area` varchar(150) CHARACTER SET utf8mb3 COLLATE utf8mb3_spanish2_ci NOT NULL,
+  `area` varchar(150) CHARACTER SET utf8mb3 COLLATE utf8mb4_spanish2_ci NOT NULL,
   PRIMARY KEY (`idarea`)
-) ENGINE=InnoDB AUTO_INCREMENT=36 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_spanish2_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=36 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb4_spanish2_ci;
 
 -- Volcando datos para la tabla complementario.area: ~35 rows (aproximadamente)
 INSERT INTO `area` (`idarea`, `area`) VALUES
@@ -87,14 +87,14 @@ INSERT INTO `area` (`idarea`, `area`) VALUES
 -- Volcando estructura para tabla complementario.aspirantes
 CREATE TABLE IF NOT EXISTS `aspirantes` (
   `idaspirante` int NOT NULL AUTO_INCREMENT,
-  `nombre` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_spanish2_ci NOT NULL,
-  `apellido` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_spanish2_ci NOT NULL,
+  `nombre` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb4_spanish2_ci NOT NULL,
+  `apellido` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb4_spanish2_ci NOT NULL,
   `idcaracterizacion` int NOT NULL,
-  `telefono` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_spanish2_ci NOT NULL,
+  `telefono` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb4_spanish2_ci NOT NULL,
   `pdf` blob,
   `tipoidentificacion` int NOT NULL,
   `numeroidentificacion` int NOT NULL,
-  `correo` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_spanish2_ci NOT NULL,
+  `correo` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb4_spanish2_ci NOT NULL,
   `fecha` date NOT NULL,
   `solicitudinscripcion` int DEFAULT NULL,
   PRIMARY KEY (`idaspirante`),
@@ -107,7 +107,9 @@ CREATE TABLE IF NOT EXISTS `aspirantes` (
   CONSTRAINT `FK_aspirantes_caracterizacion` FOREIGN KEY (`idcaracterizacion`) REFERENCES `caracterizacion` (`idcaracterizacion`),
   CONSTRAINT `FK_aspirantes_solicitud` FOREIGN KEY (`solicitudinscripcion`) REFERENCES `solicitud` (`idsolicitud`),
   CONSTRAINT `FK_aspirantes_tipoidentificacion` FOREIGN KEY (`tipoidentificacion`) REFERENCES `tipoidentificacion` (`idtipoidentificacion`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_spanish2_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb4_spanish2_ci;
+
+-- Volcando datos para la tabla complementario.aspirantes: ~9 rows (aproximadamente)
 
 -- Volcando estructura para tabla complementario.auth_group
 CREATE TABLE IF NOT EXISTS `auth_group` (
@@ -390,9 +392,9 @@ CREATE TABLE IF NOT EXISTS `auth_user_user_permissions` (
 -- Volcando estructura para tabla complementario.caracterizacion
 CREATE TABLE IF NOT EXISTS `caracterizacion` (
   `idcaracterizacion` int NOT NULL AUTO_INCREMENT,
-  `caracterizacion` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_spanish2_ci NOT NULL,
+  `caracterizacion` varchar(100) CHARACTER SET utf16 COLLATE utf16_spanish2_ci NOT NULL,
   PRIMARY KEY (`idcaracterizacion`)
-) ENGINE=InnoDB AUTO_INCREMENT=52 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_spanish2_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=52 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb4_spanish2_ci;
 
 -- Volcando datos para la tabla complementario.caracterizacion: ~51 rows (aproximadamente)
 INSERT INTO `caracterizacion` (`idcaracterizacion`, `caracterizacion`) VALUES
@@ -409,28 +411,28 @@ INSERT INTO `caracterizacion` (`idcaracterizacion`, `caracterizacion`) VALUES
 	(11, 'Campesino'),
 	(12, 'Artesanos'),
 	(13, 'Delitos contra la Libertad y la Integridad Sexual en Desarrollo del Conflicto Armado'),
-	(14, 'Desaparici?n Forzada'),
+	(14, 'Desaparición Forzada'),
 	(15, 'Desplazados Discapacitados'),
-	(16, 'Desplazados por Fen?menos Naturales'),
-	(17, 'Desplazados por Fen?menos Naturales Cabeza de Familia'),
+	(16, 'Desplazados por Fenomenos Naturales'),
+	(17, 'Desplazados por Fenomenos Naturales Cabeza de Familia'),
 	(18, 'Desplazados por la Violencia'),
 	(19, 'Desplazados por la Violencia Cabeza de Familia'),
 	(20, 'Discapacidad Intelectual'),
 	(21, 'Discapacidad Auditiva'),
-	(22, 'Discapacidad F?sica'),
+	(22, 'Discapacidad Fisica'),
 	(23, 'Discapacidad Visual'),
 	(24, 'Discapacidad Psicosocial'),
-	(25, 'Discapacidad M?ltiple'),
+	(25, 'Discapacidad Multiple'),
 	(26, 'Sordoceguera'),
 	(27, 'Emprendedores'),
 	(28, 'Gitano Rom'),
 	(29, 'Herido'),
 	(30, 'Homicidio / Masacre'),
 	(31, 'INPEC'),
-	(32, 'Ind?gena'),
-	(33, 'Ind?genas Desplazados por la Violencia'),
-	(34, 'Ind?genas Desplazados por la Violencia Cabeza de Familia'),
-	(35, 'J?venes Vulnerables'),
+	(32, 'Indigena'),
+	(33, 'Indigenas Desplazados por la Violencia'),
+	(34, 'Indigenas Desplazados por la Violencia Cabeza de Familia'),
+	(35, 'Jovenes Vulnerables'),
 	(36, 'Microempresas'),
 	(37, 'Minas Antipersonal, Munici?n sin Explotar, y Artefacto Explosivo Improvisado'),
 	(38, 'Mujer Cabeza de Familia'),
@@ -446,50 +448,50 @@ INSERT INTO `caracterizacion` (`idcaracterizacion`, `caracterizacion`) VALUES
 	(48, 'Soldados Campesinos'),
 	(49, 'Tercera Edad'),
 	(50, 'Tortura'),
-	(51, 'Vinculaci?n de Ni?os, Ni?as y Adolescentes a Actividades Relacionadas con Grupos Armados');
+	(51, 'Vinculacion de Niños, Niñas y Adolescentes a Actividades Relacionadas con Grupos Armados');
 
 -- Volcando estructura para tabla complementario.departamentos
 CREATE TABLE IF NOT EXISTS `departamentos` (
   `codigodepartamentos` int NOT NULL AUTO_INCREMENT,
-  `departamentos` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_spanish2_ci NOT NULL,
+  `departamentos` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb4_spanish2_ci NOT NULL,
   PRIMARY KEY (`codigodepartamentos`)
-) ENGINE=InnoDB AUTO_INCREMENT=100 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_spanish2_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=100 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb4_spanish2_ci;
 
 -- Volcando datos para la tabla complementario.departamentos: ~33 rows (aproximadamente)
 INSERT INTO `departamentos` (`codigodepartamentos`, `departamentos`) VALUES
-	(5, 'Antioquia'),
-	(8, 'Atlantico'),
-	(11, 'Bogota D.C.'),
-	(13, 'Bol?var'),
-	(15, 'Boyaca'),
-	(17, 'Caldas'),
-	(18, 'Caqueta'),
-	(19, 'Cauca'),
-	(20, 'Cesar'),
-	(23, 'Cordoba'),
-	(25, 'Cundinamarca'),
-	(27, 'Choco'),
-	(41, 'Huila'),
-	(44, 'La Guajira'),
-	(47, 'Magdalena'),
-	(50, 'Meta'),
-	(52, 'Narino'),
-	(54, 'Norte de Santander'),
-	(63, 'Quindio'),
-	(66, 'Risaralda'),
-	(68, 'Santander'),
-	(70, 'Sucre'),
-	(73, 'Tolima'),
-	(76, 'Valle del Cauca'),
-	(81, 'Arauca'),
-	(85, 'Casanare'),
-	(86, 'Putumayo'),
-	(88, 'San Andras y Providencia'),
-	(91, 'Amazonas'),
-	(94, 'Guainia'),
-	(95, 'Guaviare'),
-	(97, 'Vaupes'),
-	(99, 'Vichada');
+	(5, 'ANTIOQUIA'),
+	(8, 'ATLANTICO'),
+	(11, 'BOGOTA D.C.'),
+	(13, 'BOL?VAR'),
+	(15, 'BOYACA'),
+	(17, 'CALDAS'),
+	(18, 'CAQUETA'),
+	(19, 'CAUCA'),
+	(20, 'CESAR'),
+	(23, 'CORDOBA'),
+	(25, 'CUNDINAMARCA'),
+	(27, 'CHOCO'),
+	(41, 'HUILA'),
+	(44, 'LA GUAJIRA'),
+	(47, 'MAGDALENA'),
+	(50, 'META'),
+	(52, 'NARINO'),
+	(54, 'NORTE DE SANTANDER'),
+	(63, 'QUINDIO'),
+	(66, 'RISARALDA'),
+	(68, 'SANTANDER'),
+	(70, 'SUCRE'),
+	(73, 'TOLIMA'),
+	(76, 'VALLE DEL CAUCA'),
+	(81, 'ARAUCA'),
+	(85, 'CASANARE'),
+	(86, 'PUTUMAYO'),
+	(88, 'SAN ANDRAS Y PROVIDENCIA'),
+	(91, 'AMAZONAS'),
+	(94, 'GUAINIA'),
+	(95, 'GUAVIARE'),
+	(97, 'VAUPES'),
+	(99, 'VICHADA');
 
 -- Volcando estructura para tabla complementario.django_admin_log
 CREATE TABLE IF NOT EXISTS `django_admin_log` (
@@ -617,7 +619,7 @@ CREATE TABLE IF NOT EXISTS `django_session` (
   KEY `django_session_expire_date_a5c62663` (`expire_date`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish_ci;
 
--- Volcando datos para la tabla complementario.django_session: 7 rows
+-- Volcando datos para la tabla complementario.django_session: 16 rows
 /*!40000 ALTER TABLE `django_session` DISABLE KEYS */;
 INSERT INTO `django_session` (`session_key`, `session_data`, `expire_date`) VALUES
 	('hzsn467i74qfqk3eym95mw56g29f41lz', 'eyJ1c2VyX2lkIjoxLCJuYW1lIjoiSmFpYmVyIn0:1urzfA:0PbGX13xU8YFi2Zj3kdvqiLvDocP-MNWbOR7Zfx9Sm0', '2025-09-12 14:01:08.345178'),
@@ -626,15 +628,25 @@ INSERT INTO `django_session` (`session_key`, `session_data`, `expire_date`) VALU
 	('oj1z454255n9s8zhe0r8hw6dg06n5i3r', 'eyJ1c2VyX2lkIjoyLCJuYW1lIjoiSGkifQ:1uuEYl:gNNeqaeloYS6C7NOT4PfNkVN6WLgYlDd-6vkrCMxx30', '2025-09-18 18:19:47.620445'),
 	('io2w1zr25k74oeb3kbw5x1fkm4afmn2s', 'eyJ1c2VyX2lkIjo0LCJuYW1lIjoiS2V2aW4ifQ:1v0qj5:yty6sdZgFUz_seCmQWLnA91MKkt_U5SwxH4nIQKKlX8', '2025-10-07 00:17:47.573276'),
 	('52etsingw8mvu1c91v84qc6zkijcfmil', 'eyJ1c2VyX2lkIjoxLCJuYW1lIjoiQU5HRUxBIFBBVFJJQ0lBICIsInJvbCI6MX0:1v1mfX:tdr6fOsgWaZM9IAC5QLqVicQ2NJHnacOJUvH_cMR-ZQ', '2025-10-09 14:09:59.523078'),
-	('p7t1vla7jcasbyzmj0gyurz4qq2xcaql', 'eyJ1c2VyX2lkIjoyLCJuYW1lIjoiSk9OTlkgRURXSU4iLCJyb2wiOjJ9:1vTCOY:NYRADvpZt4YsF-vCAujnCIoCDItIKwiZFLdvLmUYpwI', '2025-12-24 05:05:46.555282');
+	('p7t1vla7jcasbyzmj0gyurz4qq2xcaql', 'eyJ1c2VyX2lkIjoyLCJuYW1lIjoiSk9OTlkgRURXSU4iLCJyb2wiOjJ9:1vTCOY:NYRADvpZt4YsF-vCAujnCIoCDItIKwiZFLdvLmUYpwI', '2025-12-24 05:05:46.555282'),
+	('v1u94mlesv0ga3ivkaywj66uf49cpex2', 'eyJ1c2VyX2lkIjoxNSwibmFtZSI6Ik1vaXNlcyIsInJvbCI6MX0:1vjSjg:Q5rSATqJh1_cUiOsWHnaBiqFXWgt3_WvYrb89dFOwyE', '2026-02-07 01:46:48.441267'),
+	('6vewzxp6k2vqrdkmxf5a47jgtygq83k8', 'eyJ1c2VyX2lkIjoxNCwibmFtZSI6ImphaWJlciIsInJvbCI6Mn0:1vjTWa:08JoQZuQj_9LHFfKLA9gcwF3Vi3LXaysRnUR5VdrD5o', '2026-02-07 02:37:20.201195'),
+	('l43dzzhnyp0yq7z12mv9zml578t91jh9', 'eyJ1c2VyX2lkIjoxNCwibmFtZSI6ImphaWJlciIsInJvbCI6Mn0:1vjTqm:t8jevEJGJQMSHV4j7EUe1fgQCQSAnNdg0JGaV4VZx0w', '2026-02-07 02:58:12.152270'),
+	('sg3aue7u2h0eruyettzldq19gqbjurv0', 'eyJ1c2VyX2lkIjoxNCwibmFtZSI6ImphaWJlciIsInJvbCI6Mn0:1vjUCK:ImPPfE7ofXDilUJq7C7FOyRUJ2NCibtXi6raV7bfKUM', '2026-02-07 03:20:28.183787'),
+	('mcsjigfifyjxmale8g5c215wa1r0a0fa', 'eyJ1c2VyX2lkIjoxNCwibmFtZSI6ImphaWJlciIsInJvbCI6Mn0:1vjUOZ:tAXohn9UXTfKqf1mV7TW1axMk8i9mUKgASpBdA9xXn4', '2026-02-07 03:33:07.321763'),
+	('dh0vn9uk8wdor4eflyt01ygt6wmzpzdp', 'eyJ1c2VyX2lkIjoxNiwibmFtZSI6IkZlbGlwZSIsInJvbCI6M30:1vjUwE:bAAwoSydsRmeH-XPKz3yw980juazmo2uWu4uMxhEej8', '2026-02-07 04:07:54.568628'),
+	('e64h6zj9nbdebx92dxfpy5lqy5fq6f23', 'eyJ1c2VyX2lkIjoxOCwibmFtZSI6Ik5ldyIsInJvbCI6MX0:1vjqgq:zczwLvjYZV8Djw87MIe5oYYRQYwM8vp6KNLztC-a8P4', '2026-02-08 03:21:28.139215'),
+	('rh5cz88fzfojjvnh80pfl64qybl0eeed', 'eyJ1c2VyX2lkIjoxOCwibmFtZSI6Ik5ldyIsInJvbCI6MX0:1vkFbW:4JBovCRhMDlKjCimpFJCQlYqA_Evd6pbLcWJ8NrTDjg', '2026-02-09 05:57:38.814857'),
+	('ylw6056wfh6c01kj6m1qjout6bx1m5d2', 'eyJ1c2VyX2lkIjoxOCwibmFtZSI6Ik5ldyIsInJvbCI6MX0:1vkG5g:yKMBL49dmBCpnHTwSXqnch6Bj46LUgzz9GrUjw2qZLY', '2026-02-09 06:28:48.761966'),
+	('glvcuzx1lxy81k7pizb5wgppoc0nuxzj', 'eyJ1c2VyX2lkIjoxNiwibmFtZSI6IkZlbGlwZSIsInJvbCI6M30:1vknMj:j0ogowphfaytDQ7nBKT1HB8U8wndWo16LjP4rlObxh8', '2026-02-10 18:00:37.952087');
 /*!40000 ALTER TABLE `django_session` ENABLE KEYS */;
 
 -- Volcando estructura para tabla complementario.empresa
 CREATE TABLE IF NOT EXISTS `empresa` (
   `idempresa` int NOT NULL AUTO_INCREMENT,
-  `nombreempresa` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_spanish2_ci NOT NULL,
-  `representanteempresa` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_spanish2_ci NOT NULL,
-  `correoempresa` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_spanish2_ci NOT NULL,
+  `nombreempresa` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb4_spanish2_ci NOT NULL,
+  `representanteempresa` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb4_spanish2_ci NOT NULL,
+  `correoempresa` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb4_spanish2_ci NOT NULL,
   `nitempresa` int NOT NULL,
   `idtipoempresa` int NOT NULL,
   PRIMARY KEY (`idempresa`),
@@ -643,21 +655,24 @@ CREATE TABLE IF NOT EXISTS `empresa` (
   UNIQUE KEY `nombreempresa` (`nombreempresa`),
   KEY `idtipoempresa` (`idtipoempresa`),
   CONSTRAINT `empresa_ibfk_1` FOREIGN KEY (`idtipoempresa`) REFERENCES `tipoempresa` (`idtipoempresa`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_spanish2_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb4_spanish2_ci;
+
+-- Volcando datos para la tabla complementario.empresa: ~0 rows (aproximadamente)
+
 -- Volcando estructura para tabla complementario.estados
 CREATE TABLE IF NOT EXISTS `estados` (
   `idestado` int NOT NULL AUTO_INCREMENT,
-  `estados` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_spanish2_ci NOT NULL,
+  `estados` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb4_spanish2_ci NOT NULL,
   PRIMARY KEY (`idestado`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_spanish2_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb4_spanish2_ci;
 
 -- Volcando datos para la tabla complementario.estados: ~5 rows (aproximadamente)
 INSERT INTO `estados` (`idestado`, `estados`) VALUES
-	(2, 'Rechazada'),
-	(3, 'Creada'),
-	(4, 'Matriculada'),
-	(5, 'Lista de espera'),
-	(6, 'Creacion');
+	(1, 'Rechazada'),
+	(2, 'Creada'),
+	(3, 'Matriculada'),
+	(4, 'Lista de espera'),
+	(5, 'Creacion');
 
 -- Volcando estructura para tabla complementario.estados_coordinador
 CREATE TABLE IF NOT EXISTS `estados_coordinador` (
@@ -678,8 +693,8 @@ CREATE TABLE IF NOT EXISTS `ficha` (
   `idsolicitud` int DEFAULT NULL,
   `idestado` int NOT NULL,
   `idusuario` int NOT NULL,
-  `observacion` mediumtext CHARACTER SET utf8mb3 COLLATE utf8mb3_spanish2_ci NOT NULL,
-  `opinion_instructor` mediumtext CHARACTER SET utf8mb3 COLLATE utf8mb3_spanish2_ci,
+  `observacion` mediumtext CHARACTER SET utf8mb3 COLLATE utf8mb4_spanish2_ci NOT NULL,
+  `excel` int DEFAULT 0,
   PRIMARY KEY (`idficha`),
   UNIQUE KEY `codigoficha` (`codigoficha`),
   KEY `idestado` (`idestado`),
@@ -688,26 +703,30 @@ CREATE TABLE IF NOT EXISTS `ficha` (
   CONSTRAINT `ficha_ibfk_2` FOREIGN KEY (`idestado`) REFERENCES `estados` (`idestado`),
   CONSTRAINT `FK_ficha_solicitud` FOREIGN KEY (`idsolicitud`) REFERENCES `solicitud` (`idsolicitud`),
   CONSTRAINT `FK_ficha_usuario` FOREIGN KEY (`idusuario`) REFERENCES `usuario` (`idusuario`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_spanish2_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb4_spanish2_ci;
+
+-- Volcando datos para la tabla complementario.ficha: ~1 rows (aproximadamente)
 
 -- Volcando estructura para tabla complementario.horario
 CREATE TABLE IF NOT EXISTS `horario` (
   `idhorario` int NOT NULL AUTO_INCREMENT,
   `fechainicio` date NOT NULL,
   `fechafin` date NOT NULL,
-  `mes1` mediumtext CHARACTER SET utf8mb3 COLLATE utf8mb3_spanish2_ci,
-  `mes2` mediumtext CHARACTER SET utf8mb3 COLLATE utf8mb3_spanish2_ci,
-  `horas` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_spanish2_ci DEFAULT NULL,
-  `diassemana` varchar(60) CHARACTER SET utf8mb3 COLLATE utf8mb3_spanish2_ci DEFAULT NULL,
+  `mes1` mediumtext CHARACTER SET utf8mb3 COLLATE utf8mb4_spanish2_ci,
+  `mes2` mediumtext CHARACTER SET utf8mb3 COLLATE utf8mb4_spanish2_ci,
+  `horas` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb4_spanish2_ci DEFAULT NULL,
+  `diassemana` varchar(60) CHARACTER SET utf8mb3 COLLATE utf8mb4_spanish2_ci DEFAULT NULL,
   PRIMARY KEY (`idhorario`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_spanish2_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb4_spanish2_ci;
+
+-- Volcando datos para la tabla complementario.horario: ~0 rows (aproximadamente)
 
 -- Volcando estructura para tabla complementario.modalidad
 CREATE TABLE IF NOT EXISTS `modalidad` (
   `idmodalidad` int NOT NULL AUTO_INCREMENT,
-  `modalidad` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_spanish2_ci NOT NULL,
+  `modalidad` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb4_spanish2_ci NOT NULL,
   PRIMARY KEY (`idmodalidad`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_spanish2_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb4_spanish2_ci;
 
 -- Volcando datos para la tabla complementario.modalidad: ~4 rows (aproximadamente)
 INSERT INTO `modalidad` (`idmodalidad`, `modalidad`) VALUES
@@ -719,12 +738,12 @@ INSERT INTO `modalidad` (`idmodalidad`, `modalidad`) VALUES
 -- Volcando estructura para tabla complementario.municipio
 CREATE TABLE IF NOT EXISTS `municipio` (
   `codigomunicipio` int NOT NULL AUTO_INCREMENT,
-  `municipio` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_spanish2_ci NOT NULL,
+  `municipio` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb4_spanish2_ci NOT NULL,
   `codigodepartamento` int NOT NULL,
   PRIMARY KEY (`codigomunicipio`),
   KEY `codigodepartamento` (`codigodepartamento`),
   CONSTRAINT `municipio_ibfk_1` FOREIGN KEY (`codigodepartamento`) REFERENCES `departamentos` (`codigodepartamentos`)
-) ENGINE=InnoDB AUTO_INCREMENT=99774 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_spanish2_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=99774 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb4_spanish2_ci;
 
 -- Volcando datos para la tabla complementario.municipio: ~1,122 rows (aproximadamente)
 INSERT INTO `municipio` (`codigomunicipio`, `municipio`, `codigodepartamento`) VALUES
@@ -1851,12 +1870,13 @@ INSERT INTO `municipio` (`codigomunicipio`, `municipio`, `codigodepartamento`) V
 	(99624, 'SANTA ROSALIA', 99),
 	(99773, 'CUMARIBO', 99);
 
+
 -- Volcando estructura para tabla complementario.programaespecial
 CREATE TABLE IF NOT EXISTS `programaespecial` (
   `idespecial` int NOT NULL AUTO_INCREMENT,
-  `programaespecial` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_spanish2_ci NOT NULL,
+  `programaespecial` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb4_spanish2_ci NOT NULL,
   PRIMARY KEY (`idespecial`)
-) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_spanish2_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb4_spanish2_ci;
 
 -- Volcando datos para la tabla complementario.programaespecial: ~15 rows (aproximadamente)
 INSERT INTO `programaespecial` (`idespecial`, `programaespecial`) VALUES
@@ -1879,8 +1899,8 @@ INSERT INTO `programaespecial` (`idespecial`, `programaespecial`) VALUES
 -- Volcando estructura para tabla complementario.programaformacion
 CREATE TABLE IF NOT EXISTS `programaformacion` (
   `codigoprograma` int NOT NULL AUTO_INCREMENT,
-  `verision` varchar(250) CHARACTER SET utf8mb3 COLLATE utf8mb3_spanish2_ci NOT NULL DEFAULT '',
-  `nombreprograma` mediumtext CHARACTER SET utf8mb3 COLLATE utf8mb3_spanish2_ci,
+  `verision` varchar(250) CHARACTER SET utf8mb3 COLLATE utf8mb4_spanish2_ci NOT NULL DEFAULT '',
+  `nombreprograma` mediumtext CHARACTER SET utf8mb3 COLLATE utf8mb4_spanish2_ci,
   `horas` int NOT NULL,
   `idarea` int NOT NULL,
   `idmodalidad` int NOT NULL,
@@ -1889,7 +1909,7 @@ CREATE TABLE IF NOT EXISTS `programaformacion` (
   KEY `idmodalidad` (`idmodalidad`) USING BTREE,
   CONSTRAINT `FK_programaformacion_complementario.modalidad` FOREIGN KEY (`idmodalidad`) REFERENCES `modalidad` (`idmodalidad`),
   CONSTRAINT `programaformacion_ibfk_1` FOREIGN KEY (`idarea`) REFERENCES `area` (`idarea`)
-) ENGINE=InnoDB AUTO_INCREMENT=96160189 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_spanish2_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=96160189 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb4_spanish2_ci;
 
 -- Volcando datos para la tabla complementario.programaformacion: ~3,053 rows (aproximadamente)
 INSERT INTO `programaformacion` (`codigoprograma`, `verision`, `nombreprograma`, `horas`, `idarea`, `idmodalidad`) VALUES
@@ -4951,14 +4971,14 @@ INSERT INTO `programaformacion` (`codigoprograma`, `verision`, `nombreprograma`,
 	(96160181, '96160181-2', 'ENCUADERNACION RUSTICA MECANICA CON ADHESIVOS', 40, 8, 1),
 	(96160182, '96160182-2', 'APLICACION DE BUENAS PRACTICAS DE MANUFACTURA PARA PRODUCTOS COSMETICOS', 48, 5, 1),
 	(96160184, '96160184-1', 'INSTALACION DE VIDRIOS EN AUTOMOTORES', 40, 9, 1),
-	(96160188, 'Prueba', 'Prueba Word', 20, 12, 1);
+	(96160188, 'Prueba -v 1', 'Prueba Word bascio', 30, 14, 1);
 
 -- Volcando estructura para tabla complementario.rol
 CREATE TABLE IF NOT EXISTS `rol` (
   `idrol` int NOT NULL AUTO_INCREMENT,
-  `nombrerol` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_spanish2_ci NOT NULL,
+  `nombrerol` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb4_spanish2_ci NOT NULL,
   PRIMARY KEY (`idrol`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_spanish2_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb4_spanish2_ci;
 
 -- Volcando datos para la tabla complementario.rol: ~5 rows (aproximadamente)
 INSERT INTO `rol` (`idrol`, `nombrerol`) VALUES
@@ -4978,14 +4998,16 @@ CREATE TABLE IF NOT EXISTS `solicitud` (
   `cupo` int NOT NULL,
   `idmodalidad` int NOT NULL,
   `codigomunicipio` int NOT NULL,
-  `direccion` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_spanish2_ci NOT NULL,
+  `direccion` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb4_spanish2_ci NOT NULL,
   `idusuario` int NOT NULL,
   `idempresa` int DEFAULT NULL,
-  `subsectoreconomico` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_spanish2_ci DEFAULT NULL,
+  `subsectoreconomico` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb4_spanish2_ci DEFAULT NULL,
   `idespecial` int NOT NULL,
-  `convenio` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_spanish2_ci DEFAULT NULL,
-  `ambiente` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_spanish2_ci DEFAULT NULL,
+  `convenio` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb4_spanish2_ci DEFAULT NULL,
+  `ambiente` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb4_spanish2_ci DEFAULT NULL,
   `fechasolicitud` date NOT NULL,
+  `revisado` int DEFAULT 0,
+  `linkPreinscripcion` int DEFAULT 0,
   PRIMARY KEY (`idsolicitud`),
   KEY `FK_solicitud_tiposolicitud` (`idtiposolicitud`),
   KEY `FK_solicitud_programaformacion` (`codigoprograma`),
@@ -5003,7 +5025,9 @@ CREATE TABLE IF NOT EXISTS `solicitud` (
   CONSTRAINT `FK_solicitud_programaformacion` FOREIGN KEY (`codigoprograma`) REFERENCES `programaformacion` (`codigoprograma`),
   CONSTRAINT `FK_solicitud_tiposolicitud` FOREIGN KEY (`idtiposolicitud`) REFERENCES `tiposolicitud` (`idtiposolicitud`),
   CONSTRAINT `FK_solicitud_usuario` FOREIGN KEY (`idusuario`) REFERENCES `usuario` (`idusuario`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_spanish2_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb4_spanish2_ci;
+
+-- Volcando datos para la tabla complementario.solicitud: ~4 rows (aproximadamente)
 
 -- Volcando estructura para tabla complementario.solicitudcoordinador
 CREATE TABLE IF NOT EXISTS `solicitudcoordinador` (
@@ -5012,7 +5036,7 @@ CREATE TABLE IF NOT EXISTS `solicitudcoordinador` (
   `usuario_solicitud` int DEFAULT NULL,
   `idsolicitud` int DEFAULT NULL,
   `idestado` int NOT NULL,
-  `observacion` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_spanish2_ci NOT NULL,
+  `observacion` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_spanish2_ci,
   `fecha` date DEFAULT NULL,
   PRIMARY KEY (`idsolicitudcoordinador`),
   KEY `FK_solicitudcoordinador_estados_coordinador` (`idestado`),
@@ -5023,7 +5047,9 @@ CREATE TABLE IF NOT EXISTS `solicitudcoordinador` (
   CONSTRAINT `FK_solicitudcoordinador_solicitud` FOREIGN KEY (`idsolicitud`) REFERENCES `solicitud` (`idsolicitud`),
   CONSTRAINT `FK_solicitudcoordinador_usuario` FOREIGN KEY (`usuario_revisador`) REFERENCES `usuario` (`idusuario`),
   CONSTRAINT `FK_solicitudcoordinador_usuario_2` FOREIGN KEY (`usuario_solicitud`) REFERENCES `usuario` (`idusuario`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish2_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish2_ci;
+
+-- Volcando datos para la tabla complementario.solicitudcoordinador: ~2 rows (aproximadamente)
 
 -- Volcando estructura para tabla complementario.tipocontrato
 CREATE TABLE IF NOT EXISTS `tipocontrato` (
@@ -5040,9 +5066,9 @@ INSERT INTO `tipocontrato` (`idContrato`, `tipoContrato`) VALUES
 -- Volcando estructura para tabla complementario.tipoempresa
 CREATE TABLE IF NOT EXISTS `tipoempresa` (
   `idtipoempresa` int NOT NULL AUTO_INCREMENT,
-  `tipoempresa` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_spanish2_ci NOT NULL,
+  `tipoempresa` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb4_spanish2_ci NOT NULL,
   PRIMARY KEY (`idtipoempresa`)
-) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_spanish2_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb4_spanish2_ci;
 
 -- Volcando datos para la tabla complementario.tipoempresa: ~15 rows (aproximadamente)
 INSERT INTO `tipoempresa` (`idtipoempresa`, `tipoempresa`) VALUES
@@ -5065,9 +5091,9 @@ INSERT INTO `tipoempresa` (`idtipoempresa`, `tipoempresa`) VALUES
 -- Volcando estructura para tabla complementario.tipoidentificacion
 CREATE TABLE IF NOT EXISTS `tipoidentificacion` (
   `idtipoidentificacion` int NOT NULL AUTO_INCREMENT,
-  `tipoidentificacion` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_spanish2_ci NOT NULL,
+  `tipoidentificacion` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb4_spanish2_ci NOT NULL,
   PRIMARY KEY (`idtipoidentificacion`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_spanish2_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb4_spanish2_ci;
 
 -- Volcando datos para la tabla complementario.tipoidentificacion: ~10 rows (aproximadamente)
 INSERT INTO `tipoidentificacion` (`idtipoidentificacion`, `tipoidentificacion`) VALUES
@@ -5085,9 +5111,9 @@ INSERT INTO `tipoidentificacion` (`idtipoidentificacion`, `tipoidentificacion`) 
 -- Volcando estructura para tabla complementario.tiposolicitud
 CREATE TABLE IF NOT EXISTS `tiposolicitud` (
   `idtiposolicitud` int NOT NULL AUTO_INCREMENT,
-  `tiposolicitud` varchar(10) CHARACTER SET utf8mb3 COLLATE utf8mb3_spanish2_ci NOT NULL,
+  `tiposolicitud` varchar(10) CHARACTER SET utf8mb3 COLLATE utf8mb4_spanish2_ci NOT NULL,
   PRIMARY KEY (`idtiposolicitud`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_spanish2_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb4_spanish2_ci;
 
 -- Volcando datos para la tabla complementario.tiposolicitud: ~2 rows (aproximadamente)
 INSERT INTO `tiposolicitud` (`idtiposolicitud`, `tiposolicitud`) VALUES
@@ -5097,17 +5123,17 @@ INSERT INTO `tiposolicitud` (`idtiposolicitud`, `tiposolicitud`) VALUES
 -- Volcando estructura para tabla complementario.usuario
 CREATE TABLE IF NOT EXISTS `usuario` (
   `idusuario` int NOT NULL AUTO_INCREMENT,
-  `nombre` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_spanish2_ci NOT NULL,
-  `apellido` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_spanish2_ci NOT NULL,
+  `nombre` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb4_spanish2_ci NOT NULL,
+  `apellido` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb4_spanish2_ci NOT NULL,
   `rol` int DEFAULT NULL,
   `tipoidentificacion` int NOT NULL,
   `numeroidentificacion` int NOT NULL,
-  `correo` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_spanish2_ci NOT NULL,
-  `clave` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_spanish2_ci NOT NULL,
+  `correo` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb4_spanish2_ci NOT NULL,
+  `clave` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb4_spanish2_ci NOT NULL,
   `fecha` date NOT NULL,
   `verificado` int DEFAULT NULL,
   `contrato` int DEFAULT NULL,
-  `numeroContrato` varchar(50) COLLATE utf8mb3_spanish2_ci DEFAULT NULL,
+  `numeroContrato` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb4_spanish2_ci DEFAULT NULL,
   PRIMARY KEY (`idusuario`),
   UNIQUE KEY `correo` (`correo`),
   UNIQUE KEY `numeroidentificacion` (`numeroidentificacion`),
@@ -5117,7 +5143,9 @@ CREATE TABLE IF NOT EXISTS `usuario` (
   CONSTRAINT `FK_usuario_tipocontrato` FOREIGN KEY (`contrato`) REFERENCES `tipocontrato` (`idContrato`),
   CONSTRAINT `usuario_ibfk_1` FOREIGN KEY (`rol`) REFERENCES `rol` (`idrol`),
   CONSTRAINT `usuario_ibfk_2` FOREIGN KEY (`tipoidentificacion`) REFERENCES `tipoidentificacion` (`idtipoidentificacion`)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_spanish2_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb4_spanish2_ci;
+
+-- Volcando datos para la tabla complementario.usuario: ~7 rows (aproximadamente)
 
 -- Volcando estructura para tabla complementario.usuariosasignados
 CREATE TABLE IF NOT EXISTS `usuariosasignados` (
@@ -5130,7 +5158,7 @@ CREATE TABLE IF NOT EXISTS `usuariosasignados` (
   KEY `FK_usuariosasignados_usuario_2` (`idUsuarioCoordinador`),
   CONSTRAINT `FK_usuariosasignados_usuario` FOREIGN KEY (`idInstructor`) REFERENCES `usuario` (`idusuario`),
   CONSTRAINT `FK_usuariosasignados_usuario_2` FOREIGN KEY (`idUsuarioCoordinador`) REFERENCES `usuario` (`idusuario`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish2_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_spanish2_ci;
 
 -- Volcando datos para la tabla complementario.usuariosasignados: ~0 rows (aproximadamente)
 
