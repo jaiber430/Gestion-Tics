@@ -132,11 +132,8 @@
         <div class="fila-campos-3">
           <div class="campo-entrada">
             <label for="cupoAprendices" class="etiqueta-campo">Cupo de Aprendices*:</label>
-            <select id="cupoAprendices" name="cupoAprendices" class="entrada-select" required>
-              <option value="">Seleccione cupo</option>
-              <option value="25">25</option>
-              <option value="30">30</option>
-            </select>
+            <input type="number" id="cupoAprendices" name="cupoAprendices" class="entrada-texto" required min="1" step="1" placeholder="Ej: 25" />
+            <small id="mensajeCupoAbierta" class="texto-ayuda" style="display:none;">Para oferta abierta, el cupo mínimo es 25 aprendices.</small>
           </div>
           <div class="campo-entrada">
             <label for="departamentoFormacion" class="etiqueta-campo">Departamento de Formación*:</label>
@@ -400,6 +397,19 @@
       const seccion = document.getElementById('seccionEmpresa');
       seccion.style.display = (valor === 'si') ? 'block' : 'none';
 
+      // Cupo mínimo para oferta abierta
+      const cupoInput = document.getElementById('cupoAprendices');
+      const msgCupo = document.getElementById('mensajeCupoAbierta');
+      if (cupoInput) {
+        if (valor === 'no') {
+          cupoInput.setAttribute('min', '25');
+          if (msgCupo) msgCupo.style.display = 'block';
+        } else {
+          cupoInput.setAttribute('min', '1');
+          if (msgCupo) msgCupo.style.display = 'none';
+        }
+      }
+
       // Ajustar required
       const campos = ['empresaSolicitante', 'tipoEmpresa', 'nombreResponsable', 'correoResponsable', 'nitEmpresa', 'cartaSolicitud'];
       campos.forEach(id => {
@@ -531,6 +541,16 @@
 
     // Validación antes de enviar
     document.querySelector('.formulario-ficha').addEventListener('submit', function (e) {
+      // Validar cupo mínimo para oferta abierta
+      const tipoOferta = document.getElementById('tieneEmpresa').value;
+      const cupoRaw = (document.getElementById('cupoAprendices')?.value || '').trim();
+      const cupo = cupoRaw ? parseInt(cupoRaw, 10) : NaN;
+      if (tipoOferta === 'no' && (!Number.isFinite(cupo) || cupo < 25)) {
+        e.preventDefault();
+        alert('Para oferta abierta, el cupo mínimo es 25 aprendices.');
+        return;
+      }
+
       const dias = document.querySelectorAll('input[name="diasSemana[]"]:checked');
       if (dias.length === 0) {
         e.preventDefault();
