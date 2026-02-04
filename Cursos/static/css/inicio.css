@@ -167,14 +167,17 @@ body {
     text-decoration: none;
     padding: var(--espaciado-sm) var(--espaciado-md);
     border-radius: var(--radio-borde);
-    font-weight: var(--peso-medio);
+    font-weight: var(--peso-normal);
     font-size: 1.2rem;
-    background-color: var(--color-error);
+    background-color: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    transition: background-color 160ms ease, border-color 160ms ease;
     display: block;
 }
 
 .boton-cerrar-sesion:hover {
-    background-color: #B71C1C;
+    background-color: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.85);
 }
 
 /* 
