@@ -279,8 +279,21 @@
           <option value="">Todas las horas</option>
         </select>
 
-        <label for="modalPrograma">Programas Disponibles:</label>
-        <select id="modalPrograma" size="8" class="entrada-select"></select>
+        <label>Programas Disponibles:</label>
+        <div class="tabla-programas-wrapper" aria-label="Programas disponibles">
+          <table class="tabla-programas">
+            <thead>
+              <tr>
+                <th class="col-codigo">Código</th>
+                <th>Programa</th>
+                <th>Área</th>
+                <th class="col-horas">Horas</th>
+                <th class="col-version">Versión</th>
+              </tr>
+            </thead>
+            <tbody id="modalProgramaTbody"></tbody>
+          </table>
+        </div>
 
         <button type="button" class="boton-modal" onclick="seleccionarPrograma()">Seleccionar Programa</button>
       </div>
@@ -292,6 +305,7 @@
     // Almacenamiento de datos
     let municipiosOriginales = [];
     const programasData = [];
+    let programaSeleccionadoModalRow = null;
 
     // Inicialización al cargar la página
     document.addEventListener('DOMContentLoaded', function () {
@@ -429,33 +443,70 @@
     function filtrarProgramasModal() {
       const area = document.getElementById('modalArea').value;
       const horas = document.getElementById('modalHoras').value;
-      const lista = document.getElementById('modalPrograma');
+      const tbody = document.getElementById('modalProgramaTbody');
 
-      lista.innerHTML = '';
+      programaSeleccionadoModalRow = null;
+      tbody.innerHTML = '';
 
+      let resultados = 0;
       programasData.forEach(prog => {
         const cumpleArea = !area || prog.area === area;
         const cumpleHoras = !horas || prog.horas === horas;
 
         if (cumpleArea && cumpleHoras) {
-          const opt = document.createElement('option');
-          opt.value = prog.codigo;
-          opt.textContent = prog.nombre;
-          opt.dataset.area = prog.area;
-          opt.dataset.areaNombre = prog.areaNombre;
-          opt.dataset.horas = prog.horas;
-          opt.dataset.version = prog.version || '';
-          lista.appendChild(opt);
+          resultados += 1;
+          const tr = document.createElement('tr');
+          tr.tabIndex = 0;
+          tr.dataset.codigo = prog.codigo;
+          tr.dataset.nombre = prog.nombre;
+          tr.dataset.area = prog.area;
+          tr.dataset.areaNombre = prog.areaNombre;
+          tr.dataset.horas = prog.horas;
+          tr.dataset.version = prog.version || '';
+
+          tr.innerHTML = `
+            <td class="col-codigo">${prog.codigo}</td>
+            <td>${prog.nombre}</td>
+            <td>${prog.areaNombre || ''}</td>
+            <td class="col-horas">${prog.horas}</td>
+            <td class="col-version">${prog.version || ''}</td>
+          `;
+
+          const seleccionarFila = () => {
+            const prev = tbody.querySelector('tr.is-selected');
+            if (prev) prev.classList.remove('is-selected');
+            tr.classList.add('is-selected');
+            programaSeleccionadoModalRow = tr;
+          };
+
+          tr.addEventListener('click', seleccionarFila);
+          tr.addEventListener('dblclick', function () {
+            seleccionarFila();
+            seleccionarPrograma();
+          });
+          tr.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              seleccionarFila();
+            }
+          });
+
+          tbody.appendChild(tr);
         }
       });
+
+      if (resultados === 0) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = '<td colspan="5" style="padding:12px; color:#666;">No hay programas para los filtros seleccionados.</td>';
+        tbody.appendChild(tr);
+      }
     }
 
     // Seleccionar programa del modal
     function seleccionarPrograma() {
-      const lista = document.getElementById('modalPrograma');
-      const selected = lista.selectedOptions[0];
+      const selected = programaSeleccionadoModalRow;
 
-      if (!selected) {
+      if (!selected || !selected.dataset || !selected.dataset.codigo) {
         alert('Por favor, seleccione un programa de la lista.');
         return;
       }
@@ -464,9 +515,9 @@
       document.getElementById('tipoPrograma').value = selected.dataset.areaNombre;
       document.getElementById('tipoPrograma_id').value = selected.dataset.area;
       document.getElementById('horasPrograma').value = selected.dataset.horas + ' horas';
-      document.getElementById('nombrePrograma').value = selected.textContent;
-      document.getElementById('nombrePrograma_codigo').value = selected.value;
-      document.getElementById('codigoCurso').value = selected.value;
+      document.getElementById('nombrePrograma').value = selected.dataset.nombre;
+      document.getElementById('nombrePrograma_codigo').value = selected.dataset.codigo;
+      document.getElementById('codigoCurso').value = selected.dataset.codigo;
       document.getElementById('versionPrograma').value = selected.dataset.version;
 
       cerrarModal();

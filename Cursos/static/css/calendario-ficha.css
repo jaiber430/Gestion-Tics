@@ -264,11 +264,75 @@
     padding: 30px;
     border-radius: 8px;
     width: 90%;
-    max-width: 500px;
+    max-width: 720px;
     max-height: 80vh;
     overflow-y: auto;
     position: relative;
     box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+/* Tabla de programas (modal de filtro) */
+.tabla-programas-wrapper {
+    margin: 8px 0;
+    border: 1px solid #dfe7df;
+    border-radius: 8px;
+    background-color: #ffffff;
+    max-height: 260px;
+    overflow: auto;
+}
+
+.tabla-programas {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 820px; /* fuerza scroll horizontal en pantallas pequeñas */
+}
+
+.tabla-programas thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background-color: #2E7D32;
+    color: #ffffff;
+    text-align: left;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 10px 12px;
+    border-bottom: 1px solid #1B5E20;
+    white-space: nowrap;
+}
+
+.tabla-programas tbody td {
+    padding: 10px 12px;
+    font-size: 13px;
+    color: #333;
+    border-bottom: 1px solid #f0f0f0;
+    vertical-align: middle;
+}
+
+.tabla-programas tbody tr {
+    background-color: #ffffff;
+}
+
+.tabla-programas tbody tr:hover {
+    background-color: #e8f5e9;
+    cursor: pointer;
+}
+
+.tabla-programas tbody tr.is-selected {
+    background-color: #c8e6c9;
+    outline: 2px solid #2E7D32;
+    outline-offset: -2px;
+}
+
+.tabla-programas .col-codigo {
+    width: 120px;
+    white-space: nowrap;
+}
+
+.tabla-programas .col-horas,
+.tabla-programas .col-version {
+    width: 110px;
+    white-space: nowrap;
 }
 
 .modal-contenido h3 {
