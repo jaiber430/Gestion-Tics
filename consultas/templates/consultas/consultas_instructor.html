@@ -483,17 +483,23 @@ document.addEventListener('DOMContentLoaded', function () {
                               <span class="documento-aprendiz">Teléfono: {{ aspirante.telefono }}</span>
                               <span class="documento-aprendiz">Correo: {{ aspirante.correo }}</span>
                               {% comment %} Ver Pdf de los aspirantes {% endcomment %}
-                              <a href="{% url 'seePdfForapplicants' solicitud_consulta.idsolicitud aspirante.numeroidentificacion %}"
-                                target="_blank">
-                                Ver documento 📄
-                              </a>
-                              <a href="{% url 'editApplicantData' solicitud_consulta.idsolicitud aspirante.numeroidentificacion %}"
-                                target="_blank">
-                                Editar datos
-                              </a>
-                              <a href="{%url "removeApplicant" solicitud_consulta.idsolicitud aspirante.numeroidentificacion %}"  target="_blank">
-                                Borrar Aspirante
-                              </a>
+                              <div class="acciones-aprendiz">
+                                <a class="accion-link"
+                                  href="{% url 'seePdfForapplicants' solicitud_consulta.idsolicitud aspirante.numeroidentificacion %}"
+                                  target="_blank">
+                                  Ver documento
+                                </a>
+                                <a class="accion-link accion-link-secundaria"
+                                  href="{% url 'editApplicantData' solicitud_consulta.idsolicitud aspirante.numeroidentificacion %}"
+                                  target="_blank">
+                                  Editar datos
+                                </a>
+                                <a class="accion-link accion-link-peligro"
+                                  href="{% url 'removeApplicant' solicitud_consulta.idsolicitud aspirante.numeroidentificacion %}"
+                                  target="_blank">
+                                  Eliminar
+                                </a>
+                              </div>
                             </div>
                           </div>
                         {% empty %}
@@ -505,15 +511,16 @@ document.addEventListener('DOMContentLoaded', function () {
                         {% endfor %}
                       </div>
                       {% comment %} Botones ver combinado de PDF y excel {% endcomment %}
-                      <div>
-                          <a href="{% url 'viewCombinedPdf' solicitud_consulta.idsolicitud %}">
-                            Ver Pdf combinado 📄
+                        <div class="acciones-combinados">
+                          <a href="{% url 'viewCombinedPdf' solicitud_consulta.idsolicitud %}" class="boton-descargar boton-descargar-sm">
+                            Ver PDF combinado
                           </a>
-                          <a href="{% url 'seeExcelCandidates' solicitud_consulta.idsolicitud %}">
+                          <a href="{% url 'seeExcelCandidates' solicitud_consulta.idsolicitud %}" class="boton-descargar boton-descargar-sm">
                             Ver Excel
                           </a>
-                      </div>
-                      <div>
+                        </div>
+
+                        <div class="seccion-revisado">
                           {% if solicitud_consulta.revisado == 1 %}
                               <button class="boton-compartir" disabled>
                                   ✔ Ya revisado
