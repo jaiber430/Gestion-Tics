@@ -53,6 +53,8 @@ urlpatterns = [
     path('preinscripcion/<int:idsolicitud>/', views_aspirantes.formulario_aspirantes, name="formularioaspirantes"),
     # Realización del registro de preinscripción
     path('preinscripcion/', views_aspirantes.registro_aspirante, name="Registroaspirantes"),
+    # Página informativa cuando el cupo ya se agotó
+    path('preinscripcion/cupo-agotado/', views_aspirantes.cupo_agotado, name='cupo_agotado'),
     # Descargar PDF combinado de los aspirantes
     path('pdf/<int:id>/<int:idrol>', views_consultas.descargar_pdf, name='descargar_pdf'),
     # Descargar excel

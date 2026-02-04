@@ -31,21 +31,18 @@ def formulario_aspirantes(request, idsolicitud):
         solicitudinscripcion=solicitud
     ).count()
 
-    # Si el link fue desactivado manualmente → 404 directo
+    # Si se alcanza o supera el cupo → enviar a la página informativa
+    if cerrar_inscripciones >= solicitud.cupo:
+        # Mantener el link marcado como cerrado para evitar nuevas inscripciones,
+        # pero sin mandar al 404: se muestra una página clara de "cupo agotado".
+        if solicitud.linkpreinscripcion != 1:
+            solicitud.linkpreinscripcion = 1
+            solicitud.save(update_fields=['linkpreinscripcion'])
+        return redirect('cupo_agotado')
+
+    # Si el link fue desactivado manualmente (y aún hay cupo) → 404
     if solicitud.linkpreinscripcion == 1:
         raise Http404
-
-    # Si se alcanza o supera el cupo
-    if cerrar_inscripciones >= solicitud.cupo:
-        solicitud.linkpreinscripcion = 1
-        solicitud.save(update_fields=['linkpreinscripcion'])
-
-        # ⚠ Mostrar mensaje primero y luego redirigir a 404
-        return render(request, 'forms/formulario_aspirantes.html', {
-            'solicitud': solicitud,
-            'cupo_completo': True,
-            'redirect_404': True,  # bandera para JS
-        })
 
     caracterizacion = Caracterizacion.objects.all()
     tipo_documento = Tipoidentificacion.objects.all()
@@ -54,8 +51,12 @@ def formulario_aspirantes(request, idsolicitud):
         'tipos_identificacion': tipo_documento,
         'caracterizaciones': caracterizacion,
         'solicitud': solicitud,
-        'cupo_completo': False,
-        'redirect_404': False,
+    })
+
+
+def cupo_agotado(request):
+    return render(request, 'pages/cupo_agotado.html', {
+        'title': 'Cupos agotados',
     })
 
 def registro_aspirante(request):
@@ -83,8 +84,10 @@ def registro_aspirante(request):
 
             conteo_actual = Aspirantes.objects.filter(solicitudinscripcion=solicitud_obj).count()
             if conteo_actual >= solicitud_obj.cupo:
-                messages.error(request, 'Los cupos ya están completos para esta solicitud.')
-                return redirect('formularioaspirantes', idsolicitud=solicitud_inscripcion)
+                if solicitud_obj.linkpreinscripcion != 1:
+                    solicitud_obj.linkpreinscripcion = 1
+                    solicitud_obj.save(update_fields=['linkpreinscripcion'])
+                return redirect('cupo_agotado')
 
             # Validar duplicados correctamente y con redirect al mismo formulario
             duplicado = Aspirantes.objects.filter(
