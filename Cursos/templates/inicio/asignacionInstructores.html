@@ -4,21 +4,6 @@
 <div class="seccion-formulario">
     <h3 class="titulo-seccion-form">Asignación de Instructores</h3>
 
-    <!-- BLOQUE DE MENSAJES -->
-    {% if messages %}
-        <div class="mensajes">
-            {% for message in messages %}
-                <div class="alert alert-{% if message.tags == 'error' %}
-                    danger
-                {% else %}
-                    {{ message.tags }}
-                {% endif %}">
-                    {{ message }}
-                </div>
-            {% endfor %}
-        </div>
-    {% endif %}
-
     <!-- LISTA DE INSTRUCTORES A ASIGNAR -->
     {% for usuario in designatedUser %}
         <form class="formulario-ficha"

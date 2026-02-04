@@ -15,15 +15,6 @@
         </p>
       </div>
     </div>
-    {% if messages %}
-      <div class="alertas" style="max-width:800px;margin:0 auto 2.4rem;">
-        {% for message in messages %}
-          <div class="alert alert-{{ message.tags }}" style="padding:1rem 1.4rem;border-radius:0.6rem;margin-bottom:0.8rem;font-size:1.4rem;line-height:1.4; background:#f1f1f1; border-left:4px solid {% if 'success' in message.tags %}#2E7D32{% elif 'error' in message.tags or 'danger' in message.tags %}#D32F2F{% elif 'warning' in message.tags %}#F9A825{% else %}#1976D2{% endif %};">
-            {{ message }}
-          </div>
-        {% endfor %}
-      </div>
-    {% endif %}
     {% comment %} {% if fechas != 'Creaciones_abiertas' %} {% endcomment %}
     {% if fechas == 'Creaciones_abiertas' %}
     {% comment %} Habilita la creación de un curso si aun se encuentra en las fechas {% endcomment %}

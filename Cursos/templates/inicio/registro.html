@@ -26,12 +26,14 @@
       <!-- Sección principal - Formulario de inicio de sesión -->
       <main class="contenido-principal">
           {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-success">
-                  {{message}}
+            <div class="alertas">
+              {% for message in messages %}
+                <div class="alert {% if 'error' in message.tags %}alert-error{% else %}alert-success{% endif %}">
+                  {{ message }}
                 </div>
               {% endfor %}
-            {% endif %} 
+            </div>
+          {% endif %}
           {{error}}
         <!-- Contenedor del formulario de login -->
         <div class="formulario-contenedor">

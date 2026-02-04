@@ -51,6 +51,16 @@
         </nav>
       </header>
 
+      {% if messages %}
+        <div class="alertas">
+          {% for message in messages %}
+            <div class="alert {% if 'error' in message.tags %}alert-error{% else %}alert-success{% endif %}">
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
       {% block content %}
 
       {% endblock %}

@@ -4,21 +4,6 @@
   <div class="seccion-formulario">
     <h3 class="titulo-seccion-form">Usuarios sin Verificación</h3>
 
-    <!-- BLOQUE DE MENSAJES -->
-    {% if messages %}
-      <div class="mensajes">
-        {% for message in messages %}
-          <div class="alert alert-{% if message.tags == 'error' %}
-
-              danger
-
-            {% else %}
-              {{ message.tags }}
-            {% endif %}">{{ message }}</div>
-        {% endfor %}
-      </div>
-    {% endif %}
-
     {% for usuario in usuariosSinVerificar %}
       <form class="formulario-ficha" method="post" action="{% url 'verificar_usuario' usuario.idusuario %}" enctype="multipart/form-data" style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
         {% csrf_token %}

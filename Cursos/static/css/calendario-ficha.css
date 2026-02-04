@@ -431,22 +431,22 @@
     border: 1px solid;
 }
 
-.alert.success {
-    background-color: #d4edda;
-    color: #155724;
-    border-color: #c3e6cb;
+.alert-success,
+.alert.success,
+.alert-info,
+.alert.info,
+.alert-warning,
+.alert.warning {
+    background-color: #E8F5E9;
+    color: #1B5E20;
+    border-color: #2E7D32;
 }
 
+.alert-error,
 .alert.error {
-    background-color: #f8d7da;
-    color: #721c24;
-    border-color: #f5c6cb;
-}
-
-.alert.info {
-    background-color: #d1ecf1;
-    color: #0c5460;
-    border-color: #bee5eb;
+    background-color: #FFEBEE;
+    color: #B71C1C;
+    border-color: #D32F2F;
 }
 
 /* Estilos para estados de validación */

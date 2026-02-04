@@ -2,21 +2,6 @@
 
 {% block content %}
   <main class="contenido-principal">
-    <!-- Mensajes de Django -->
-    {% if messages %}
-      {% for message in messages %}
-        <div class="alert"
-          style="padding: 12px; margin: 15px 0; border-radius: 6px; font-size: 14px; border: 1px solid;
-          {% if message.tags == 'success' %}
-            background-color: #d4edda; color: #155724; border-color: #c3e6cb;
-          {% elif message.tags == 'error' %}
-            background-color: #f8d7da; color: #721c24; border-color: #f5c6cb;
-          {% else %}
-            background-color: #d1ecf1; color: #0c5460; border-color: #bee5eb;
-          {% endif %}">{{ message }}</div>
-      {% endfor %}
-    {% endif %}
-
     <!-- Formulario de búsqueda -->
     <div class="seccion-formulario">
       <form method="POST" action="{% url 'buscar_programa' %}" class="programa-busqueda-form">

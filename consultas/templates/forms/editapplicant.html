@@ -2,15 +2,6 @@
 
 {% block content %}
 <main class="contenido-principal">
-
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }}">
-                {{ message }}
-            </div>
-        {% endfor %}
-    {% endif %}
-
     <form method="POST"
         action="{% url 'updateCandidate' aspirante.solicitudinscripcion_id aspirante.numeroidentificacion %}">
 
