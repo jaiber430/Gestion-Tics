@@ -24,6 +24,7 @@ import calendar
 import shutil
 # Importar mensajes
 from django.contrib import messages
+from django.db.models import Count
 # Poder visualizar el excel
 from openpyxl import load_workbook
 # Importar decorador personalizado para el logueo
@@ -38,7 +39,7 @@ from django.template.loader import get_template
 # import pandas as pd
 
 # Ver pdf aspirante en especifico
-
+@login_required_custom
 def showPdfApplicants(request, id, numDoc):
     # Verificar que el aspirante existe
     if not Aspirantes.objects.filter(numeroidentificacion=numDoc).exists():
@@ -59,6 +60,7 @@ def showPdfApplicants(request, id, numDoc):
         content_type='application/pdf'
     )
 
+@login_required_custom
 # Ver pdf combinado
 def viewCombinedPdf (request,  pdfFolder):
 
@@ -77,6 +79,7 @@ def viewCombinedPdf (request,  pdfFolder):
         content_type='application/pdf'
     )
 
+@login_required_custom
 def showExcelApprentices(request, excelFolder ):
     # Nombre del archivo
     folder_name = f'formato_inscripcion_{excelFolder}.xlsx'
@@ -105,6 +108,7 @@ def showExcelApprentices(request, excelFolder ):
         "error": error
     })
 
+@login_required_custom
 def reviewedByInstructor(request, idSolicitud):
     user_id = request.session.get('user_id')
 
@@ -120,6 +124,7 @@ def reviewedByInstructor(request, idSolicitud):
 
     return redirect('consultas_instructor')
 
+@login_required_custom
 def editApplicantData(request, idSolicitud, numDoc):
 
     user_id = request.session.get('user_id')
@@ -929,7 +934,7 @@ def revision_fichas(request, id):
                     idestado=id_estado,
                     idusuario=creado_por,
                     observacion=observacion,
-                    excel=0  # ← ESTADO INICIAL: DESCARGAR
+                    excel=1  # ← ESTADO INICIAL: DESCARGAR
                 )
 
 
@@ -1207,3 +1212,56 @@ def ver_pdf_carta(request, id_solicitud):
         return redirect(ruta_pdf)
     else:
         return HttpResponseNotFound("El archivo PDF no existe para esta solicitud.")
+
+
+# Enviar datos para la creación de la grafica
+@login_required_custom
+def reporteCreaciones (request):
+
+    # Total real de solicitudes (base del 100%)
+    total_solicitudes = Solicitud.objects.count()
+
+    solicitudes_por_estado = (
+        Ficha.objects
+        .values('idestado__estados')
+        .annotate(total=Count('idsolicitud', distinct=True))
+        .order_by('idestado__estados')
+    )
+
+    # porcentajes (la suma de todos los estados)
+    total_estados = sum(item['total'] for item in solicitudes_por_estado)
+
+    colores_estado = {
+        'matriculada': '#2ecc71',      # verde
+        'rechazada': '#e74c3c',        # rojo
+        'lista de espera': '#e6dccb',  # beige
+        'creacion': '#f39c12',         # naranja
+        'creación': '#f39c12',
+    }
+
+    resumen = []
+    for item in solicitudes_por_estado:
+        estado = item['idestado__estados']
+        cantidad = item['total']
+
+        porcentaje = round(
+            (cantidad / total_estados) * 100, 1
+        ) if total_estados > 0 else 0
+
+        resumen.append({
+            'estado': estado,
+            'total': cantidad,
+            'porcentaje': porcentaje,
+            'color': colores_estado.get(estado.lower(), '#95a5a6')
+        })
+
+    context = {
+        'totalSolicitudes': total_solicitudes,
+        'total_estados': total_estados,
+        'estados': [r['estado'] for r in resumen],
+        'totales': [r['total'] for r in resumen],
+        'colores': [r['color'] for r in resumen],
+        'resumen': resumen
+    }
+
+    return render(request, 'reportes/grafica.html', context)

@@ -95,8 +95,10 @@ urlpatterns = [
     path('submitRevised/<int:idSolicitud>/', views_consultas.reviewedByInstructor, name="reviewedByInstructor"),
     path('fromEditApplicant/<int:idSolicitud>/<int:numDoc>/', views_consultas.editApplicantData, name="editApplicantData"),
     # Modificar y borrar aspirante como instructor
-    path( 'applicant/edit/<int:idSolicitud>/<int:numDoc>/',views_aspirantes.updateCandidate,name='updateCandidate'),
-    path( 'applicant/remove/<int:idSolicitud>/<int:numDoc>/',views_aspirantes.removeApplicant,name='removeApplicant'),
+    path('applicant/edit/<int:idSolicitud>/<int:numDoc>/',views_aspirantes.updateCandidate,name='updateCandidate'),
+    path('applicant/remove/<int:idSolicitud>/<int:numDoc>/',views_aspirantes.removeApplicant,name='removeApplicant'),
+    # Creación de grafica
+    path('graphReports/', views_consultas.reporteCreaciones, name='viewGraphReports')
 ]
 # Poder almacenar archivos en la carpeta media
 if settings.DEBUG:

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Resumen de Solicitudes</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        .contenedor {
+            display: flex;
+            gap: 40px;
+            align-items: flex-start;
+        }
+        .panel {
+            width: 260px;
+        }
+        .card {
+            padding: 12px;
+            margin-bottom: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            background: #fafafa;
+        }
+        .barra {
+            height: 6px;
+            border-radius: 4px;
+            margin-top: 6px;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Total de solicitudes: {{ totalSolicitudes }}</h2>
+
+<div class="contenedor">
+
+    <!-- Gráfica -->
+    <div style="width: 600px;">
+        <canvas id="graficaSolicitudes"></canvas>
+    </div>
+
+    <!-- Panel derecho -->
+    <div class="panel">
+        {% for item in resumen %}
+            <div class="card" style="border-left: 6px solid {{ item.color }};">
+                <strong>{{ item.estado }}</strong><br>
+                {{ item.total }} solicitud ({{ item.porcentaje }}%)
+                <div class="barra"
+                    style="width: {{ item.porcentaje }}%; background-color: {{ item.color }};">
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+</div>
+
+<script>
+    const estados = {{ estados|safe }};
+    const totales = {{ totales|safe }};
+    const colores = {{ colores|safe }};
+
+    new Chart(document.getElementById('graficaSolicitudes'), {
+        type: 'bar',
+        data: {
+            labels: estados,
+            datasets: [{
+                label: 'Solicitudes',
+                data: totales,
+                backgroundColor: colores,
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+</script>
+
+</body>
+</html>

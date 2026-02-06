@@ -87,7 +87,7 @@ WSGI_APPLICATION = 'Gestion.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'complementario',
+        'NAME': 'complementario16',
         'USER': 'root',
         'PASSWORD': '',
         'HOST': 'localhost',
