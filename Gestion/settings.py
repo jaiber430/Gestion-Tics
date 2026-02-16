@@ -84,13 +84,20 @@ WSGI_APPLICATION = 'Gestion.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+ALLOWED_HOSTS = [
+    '127.0.0.1',
+    'localhost',
+    '172.10.1.10',
+]
+
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'complementario',
         'USER': 'agro_cursos',
         'PASSWORD': 'AdminCursos2026*',
-        'ALLOWED_HOSTS': '172.10.1.10',
+        'HOST': '172.10.1.10',   # o 'localhost'
         'PORT': '3306',
     }
 }
