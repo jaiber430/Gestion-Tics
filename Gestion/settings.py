@@ -94,7 +94,7 @@ ALLOWED_HOSTS = [
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'complementario',
+        'NAME': 'complementario16',
         'USER': 'agro_cursos',
         'PASSWORD': 'AdminCursos2026*',
         'HOST': '172.10.1.10',   # o 'localhost'
