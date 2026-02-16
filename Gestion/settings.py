@@ -90,7 +90,7 @@ DATABASES = {
         'NAME': 'complementario',
         'USER': 'agro_cursos',
         'PASSWORD': 'AdminCursos2026*',
-        'HOST': 'localhost',
+        'HOST': '172.10.1.10',
         'PORT': '3306',
     }
 }
