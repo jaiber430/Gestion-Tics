@@ -88,7 +88,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'complementario',
-        'USER': 'root',
+        'USER': 'agro_cursos',
         'PASSWORD': 'AdminCursos2026*',
         'HOST': 'localhost',
         'PORT': '3306',
