@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.http import Http404, FileResponse,  HttpResponse
+from django.http import Http404, FileResponse,  HttpResponse, JsonResponse
 from django.template.loader import render_to_string
 from Cursos.models import (
     Usuario, Solicitud, Programaformacion, Horario, Modalidad,
@@ -201,9 +201,17 @@ def consultas_todos(request):
             idestado__estado="Aprobado"
         ).values_list('idsolicitud', flat=True)
 
+        # IDs de solicitudes con ficha en estado 4 (ocultar — Matriculada)
+        fichas_ocultas = Ficha.objects.filter(
+            idestado__idestado=4
+        ).values_list('idsolicitud', flat=True)
+
         solicitudes = Solicitud.objects.filter(
             idsolicitud__in=solicitudes_aprobadas
+        ).exclude(
+            idsolicitud__in=fichas_ocultas  # ← excluir las que tienen estado 4
         ).select_related('idusuario', 'idempresa').order_by('-fechasolicitud')
+
     else:
         # Instructor o Admin
         solicitudes = Solicitud.objects.select_related('idusuario', 'idempresa') \
@@ -238,16 +246,36 @@ def consultas_todos(request):
             solicitud.estado_usuario = ficha.idestado.estados if ficha.idestado else None
             solicitud.observacion_usuario = ficha.observacion or ''
             solicitud.codigo_ficha = ficha.codigoficha or ''
-            solicitud.ficha_excel = ficha.excel or 0
+            solicitud.ficha_excel = ficha.excel if ficha.excel is not None else 0
+            id_estado_ficha = ficha.idestado.idestado if ficha.idestado else None
+
+            # ----------------------------
+            # Lógica del campo excel según estado:
+            # 0 → sin archivo, mostrar input para subir
+            # 1 → archivo subido, mostrar botón descargar deshabilitado
+            # 2 → rechazada, no mostrar nada (esperar que el ciclo reinicie)
+            # ----------------------------
+            if solicitud.ficha_excel == 0:
+                # Sin archivo → mostrar input para subir
+                solicitud.mostrar_input_excel = True
+                solicitud.mostrar_boton_descarga_excel = False
+            elif solicitud.ficha_excel == 2:
+                # Rechazada → no mostrar nada, esperar que el instructor reenvíe
+                solicitud.mostrar_input_excel = False
+                solicitud.mostrar_boton_descarga_excel = False
+            else:  # excel == 1
+                # Archivo subido → botón descargar deshabilitado
+                solicitud.mostrar_input_excel = False
+                solicitud.mostrar_boton_descarga_excel = True
+
         else:
+            # Sin ficha en BD → mostrar input para subir
             solicitud.estado_usuario = None
             solicitud.observacion_usuario = ''
             solicitud.codigo_ficha = ''
-            solicitud.ficha_excel = 1
-
-        # Regla clara
-        solicitud.mostrar_descarga_excel = solicitud.ficha_excel == 0
-        solicitud.mostrar_subida_excel = solicitud.ficha_excel == 1
+            solicitud.ficha_excel = 0
+            solicitud.mostrar_input_excel = True
+            solicitud.mostrar_boton_descarga_excel = False
 
         solicitud.codigo_solicitud = solicitud.codigosolicitud
 
@@ -923,6 +951,18 @@ def revision_fichas(request, id):
 
                 ficha.idestado = id_estado
                 ficha.observacion = observacion
+
+                # ----------------------------
+                # Manejo del campo excel según acción:
+                # - Si sube archivo → excel=1 (tiene archivo, mostrar descargar deshabilitado)
+                # - Si rechaza sin archivo → excel=2 (ocultar todo, esperar ciclo)
+                # - En cualquier otro caso → mantiene el valor anterior
+                # ----------------------------
+                if nuevo_archivo:
+                    ficha.excel = 1
+                elif id_estado.idestado == idRechazadoByFuncionario:
+                    ficha.excel = 2
+
                 ficha.save()
             else:
                 # ----------------------------
@@ -934,9 +974,8 @@ def revision_fichas(request, id):
                     idestado=id_estado,
                     idusuario=creado_por,
                     observacion=observacion,
-                    excel=1  # ← ESTADO INICIAL: DESCARGAR
+                    excel=0  # ← ESTADO INICIAL: sin archivo, mostrar input para subir
                 )
-
 
             # ----------------------------
             # Actualizar la solicitud con el número/código
@@ -967,6 +1006,9 @@ def revision_fichas(request, id):
                     for chunk in nuevo_archivo.chunks():
                         destino.write(chunk)
 
+                # ----------------------------
+                # Marcar excel=1 en ficha (ya subió archivo)
+                # ----------------------------
                 ficha = Ficha.objects.filter(idsolicitud=solicitud).first()
                 if ficha:
                     ficha.excel = 1
@@ -1021,6 +1063,27 @@ def descargar_excel_ficha(request, id):
     else:
         # Si no existe, mostrar un error
         raise Http404("Aun no se ha subido el excel.")
+
+# ===============================================================
+# Marcar excel para subir (cambia ficha.excel = 0 en BD)
+# ===============================================================
+@login_required_custom
+def marcar_excel_para_subir(request, id):
+    """
+    Cambia ficha.excel = 0 para que el funcionario pueda subir un nuevo archivo.
+    Solo acepta POST para evitar cambios accidentales.
+    """
+    if request.method == "POST":
+        solicitud = get_object_or_404(Solicitud, idsolicitud=id)
+        ficha = Ficha.objects.filter(idsolicitud=solicitud).first()
+
+        if ficha:
+            ficha.excel = 0
+            ficha.save(update_fields=['excel'])
+
+        return JsonResponse({'ok': True})
+
+    return JsonResponse({'ok': False, 'error': 'Método no permitido'}, status=405)
 
 @login_required_custom
 def revision_coordinador(request, id_solicitud):

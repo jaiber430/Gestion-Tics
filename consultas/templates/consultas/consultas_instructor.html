@@ -55,31 +55,33 @@
                     Documentos aspirantes
                   </a>
 
-                    {% if solicitud_consulta.boton_ver_carta_disabled %}
-                      <button class="boton-descargar" disabled style="padding: 6px 10px; font-size: 12px;">Ver Carta (No disponible)</button>
-                    {% elif solicitud_consulta.mostrar_boton_carta_funcionario %}
-                      <a href="{% url 'descargar_carta' solicitud_consulta.idsolicitud rol %}" class="boton-descargar" style="padding: 6px 10px; font-size: 12px;">Carta de solicitud</a>
-                    {% else %}
-                      <a href="{% url 'descargar_carta' solicitud_consulta.idsolicitud rol %}" class="boton-descargar" style="padding: 6px 10px; font-size: 12px;">Carta de solicitud</a>
+                  {% if solicitud_consulta.boton_ver_carta_disabled %}
+                    <button class="boton-descargar" disabled style="padding: 6px 10px; font-size: 12px;">Ver Carta (No disponible)</button>
+                  {% elif solicitud_consulta.mostrar_boton_carta_funcionario %}
+                    <a href="{% url 'descargar_carta' solicitud_consulta.idsolicitud rol %}" class="boton-descargar" style="padding: 6px 10px; font-size: 12px;">Carta de solicitud</a>
+                  {% else %}
+                    <a href="{% url 'descargar_carta' solicitud_consulta.idsolicitud rol %}" class="boton-descargar" style="padding: 6px 10px; font-size: 12px;">Carta de solicitud</a>
+                  {% endif %}
+
+                  <div id="excel-container-{{ solicitud_consulta.idsolicitud }}">
+
+                    {% if solicitud_consulta.mostrar_input_excel %}
+                      <!-- ESTADO: SUBIR -->
+                      <input type="file"
+                             name="actualizar_excel"
+                             class="archivo-subida">
+
+                    {% elif solicitud_consulta.mostrar_boton_descarga_excel %}
+                      <!-- ESTADO: DESCARGAR (deshabilitado) -->
+                      <a class="boton-descargar"
+                         style="pointer-events:none; opacity:0.5; padding: 6px 10px; font-size: 12px;"
+                         title="Formato ya subido">
+                        Formato inscripción masivo
+                      </a>
+
                     {% endif %}
 
-                    <div id="excel-container-{{ solicitud_consulta.idsolicitud }}">
-
-                      {% if solicitud_consulta.ficha_excel == 0 %}
-                        <!-- ESTADO: SUBIR -->
-                        <input type="file"
-                              name="actualizar_excel"
-                              class="archivo-subida">
-                      {% else %}
-                        <!-- ESTADO: DESCARGAR -->
-                        <a href="{% url 'descargar_excel' solicitud_consulta.idsolicitud rol %}"
-                          class="boton-descargar excel-toggle"
-                          data-id="{{ solicitud_consulta.idsolicitud }}">
-                          Formato inscripción masivo
-                        </a>
-                      {% endif %}
-
-                    </div>
+                  </div>
 
                 </div>
               </td>
@@ -100,15 +102,15 @@
 
               <td>
                 <input type="text"
-                      name="codigo_ficha"
-                      value="{{ solicitud_consulta.codigo_ficha }}"
-                      {% if solicitud_consulta.codigo_ficha %}readonly{% endif %}>
+                       name="codigo_ficha"
+                       value="{{ solicitud_consulta.codigo_ficha }}"
+                       {% if solicitud_consulta.codigo_ficha %}readonly{% endif %}>
               </td>
 
               <td>
                 <input type="text"
-                      name="codigo_solicitud"
-                      value="{{ solicitud_consulta.codigosolicitud|default_if_none:'' }}">
+                       name="codigo_solicitud"
+                       value="{{ solicitud_consulta.codigosolicitud|default_if_none:'' }}">
               </td>
 
               <td>
@@ -135,26 +137,42 @@
 document.addEventListener('DOMContentLoaded', function () {
 
   document.querySelectorAll('.excel-toggle').forEach(link => {
-    link.addEventListener('click', function () {
+    link.addEventListener('click', function (e) {
+      e.preventDefault() // Evita navegar antes de hacer el POST
 
       const id = this.dataset.id
       const container = document.getElementById(`excel-container-${id}`)
+      const downloadUrl = this.href // Guardamos la URL de descarga
 
-      // Cambia visualmente el campo
-      setTimeout(() => {
-        container.innerHTML = `
-          <input type="file"
-                name="actualizar_excel"
-                class="archivo-subida">
-        `
-      }, 300)
+      // 1. Persistir el cambio en BD
+      fetch(`/marcar-excel-subir/${id}/`, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': document.cookie.match(/csrftoken=([^;]+)/)?.[1] || ''
+        }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.ok) {
+          // 2. Abrir la descarga manualmente (ya que bloqueamos el clic)
+          window.location.href = downloadUrl
 
+          // 3. Cambiar el campo a "subir archivo"
+          setTimeout(() => {
+            container.innerHTML = `
+              <input type="file"
+                     name="actualizar_excel"
+                     class="archivo-subida">
+            `
+          }, 300)
+        }
+      })
+      .catch(err => console.error('Error al marcar excel:', err))
     })
   })
 
 })
 </script>
-
 
   {% elif rol == 2 %}
     {% comment %}Mostrar esto solo al Coordinador{% endcomment %}
@@ -249,7 +267,7 @@ document.addEventListener('DOMContentLoaded', function () {
               <td>{{ solicitud_consulta.fechasolicitud }}</td>
               <!-- Observaciones del coordinador -->
               <td>
-          <textarea name="observacion" class="entrada-texto">{{ solicitud_consulta.observacion_coordinador|default_if_none:"" }}</textarea>
+                <textarea name="observacion" class="entrada-texto">{{ solicitud_consulta.observacion_coordinador|default_if_none:"" }}</textarea>
               </td>
               <!-- Botón de envío; deshabilitado si la solicitud ya está aprobada -->
               <td>
