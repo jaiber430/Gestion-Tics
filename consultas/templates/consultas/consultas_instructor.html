@@ -66,20 +66,31 @@
                   <div id="excel-container-{{ solicitud_consulta.idsolicitud }}">
 
                     {% if solicitud_consulta.mostrar_input_excel %}
-                      <!-- ESTADO: SUBIR -->
+                      <!-- ESTADO 0: sin archivo, mostrar input para subir -->
                       <input type="file"
                              name="actualizar_excel"
                              class="archivo-subida">
 
                     {% elif solicitud_consulta.mostrar_boton_descarga_excel %}
-                      <!-- ESTADO: DESCARGAR (deshabilitado) -->
-                      <a class="boton-descargar"
-                         style="pointer-events:none; opacity:0.5; padding: 6px 10px; font-size: 12px;"
-                         title="Formato ya subido">
-                        Formato inscripción masivo
-                      </a>
+                      {% if solicitud_consulta.excel_descarga_activa %}
+                        <!-- ESTADO 3: reinicio tras rechazo, botón activo con fetch -->
+                        <a href="{% url 'descargar_excel' solicitud_consulta.idsolicitud rol %}"
+                           class="boton-descargar excel-toggle"
+                           data-id="{{ solicitud_consulta.idsolicitud }}"
+                           style="padding: 6px 10px; font-size: 12px;">
+                          Formato inscripción masivo
+                        </a>
+                      {% else %}
+                        <!-- ESTADO 1: archivo subido, botón deshabilitado -->
+                        <a class="boton-descargar"
+                           style="pointer-events:none; opacity:0.5; padding: 6px 10px; font-size: 12px;"
+                           title="Formato ya subido">
+                          Formato inscripción masivo
+                        </a>
+                      {% endif %}
 
                     {% endif %}
+                    <!-- ESTADO 2: rechazada, no se muestra nada -->
 
                   </div>
 
@@ -144,7 +155,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const container = document.getElementById(`excel-container-${id}`)
       const downloadUrl = this.href // Guardamos la URL de descarga
 
-      // 1. Persistir el cambio en BD
+      // 1. Persistir el cambio en BD (excel → 0)
       fetch(`/marcar-excel-subir/${id}/`, {
         method: 'POST',
         headers: {
@@ -154,7 +165,7 @@ document.addEventListener('DOMContentLoaded', function () {
       .then(res => res.json())
       .then(data => {
         if (data.ok) {
-          // 2. Abrir la descarga manualmente (ya que bloqueamos el clic)
+          // 2. Abrir la descarga manualmente
           window.location.href = downloadUrl
 
           // 3. Cambiar el campo a "subir archivo"
@@ -301,7 +312,6 @@ document.addEventListener('DOMContentLoaded', function () {
           const esCampesina = tipoNombre === 'campesina' || tipoId === '2'
           const esRegular = tipoNombre === 'regular' || tipoId === '1'
           let mostrar = true
-          // Aplicar los filtros: si filtroPrograma no está vacío y no coincide, ocultar
           if (filtroPrograma && !programa.includes(filtroPrograma)) mostrar = false
           if (filtroTipo) {
             const esCampesina = programa.includes('campesina')
@@ -331,7 +341,6 @@ document.addEventListener('DOMContentLoaded', function () {
       </div>
 
       <!-- busqueda y filtro -->
-      <!-- filtro por nombre de programa -->
       <div class="filtros-busqueda">
         <div class="filtro-nombre-programa">
           <label for="filtro-programa">Filtrar por Nombre de Programa:</label>
@@ -372,7 +381,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 <td>{{ solicitud_consulta.codigoprograma.nombreprograma }}</td>
                 <td>
                   {% if solicitud_consulta.estado_usuario %}
-                    <!-- Estado dado por el funcionario -->
                     {% if solicitud_consulta.estado_usuario == 'Matriculada' %}
                       <span class="estado-aprobado">{{ solicitud_consulta.estado_usuario }}</span>
                     {% elif solicitud_consulta.estado_usuario == 'Rechazada' %}
@@ -383,7 +391,6 @@ document.addEventListener('DOMContentLoaded', function () {
                       <span class="estado estado-creacion">{{ solicitud_consulta.estado_usuario }}</span>
                     {% endif %}
                   {% elif solicitud_consulta.estado_coordinador %}
-                    <!-- Solo si no hay funcionario, mostrar el del coordinador -->
                     {% if solicitud_consulta.estado_coordinador == 'Aprobada' %}
                       <span class="estado-aprobado">{{ solicitud_consulta.estado_coordinador }}</span>
                     {% elif solicitud_consulta.estado_coordinador == 'Rechazada' %}
@@ -392,7 +399,6 @@ document.addEventListener('DOMContentLoaded', function () {
                       <span class="estado">{{ solicitud_consulta.estado_coordinador }}</span>
                     {% endif %}
                   {% else %}
-                    <!-- Si no hay ninguno -->
                     <span class="estado-espera">Lista de espera</span>
                   {% endif %}
                 </td>
@@ -540,10 +546,8 @@ document.addEventListener('DOMContentLoaded', function () {
     <script>
       // Funciones de filtrado para instructores/administradores
       function filtrarPorPrograma() {
-        // Obtener el valor del filtro y las filas de la tabla
         const filtro = document.getElementById('filtro-programa').value.toLowerCase()
         const filas = document.querySelectorAll('.tabla-fichas tbody tr')
-
         filas.forEach((fila) => {
           const programa = fila.cells[0].textContent.toLowerCase()
           if (programa.includes(filtro)) {
@@ -558,16 +562,12 @@ document.addEventListener('DOMContentLoaded', function () {
       function filtrarPorTipo() {
         const filtro = document.getElementById('filtro-tipo').value
         const filas = document.querySelectorAll('.tabla-fichas tbody tr')
-
         filas.forEach((fila) => {
-          const programa = fila.cells[0].textContent
           if (filtro === '') {
             fila.style.display = ''
           } else if (filtro === 'Regular' && esRegular) {
-            // si filtro es Regular y la fila es Regular, mostrar
             fila.style.display = ''
           } else if (filtro === 'Campesina' && esCampesina) {
-            // si filtro es Campesina y la fila es Campesina, mostrar
             fila.style.display = ''
           } else {
             fila.style.display = 'none'
@@ -577,7 +577,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
       // Función combinada que aplica ambos filtros
       function aplicarFiltros() {
-        // Obtener los valores de los filtros
         const filtroPrograma = document.getElementById('filtro-programa').value.toLowerCase()
         const filtroTipo = document.getElementById('filtro-tipo').value
         const filtroFecha = document.getElementById('filtro-fecha-general').value
@@ -597,7 +596,6 @@ document.addEventListener('DOMContentLoaded', function () {
             if (filtroTipo === 'Regular' && !esRegular) mostrarFila = false
             if (filtroTipo === 'Campesina' && !esCampesina) mostrarFila = false
           }
-          // Fecha exacta
           if (filtroFecha && fecha !== filtroFecha) mostrarFila = false
           fila.style.display = mostrarFila ? '' : 'none'
         })
@@ -607,13 +605,9 @@ document.addEventListener('DOMContentLoaded', function () {
       function filtrarPorPrograma() {
         aplicarFiltros()
       }
-
-      // Actualizar la función de filtro por tipo para usar la función combinada
       function filtrarPorTipo() {
         aplicarFiltros()
       }
-
-      // Función para mostrar alerta si el Excel no está disponible
       document.getElementById('filtro-fecha-general').addEventListener('change', aplicarFiltros)
     </script>
   {% endif %}

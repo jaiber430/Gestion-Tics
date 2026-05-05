@@ -1,82 +1,769 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Resumen de Solicitudes</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% extends layout %}
 
-    <style>
-        .contenedor {
-            display: flex;
-            gap: 40px;
-            align-items: flex-start;
-        }
-        .panel {
-            width: 260px;
-        }
-        .card {
-            padding: 12px;
-            margin-bottom: 12px;
-            border-radius: 8px;
-            font-size: 14px;
-            background: #fafafa;
-        }
-        .barra {
-            height: 6px;
-            border-radius: 4px;
-            margin-top: 6px;
-        }
-    </style>
-</head>
-<body>
+{% block content %}
+<style>
+  /* =============================================
+     VARIABLES
+  ============================================= */
+  :root {
+    --verde-sena:        #3a7d44;
+    --verde-oscuro:      #2d6235;
+    --gris-fondo:        #f4f6fb;
+    --gris-borde:        #e0e4ea;
+    --texto-principal:   #1a2332;
+    --texto-secundario:  #6b7a8d;
+    --blanco:            #ffffff;
+    --sombra-suave:      0 2px 16px rgba(0,0,0,0.07);
+    --sombra-media:      0 6px 28px rgba(0,0,0,0.13);
+    --radio:             16px;
+    --radio-sm:          10px;
+  }
 
-<h2>Total de solicitudes: {{ totalSolicitudes }}</h2>
+  /* =============================================
+     WRAPPER
+  ============================================= */
+  .grafica-wrapper {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 36px 28px 60px;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+  }
 
-<div class="contenedor">
+  /* =============================================
+     ENCABEZADO
+  ============================================= */
+  .grafica-header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+  .grafica-header h2 {
+    font-size: 2.6rem;
+    font-weight: 800;
+    color: var(--verde-sena);
+    margin-bottom: 8px;
+    letter-spacing: -0.5px;
+  }
+  .grafica-header p {
+    color: var(--texto-secundario);
+    font-size: 1.15rem;
+  }
 
-    <!-- Gráfica -->
-    <div style="width: 600px;">
+  /* =============================================
+     STATS GRID
+  ============================================= */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 18px;
+    margin-bottom: 36px;
+  }
+  .stat-card {
+    background: var(--blanco);
+    border-radius: var(--radio);
+    padding: 24px 28px;
+    box-shadow: var(--sombra-suave);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    border-left: 6px solid var(--verde-sena);
+    transition: box-shadow 0.2s, transform 0.2s;
+  }
+  .stat-card:hover {
+    box-shadow: var(--sombra-media);
+    transform: translateY(-3px);
+  }
+  .stat-numero {
+    font-size: 2.6rem;
+    font-weight: 900;
+    color: var(--texto-principal);
+    line-height: 1;
+  }
+  .stat-label {
+    font-size: 0.92rem;
+    color: var(--texto-secundario);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+  }
+
+  /* =============================================
+     FILTROS
+  ============================================= */
+  .filtros-seccion {
+    background: var(--blanco);
+    border-radius: var(--radio);
+    padding: 26px 32px;
+    box-shadow: var(--sombra-suave);
+    margin-bottom: 36px;
+    border: 1px solid var(--gris-borde);
+  }
+  .filtros-titulo {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--texto-secundario);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-bottom: 18px;
+  }
+  .filtros-fila {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    align-items: flex-end;
+  }
+  .filtro-grupo {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    flex: 1;
+    min-width: 220px;
+  }
+  .filtro-grupo label {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--texto-principal);
+  }
+  .filtro-grupo select {
+    padding: 12px 16px;
+    border: 1.5px solid var(--gris-borde);
+    border-radius: var(--radio-sm);
+    font-size: 1rem;
+    color: var(--texto-principal);
+    background: var(--gris-fondo);
+    outline: none;
+    transition: border-color 0.2s, background 0.2s;
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+  }
+  .filtro-grupo select:focus {
+    border-color: var(--verde-sena);
+    background: var(--blanco);
+  }
+  .btn-filtrar {
+    padding: 12px 32px;
+    background: var(--verde-sena);
+    color: var(--blanco);
+    border: none;
+    border-radius: var(--radio-sm);
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+    white-space: nowrap;
+    height: 48px;
+    box-shadow: 0 4px 14px rgba(58,125,68,0.25);
+  }
+  .btn-filtrar:hover {
+    background: var(--verde-oscuro);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(58,125,68,0.35);
+  }
+  .btn-limpiar {
+    padding: 12px 24px;
+    background: transparent;
+    color: var(--texto-secundario);
+    border: 1.5px solid var(--gris-borde);
+    border-radius: var(--radio-sm);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    height: 48px;
+    white-space: nowrap;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+  }
+  .btn-limpiar:hover {
+    border-color: var(--verde-sena);
+    color: var(--verde-sena);
+  }
+
+  /* =============================================
+     LAYOUT GRÁFICA + PANEL
+  ============================================= */
+  .grafica-contenido {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 28px;
+    align-items: start;
+  }
+  @media (max-width: 960px) {
+    .grafica-contenido { grid-template-columns: 1fr; }
+  }
+
+  /* =============================================
+     CARD GRÁFICA
+  ============================================= */
+  .grafica-card {
+    background: var(--blanco);
+    border-radius: var(--radio);
+    padding: 32px 36px;
+    box-shadow: var(--sombra-suave);
+    border: 1px solid var(--gris-borde);
+  }
+  .grafica-card-titulo {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--texto-principal);
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .grafica-card-titulo::before {
+    content: '';
+    display: inline-block;
+    width: 6px; height: 22px;
+    background: var(--verde-sena);
+    border-radius: 4px;
+  }
+
+  /* =============================================
+     PANEL ESTADOS
+  ============================================= */
+  .panel-estados {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .panel-titulo {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--texto-principal);
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .panel-titulo::before {
+    content: '';
+    display: inline-block;
+    width: 6px; height: 22px;
+    background: var(--verde-sena);
+    border-radius: 4px;
+  }
+  .estado-card {
+    background: var(--blanco);
+    border-radius: var(--radio);
+    padding: 18px 22px;
+    box-shadow: var(--sombra-suave);
+    border: 1px solid var(--gris-borde);
+    transition: box-shadow 0.2s, transform 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .estado-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 5px; height: 100%;
+    background: var(--color-estado, var(--verde-sena));
+    border-radius: 4px 0 0 4px;
+  }
+  .estado-card:hover {
+    box-shadow: var(--sombra-media);
+    transform: translateY(-3px);
+  }
+  .estado-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .estado-card-nombre {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--texto-principal);
+  }
+  .estado-card-badge {
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: var(--color-estado, var(--verde-sena));
+    background: color-mix(in srgb, var(--color-estado, var(--verde-sena)) 12%, white);
+    padding: 2px 12px;
+    border-radius: 99px;
+  }
+  .estado-card-detalle {
+    font-size: 0.9rem;
+    color: var(--texto-secundario);
+    margin-bottom: 10px;
+    font-weight: 500;
+  }
+  .barra-progreso {
+    height: 8px;
+    border-radius: 99px;
+    background: var(--gris-fondo);
+    overflow: hidden;
+    border: 1px solid var(--gris-borde);
+  }
+  .barra-progreso-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 1s cubic-bezier(.4,0,.2,1);
+  }
+
+  /* =============================================
+     BOTÓN VER INSTRUCTORES
+  ============================================= */
+  .btn-ver-instructores {
+    width: 100%;
+    padding: 14px;
+    background: var(--verde-claro, #e8f5e9);
+    color: var(--verde-sena);
+    border: 2px solid var(--verde-sena);
+    border-radius: var(--radio-sm);
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 4px;
+  }
+  .btn-ver-instructores:hover {
+    background: var(--verde-sena);
+    color: var(--blanco);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(58,125,68,0.25);
+  }
+
+  /* =============================================
+     MODAL INSTRUCTORES
+  ============================================= */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(26,35,50,0.55);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(3px);
+  }
+  .modal-overlay.activo {
+    display: flex;
+  }
+  .modal-caja {
+    background: var(--blanco);
+    border-radius: var(--radio);
+    width: 100%;
+    max-width: 680px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+    animation: modalEntrar 0.25s cubic-bezier(.4,0,.2,1);
+    margin: 16px;
+  }
+  @keyframes modalEntrar {
+    from { opacity: 0; transform: translateY(24px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0)    scale(1);    }
+  }
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 28px 18px;
+    border-bottom: 1px solid var(--gris-borde);
+  }
+  .modal-header h3 {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--texto-principal);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .modal-header h3::before {
+    content: '';
+    display: inline-block;
+    width: 5px; height: 20px;
+    background: var(--verde-sena);
+    border-radius: 4px;
+  }
+  .modal-cerrar {
+    background: var(--gris-fondo);
+    border: none;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: var(--texto-secundario);
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s, color 0.2s;
+  }
+  .modal-cerrar:hover {
+    background: #fee2e2;
+    color: #dc2626;
+  }
+
+  /* Buscador dentro del modal */
+  .modal-buscador {
+    padding: 16px 28px 12px;
+    border-bottom: 1px solid var(--gris-borde);
+  }
+  .modal-buscador input {
+    width: 100%;
+    padding: 10px 16px;
+    border: 1.5px solid var(--gris-borde);
+    border-radius: var(--radio-sm);
+    font-size: 0.97rem;
+    color: var(--texto-principal);
+    background: var(--gris-fondo);
+    outline: none;
+    transition: border-color 0.2s;
+    box-sizing: border-box;
+  }
+  .modal-buscador input:focus {
+    border-color: var(--verde-sena);
+    background: var(--blanco);
+  }
+
+  .modal-body {
+    overflow-y: auto;
+    padding: 16px 28px 24px;
+    flex: 1;
+  }
+
+  /* Tabla de instructores */
+  .tabla-instructores {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.97rem;
+  }
+  .tabla-instructores thead th {
+    text-align: left;
+    padding: 10px 14px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--texto-secundario);
+    border-bottom: 2px solid var(--gris-borde);
+    background: var(--gris-fondo);
+  }
+  .tabla-instructores tbody tr {
+    transition: background 0.15s;
+  }
+  .tabla-instructores tbody tr:hover {
+    background: var(--gris-fondo);
+  }
+  .tabla-instructores tbody td {
+    padding: 13px 14px;
+    color: var(--texto-principal);
+    border-bottom: 1px solid var(--gris-borde);
+    font-size: 0.97rem;
+  }
+  .tabla-instructores tbody td:first-child {
+    font-weight: 600;
+  }
+  .sin-instructores {
+    text-align: center;
+    padding: 32px;
+    color: var(--texto-secundario);
+    font-size: 1rem;
+  }
+
+  /* =============================================
+     ESTADO VACÍO
+  ============================================= */
+  .estado-vacio {
+    text-align: center;
+    padding: 60px 24px;
+    color: var(--texto-secundario);
+    background: var(--blanco);
+    border-radius: var(--radio);
+    border: 2px dashed var(--gris-borde);
+  }
+  .estado-vacio svg { margin-bottom: 14px; opacity: 0.35; }
+  .estado-vacio p { font-size: 1.1rem; font-weight: 500; }
+</style>
+
+<main class="contenido-principal">
+  <div class="grafica-wrapper">
+
+    <!-- ENCABEZADO -->
+    <div class="grafica-header">
+      <h2>📊 Reportes Gráficos de Solicitudes</h2>
+      <p>Visualiza el estado de las fichas filtradas por estado o instructor</p>
+    </div>
+
+    <!-- TARJETAS DE RESUMEN -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-numero">{{ totalSolicitudes }}</span>
+        <span class="stat-label">Total solicitudes</span>
+      </div>
+      {% for item in resumen %}
+      <div class="stat-card" style="border-left-color: {{ item.color }};">
+        <span class="stat-numero" style="color: {{ item.color }};">{{ item.total }}</span>
+        <span class="stat-label">{{ item.estado }}</span>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- FILTROS -->
+    <div class="filtros-seccion">
+      <div class="filtros-titulo">🔍 Filtrar resultados</div>
+      <form method="GET" action="">
+        <div class="filtros-fila">
+
+          <div class="filtro-grupo">
+            <label for="filtro-estado">Estado de la ficha</label>
+            <select name="estado" id="filtro-estado">
+              <option value="">— Todos los estados —</option>
+              {% for e in estados_disponibles %}
+                <option value="{{ e }}" {% if filtro_estado_activo == e|lower %}selected{% endif %}>
+                  {{ e }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="filtro-grupo">
+            <label for="filtro-instructor">Instructor</label>
+            <select name="instructor" id="filtro-instructor">
+              <option value="">— Todos los instructores —</option>
+              {% for inst in instructores %}
+                <option value="{{ inst.idusuario }}"
+                  {% if filtro_instructor_activo == inst.idusuario|stringformat:"s" %}selected{% endif %}>
+                  {{ inst.nombre }} {{ inst.apellido }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <button type="submit" class="btn-filtrar">Aplicar filtros</button>
+          <a href="{% url 'viewGraphReports' %}" class="btn-limpiar">✕ Limpiar</a>
+
+        </div>
+      </form>
+    </div>
+
+    <!-- GRÁFICA + PANEL -->
+    {% if resumen %}
+    <div class="grafica-contenido">
+
+      <!-- GRÁFICA -->
+      <div class="grafica-card">
+        <div class="grafica-card-titulo">Distribución por estado</div>
         <canvas id="graficaSolicitudes"></canvas>
-    </div>
+      </div>
 
-    <!-- Panel derecho -->
-    <div class="panel">
+      <!-- PANEL ESTADOS + BOTÓN -->
+      <div class="panel-estados">
+        <div class="panel-titulo">Detalle por estado</div>
+
         {% for item in resumen %}
-            <div class="card" style="border-left: 6px solid {{ item.color }};">
-                <strong>{{ item.estado }}</strong><br>
-                {{ item.total }} solicitud ({{ item.porcentaje }}%)
-                <div class="barra"
-                    style="width: {{ item.porcentaje }}%; background-color: {{ item.color }};">
-                </div>
-            </div>
+        <div class="estado-card" style="--color-estado: {{ item.color }};">
+          <div class="estado-card-header">
+            <span class="estado-card-nombre">{{ item.estado }}</span>
+            <span class="estado-card-badge">{{ item.total }}</span>
+          </div>
+          <div class="estado-card-detalle">
+            {{ item.total }} solicitud{% if item.total != 1 %}es{% endif %} &middot; {{ item.porcentaje }}% del total
+          </div>
+          <div class="barra-progreso">
+            <div class="barra-progreso-fill"
+                 style="width: {{ item.porcentaje }}%; background-color: {{ item.color }};"></div>
+          </div>
+        </div>
         {% endfor %}
+
+        <!-- BOTÓN VER INSTRUCTORES -->
+        <button class="btn-ver-instructores" onclick="abrirModalInstructores()">
+          👥 Ver instructores
+        </button>
+
+      </div>
     </div>
 
+    {% else %}
+    <div class="estado-vacio">
+      <svg width="56" height="56" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+          d="M9 17v-2m3 2v-4m3 4v-6M3 20h18M5 20V10l7-7 7 7v10"/>
+      </svg>
+      <p>No hay datos para los filtros seleccionados.</p>
+    </div>
+    {% endif %}
+
+  </div>
+</main>
+
+<!-- =============================================
+     MODAL INSTRUCTORES
+============================================= -->
+<div class="modal-overlay" id="modalInstructores">
+  <div class="modal-caja">
+
+    <div class="modal-header">
+      <h3>Instructores</h3>
+      <button class="modal-cerrar" onclick="cerrarModalInstructores()">✕</button>
+    </div>
+
+    <div class="modal-buscador">
+      <input type="text"
+             id="buscadorInstructor"
+             placeholder="🔍 Buscar por nombre o identificación..."
+             oninput="filtrarInstructoresModal(this.value)">
+    </div>
+
+    <div class="modal-body">
+      {% if instructores %}
+      <table class="tabla-instructores" id="tablaInstructores">
+        <thead>
+          <tr>
+            <th>Nombre completo</th>
+            <th>N° Identificación</th>
+            <th>Teléfono</th>
+          </tr>
+        </thead>
+        <tbody id="cuerpoTablaInstructores">
+          {% for inst in instructores %}
+          <tr>
+            <td>{{ inst.nombre }} {{ inst.apellido }}</td>
+            <td>{{ inst.numeroidentificacion|default:"—" }}</td>
+            <td>{{ inst.correo|default:"—" }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="sin-instructores">No hay instructores registrados.</div>
+      {% endif %}
+    </div>
+
+  </div>
 </div>
 
+{% if resumen %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    const estados = {{ estados|safe }};
-    const totales = {{ totales|safe }};
-    const colores = {{ colores|safe }};
+  const estados  = {{ estados|safe }};
+  const totales  = {{ totales|safe }};
+  const colores  = {{ colores|safe }};
 
-    new Chart(document.getElementById('graficaSolicitudes'), {
-        type: 'bar',
-        data: {
-            labels: estados,
-            datasets: [{
-                label: 'Solicitudes',
-                data: totales,
-                backgroundColor: colores,
-                borderWidth: 1
-            }]
+  // Barras más delgadas si hay filtro activo (menos categorías)
+  const hayFiltro = estados.length <= 2;
+  const grosorBarra = hayFiltro ? 0.35 : 0.65;
+
+  const coloresFondo = colores.map(c => c + 'bb');
+
+  new Chart(document.getElementById('graficaSolicitudes'), {
+    type: 'bar',
+    data: {
+      labels: estados,
+      datasets: [{
+        label: 'Solicitudes',
+        data: totales,
+        backgroundColor: coloresFondo,
+        borderColor: colores,
+        borderWidth: 2,
+        borderRadius: 10,
+        borderSkipped: false,
+        hoverBackgroundColor: colores,
+        barPercentage: grosorBarra,
+        categoryPercentage: 0.7,
+      }]
+    },
+    options: {
+      responsive: true,
+      animation: {
+        duration: 900,
+        easing: 'easeOutQuart'
+      },
+      plugins: {
+        legend: {
+          display: true,
+          position: 'top',
+          labels: {
+            font: { size: 15, weight: '600' },
+            color: '#1a2332',
+            padding: 20,
+            usePointStyle: true,
+            pointStyle: 'rectRounded',
+          }
         },
-        options: {
-            scales: {
-                y: { beginAtZero: true }
+        tooltip: {
+          backgroundColor: '#1a2332',
+          titleFont: { size: 15, weight: '700' },
+          bodyFont: { size: 14 },
+          padding: 14,
+          cornerRadius: 10,
+          callbacks: {
+            label: function(ctx) {
+              return `  ${ctx.parsed.y} solicitud${ctx.parsed.y !== 1 ? 'es' : ''}`;
             }
+          }
         }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: {
+            color: '#1a2332',
+            font: { size: 15, weight: '600' },
+            padding: 8
+          },
+          border: { display: false }
+        },
+        y: {
+          beginAtZero: true,
+          grid: { color: '#e0e4ea', drawTicks: false },
+          ticks: {
+            color: '#6b7a8d',
+            font: { size: 14 },
+            stepSize: 1,
+            padding: 10
+          },
+          border: { display: false, dash: [4, 4] }
+        }
+      }
+    }
+  });
+</script>
+{% endif %}
+
+<script>
+  // =============================================
+  // MODAL INSTRUCTORES
+  // =============================================
+  function abrirModalInstructores() {
+    document.getElementById('modalInstructores').classList.add('activo');
+    document.body.style.overflow = 'hidden';
+    document.getElementById('buscadorInstructor').value = '';
+    filtrarInstructoresModal('');
+  }
+
+  function cerrarModalInstructores() {
+    document.getElementById('modalInstructores').classList.remove('activo');
+    document.body.style.overflow = '';
+  }
+
+  // Cerrar al hacer clic fuera del modal
+  document.getElementById('modalInstructores').addEventListener('click', function(e) {
+    if (e.target === this) cerrarModalInstructores();
+  });
+
+  // Cerrar con Escape
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') cerrarModalInstructores();
+  });
+
+  // Buscador dentro del modal
+  function filtrarInstructoresModal(texto) {
+    const filas = document.querySelectorAll('#cuerpoTablaInstructores tr');
+    const q = texto.toLowerCase().trim();
+    filas.forEach(fila => {
+      const contenido = fila.textContent.toLowerCase();
+      fila.style.display = contenido.includes(q) ? '' : 'none';
     });
+  }
 </script>
 
-</body>
-</html>
+{% endblock %}

@@ -247,26 +247,36 @@ def consultas_todos(request):
             solicitud.observacion_usuario = ficha.observacion or ''
             solicitud.codigo_ficha = ficha.codigoficha or ''
             solicitud.ficha_excel = ficha.excel if ficha.excel is not None else 0
-            id_estado_ficha = ficha.idestado.idestado if ficha.idestado else None
 
             # ----------------------------
-            # Lógica del campo excel según estado:
+            # Lógica del campo excel según valor:
             # 0 → sin archivo, mostrar input para subir
-            # 1 → archivo subido, mostrar botón descargar deshabilitado
-            # 2 → rechazada, no mostrar nada (esperar que el ciclo reinicie)
+            # 1 → archivo subido, botón descargar DESHABILITADO
+            # 2 → rechazada, no mostrar nada (esperar ciclo)
+            # 3 → ciclo reiniciado tras rechazo, botón descargar ACTIVO (con fetch)
             # ----------------------------
             if solicitud.ficha_excel == 0:
-                # Sin archivo → mostrar input para subir
                 solicitud.mostrar_input_excel = True
                 solicitud.mostrar_boton_descarga_excel = False
-            elif solicitud.ficha_excel == 2:
-                # Rechazada → no mostrar nada, esperar que el instructor reenvíe
-                solicitud.mostrar_input_excel = False
-                solicitud.mostrar_boton_descarga_excel = False
-            else:  # excel == 1
-                # Archivo subido → botón descargar deshabilitado
+                solicitud.excel_descarga_activa = False
+            elif solicitud.ficha_excel == 1:
                 solicitud.mostrar_input_excel = False
                 solicitud.mostrar_boton_descarga_excel = True
+                solicitud.excel_descarga_activa = False  # deshabilitado
+            elif solicitud.ficha_excel == 2:
+                # Rechazada → no mostrar nada
+                solicitud.mostrar_input_excel = False
+                solicitud.mostrar_boton_descarga_excel = False
+                solicitud.excel_descarga_activa = False
+            elif solicitud.ficha_excel == 3:
+                # Reinicio tras rechazo → botón descargar activo (igual que al inicio del flujo)
+                solicitud.mostrar_input_excel = False
+                solicitud.mostrar_boton_descarga_excel = True
+                solicitud.excel_descarga_activa = True  # activo con fetch
+            else:
+                solicitud.mostrar_input_excel = True
+                solicitud.mostrar_boton_descarga_excel = False
+                solicitud.excel_descarga_activa = False
 
         else:
             # Sin ficha en BD → mostrar input para subir
@@ -276,6 +286,7 @@ def consultas_todos(request):
             solicitud.ficha_excel = 0
             solicitud.mostrar_input_excel = True
             solicitud.mostrar_boton_descarga_excel = False
+            solicitud.excel_descarga_activa = False
 
         solicitud.codigo_solicitud = solicitud.codigosolicitud
 
@@ -954,7 +965,7 @@ def revision_fichas(request, id):
 
                 # ----------------------------
                 # Manejo del campo excel según acción:
-                # - Si sube archivo → excel=1 (tiene archivo, mostrar descargar deshabilitado)
+                # - Si sube archivo → excel=1 (tiene archivo, botón descargar deshabilitado)
                 # - Si rechaza sin archivo → excel=2 (ocultar todo, esperar ciclo)
                 # - En cualquier otro caso → mantiene el valor anterior
                 # ----------------------------
@@ -1150,12 +1161,22 @@ def revision_coordinador(request, id_solicitud):
                 idsolicitud=solicitud,
                 defaults={
                     "usuario_solicitud": usuario_solicitud,          # usuario que creó la solicitud
-                    "usuario_revisador": usuario_revisador,  # coordinador que revisa
+                    "usuario_revisador": usuario_revisador,          # coordinador que revisa
                     "idestado": estado_obj,
                     "observacion": observacion,
                     "fecha": datetime.date.today(),
                 }
             )
+
+            # ----------------------------
+            # Si el coordinador aprueba de nuevo → resetear excel a 3
+            # para que el funcionario pueda descargar el nuevo formato y luego subir
+            # ----------------------------
+            if estado_obj.id == 1:  # Aprobado
+                ficha = Ficha.objects.filter(idsolicitud=solicitud).first()
+                if ficha and ficha.excel == 2:
+                    ficha.excel = 3  # ← reinicia mostrando botón de descarga activo
+                    ficha.save(update_fields=['excel'])
 
             # ============================
             # Generar carta PDF internamente SOLO SI la revisión fue exitosa
@@ -1279,13 +1300,38 @@ def ver_pdf_carta(request, id_solicitud):
 
 # Enviar datos para la creación de la grafica
 @login_required_custom
-def reporteCreaciones (request):
+def reporteCreaciones(request):
 
+    # ----------------------------
+    # Filtros desde GET
+    # ----------------------------
+    filtro_estado = request.GET.get('estado', '').strip().lower()
+    filtro_instructor = request.GET.get('instructor', '').strip()
+
+    # ----------------------------
     # Total real de solicitudes (base del 100%)
+    # ----------------------------
     total_solicitudes = Solicitud.objects.count()
 
+    # ----------------------------
+    # Query base de fichas
+    # ----------------------------
+    fichas_qs = Ficha.objects.select_related('idestado', 'idsolicitud__idusuario')
+
+    # Aplicar filtro por instructor si se envía
+    if filtro_instructor:
+        fichas_qs = fichas_qs.filter(
+            idsolicitud__idusuario__idusuario=filtro_instructor
+        )
+
+    # Aplicar filtro por estado si se envía
+    if filtro_estado:
+        fichas_qs = fichas_qs.filter(
+            idestado__estados__iexact=filtro_estado
+        )
+
     solicitudes_por_estado = (
-        Ficha.objects
+        fichas_qs
         .values('idestado__estados')
         .annotate(total=Count('idsolicitud', distinct=True))
         .order_by('idestado__estados')
@@ -1318,13 +1364,33 @@ def reporteCreaciones (request):
             'color': colores_estado.get(estado.lower(), '#95a5a6')
         })
 
+    # ----------------------------
+    # Lista de instructores con todos los datos necesarios para el modal
+    # ----------------------------
+    instructores = Usuario.objects.filter(
+        rol__idrol=1
+    ).values(
+        'idusuario', 'nombre', 'apellido',
+        'numeroidentificacion', 'correo'
+    ).order_by('nombre', 'apellido')
+
+    # ----------------------------
+    # Lista de estados únicos para el filtro
+    # ----------------------------
+    estados_disponibles = Estados.objects.values_list('estados', flat=True).distinct()
+
     context = {
+        'layout': 'layout/layout_funcionario.html',
         'totalSolicitudes': total_solicitudes,
         'total_estados': total_estados,
         'estados': [r['estado'] for r in resumen],
         'totales': [r['total'] for r in resumen],
         'colores': [r['color'] for r in resumen],
-        'resumen': resumen
+        'resumen': resumen,
+        'instructores': instructores,
+        'estados_disponibles': estados_disponibles,
+        'filtro_estado_activo': filtro_estado,
+        'filtro_instructor_activo': filtro_instructor,
     }
 
     return render(request, 'reportes/grafica.html', context)
