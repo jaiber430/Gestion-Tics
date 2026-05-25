@@ -8,20 +8,28 @@ from Cursos.views import login_required_custom
 @login_required_custom
 def buscar_programas(request):
     buscar = None
+    area_seleccionada = None
     if request.method == "POST":
-        programa = request.POST.get("programa")
-        buscar = Programaformacion.objects.filter(nombreprograma__icontains=programa)
+        programa = request.POST.get("programa", "").strip()
+        area_id  = request.POST.get("area_filtro", "")
+        area_seleccionada = area_id
 
-        # 🔹 Si no existe ningún programa, mandamos un mensaje
+        buscar = Programaformacion.objects.all()
+        if programa:
+            buscar = buscar.filter(nombreprograma__icontains=programa)
+        if area_id:
+            buscar = buscar.filter(idarea__idarea=area_id)
+
         if not buscar.exists():
-            messages.error(request, "No existe un programa con las carcateristicas dadas")
+            messages.error(request, "No existe un programa con las características dadas")
 
-    # 🔹 Traemos las áreas para el modal de agregar
+    # Traemos las áreas para el filtro y los modales
     areas = Area.objects.all()
 
     return render(request, "crud/buscar.html", {
         "buscar": buscar,
-        "areas": areas
+        "areas": areas,
+        "area_seleccionada": area_seleccionada,
     })
 
 
@@ -75,8 +83,6 @@ def crear_programa(request):
         nombre = request.POST.get("nombre")
         horas = request.POST.get("horas")
         area_id = request.POST.get("area")
-        modalidad_id = request.POST.get("modalidad")
-
         # Validar que no exista un programa con el mismo código
         if Programaformacion.objects.filter(codigoprograma=codigo).exists():
             messages.error(request, "Ya existe un programa con este código.")
@@ -85,7 +91,11 @@ def crear_programa(request):
         try:
             # Obtener las relaciones
             area = get_object_or_404(Area, idarea=area_id)
-            modalidad = get_object_or_404(Modalidad, idmodalidad=modalidad_id)
+            modalidad_id = request.POST.get("modalidad")
+            if modalidad_id:
+                modalidad = get_object_or_404(Modalidad, idmodalidad=modalidad_id)
+            else:
+                modalidad = Modalidad.objects.first()
 
             # Crear el nuevo programa
             nuevo_programa = Programaformacion(
@@ -105,9 +115,7 @@ def crear_programa(request):
 
     # GET: Mostrar formulario de creación
     areas = Area.objects.all()
-    modalidades = Modalidad.objects.all()
 
     return render(request, "crud/crear.html", {
         "areas": areas,
-        "modalidades": modalidades
     })

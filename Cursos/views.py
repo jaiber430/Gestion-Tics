@@ -78,6 +78,7 @@ def login_view(request):
             elif rol == 5:
                 layout = "layout/layout_programa.html"
                 rol_name = "Modificador"
+                return redirect("buscar_programa")
             else:
                 layout = "layout/layout_desconocido.html"
                 rol_name = "Desconocido"
