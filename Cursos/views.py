@@ -260,6 +260,8 @@ def editar_perfil(request):
         layout = 'layout/layout_funcionario.html'
     elif id_rol == 4:
         layout = 'layout/layout_admin.html'
+    elif id_rol == 5:
+        layout = 'layout/layout_programa.html'
     else:
         layout = 'layout/layout_admin.html'
 
