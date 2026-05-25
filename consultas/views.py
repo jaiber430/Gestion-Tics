@@ -180,21 +180,15 @@ def consultas_todos(request):
         rol_name = "Desconocido"
 
     # Solicitudes según rol
-    if id_rol == 2:  # Coordinador: solo solicitudes de instructores asignados
+    if id_rol == 2:  # Coordinador: solicitudes revisadas del mes actual
         hoy = datetime.date.today()
         primer_dia = datetime.date(hoy.year, hoy.month, 1)
         ultimo_dia = datetime.date(hoy.year, hoy.month, calendar.monthrange(hoy.year, hoy.month)[1])
 
-        instructores_asignados = Usuariosasignados.objects.filter(
-            idusuariocoordinador=usuario
-        ).values_list('idinstructor', flat=True)
-
         solicitudes = Solicitud.objects.filter(
             fechasolicitud__range=(primer_dia, ultimo_dia),
-            idusuario__in=instructores_asignados
+            revisado=1
         ).select_related('idusuario', 'idempresa').order_by('-fechasolicitud')
-
-        solicitudes = solicitudes.filter(revisado=1)
 
     elif id_rol == 3:  # Funcionario: solicitudes aprobadas por coordinador
         solicitudes_aprobadas = Solicitudcoordinador.objects.filter(
