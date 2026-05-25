@@ -65,10 +65,12 @@ urlpatterns = [
     path('revision_funcionario/<int:id>/', views_consultas.revision_fichas, name="ficha_funcionario"),
     # Descargar excel subido por el funcionario
     path('descargar_formato_sofia_plus/<int:id>', views_consultas.descargar_excel_ficha, name='sofia_plus_descarga'),
-    # Enviar esatdo y observación del coordinador
+    # Enviar estado y observación del coordinador
     path('revision_coordinador/<int:id_solicitud>/', views_consultas.revision_coordinador, name='revision_coordinador'),
     # Ver excel
     path('ver_formato/<int:id_solicitud>/', views_consultas.ver_formato_inscripcion, name='ver_formato'),
+    # Marcar excel para subir (cambia ficha.excel = 0 en BD)
+    path('marcar-excel-subir/<int:id>/', views_consultas.marcar_excel_para_subir, name='marcar_excel_para_subir'),
     # Ver PDF aspirantes
     path('ver_pdf_aspirantes/<int:id_solicitud>/', views_consultas.ver_pdf_aspirantes, name="ver_pdf_aspirantes"),
     # Ver carta
@@ -95,8 +97,12 @@ urlpatterns = [
     path('submitRevised/<int:idSolicitud>/', views_consultas.reviewedByInstructor, name="reviewedByInstructor"),
     path('fromEditApplicant/<int:idSolicitud>/<int:numDoc>/', views_consultas.editApplicantData, name="editApplicantData"),
     # Modificar y borrar aspirante como instructor
-    path( 'applicant/edit/<int:idSolicitud>/<int:numDoc>/',views_aspirantes.updateCandidate,name='updateCandidate'),
-    path( 'applicant/remove/<int:idSolicitud>/<int:numDoc>/',views_aspirantes.removeApplicant,name='removeApplicant'),
+    path('applicant/edit/<int:idSolicitud>/<int:numDoc>/',views_aspirantes.updateCandidate,name='updateCandidate'),
+    path('applicant/remove/<int:idSolicitud>/<int:numDoc>/',views_aspirantes.removeApplicant,name='removeApplicant'),
+    # Creación de grafica
+    path('graphReports/', views_consultas.reporteCreaciones, name='viewGraphReports'),
+    # En tu archivo urls.py agrega esta ruta:
+    path('perfil/editar/', views.editar_perfil, name='editar_perfil'),
 ]
 # Poder almacenar archivos en la carpeta media
 if settings.DEBUG:

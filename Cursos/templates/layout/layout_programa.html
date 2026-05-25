@@ -36,13 +36,16 @@
 
         <nav class="barra-navegacion">
           <ul class="menu-navegacion">
+            <li class="elemento-menu">
+              <a href="{% url 'editar_perfil' %}" class="enlace-menu">Editar datos</a>
+            </li>
             <!-- Botón Cerrar Sesión -->
             <li class="elemento-menu">
               <a href="{% url 'salir' %}" class="boton-cerrar-sesion">Cerrar Sesión</a>
             </li>
           </ul>
         </nav>
-        
+
       </header>
 
       {% if messages %}

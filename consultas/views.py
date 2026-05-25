@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.http import Http404, FileResponse,  HttpResponse
+from django.http import Http404, FileResponse,  HttpResponse, JsonResponse
 from django.template.loader import render_to_string
 from Cursos.models import (
     Usuario, Solicitud, Programaformacion, Horario, Modalidad,
@@ -24,6 +24,7 @@ import calendar
 import shutil
 # Importar mensajes
 from django.contrib import messages
+from django.db.models import Count
 # Poder visualizar el excel
 from openpyxl import load_workbook
 # Importar decorador personalizado para el logueo
@@ -38,7 +39,7 @@ from django.template.loader import get_template
 # import pandas as pd
 
 # Ver pdf aspirante en especifico
-
+@login_required_custom
 def showPdfApplicants(request, id, numDoc):
     # Verificar que el aspirante existe
     if not Aspirantes.objects.filter(numeroidentificacion=numDoc).exists():
@@ -59,6 +60,7 @@ def showPdfApplicants(request, id, numDoc):
         content_type='application/pdf'
     )
 
+@login_required_custom
 # Ver pdf combinado
 def viewCombinedPdf (request,  pdfFolder):
 
@@ -77,6 +79,7 @@ def viewCombinedPdf (request,  pdfFolder):
         content_type='application/pdf'
     )
 
+@login_required_custom
 def showExcelApprentices(request, excelFolder ):
     # Nombre del archivo
     folder_name = f'formato_inscripcion_{excelFolder}.xlsx'
@@ -105,6 +108,7 @@ def showExcelApprentices(request, excelFolder ):
         "error": error
     })
 
+@login_required_custom
 def reviewedByInstructor(request, idSolicitud):
     user_id = request.session.get('user_id')
 
@@ -120,6 +124,7 @@ def reviewedByInstructor(request, idSolicitud):
 
     return redirect('consultas_instructor')
 
+@login_required_custom
 def editApplicantData(request, idSolicitud, numDoc):
 
     user_id = request.session.get('user_id')
@@ -196,9 +201,17 @@ def consultas_todos(request):
             idestado__estado="Aprobado"
         ).values_list('idsolicitud', flat=True)
 
+        # IDs de solicitudes con ficha en estado 4 (ocultar — Matriculada)
+        fichas_ocultas = Ficha.objects.filter(
+            idestado__idestado=4
+        ).values_list('idsolicitud', flat=True)
+
         solicitudes = Solicitud.objects.filter(
             idsolicitud__in=solicitudes_aprobadas
+        ).exclude(
+            idsolicitud__in=fichas_ocultas
         ).select_related('idusuario', 'idempresa').order_by('-fechasolicitud')
+
     else:
         # Instructor o Admin
         solicitudes = Solicitud.objects.select_related('idusuario', 'idempresa') \
@@ -233,16 +246,44 @@ def consultas_todos(request):
             solicitud.estado_usuario = ficha.idestado.estados if ficha.idestado else None
             solicitud.observacion_usuario = ficha.observacion or ''
             solicitud.codigo_ficha = ficha.codigoficha or ''
-            solicitud.ficha_excel = ficha.excel or 0
+            solicitud.ficha_excel = ficha.excel if ficha.excel is not None else 0
+
+            # ----------------------------
+            # Lógica del campo excel según valor:
+            # 0 → sin archivo, mostrar input para subir
+            # 1 → archivo subido, botón descargar DESHABILITADO (funcionario)
+            # 2 → rechazada, no mostrar nada (esperar ciclo)
+            # 3 → ciclo reiniciado tras rechazo, botón descargar ACTIVO (con fetch)
+            # ----------------------------
+            if solicitud.ficha_excel == 0:
+                solicitud.mostrar_input_excel = True
+                solicitud.mostrar_boton_descarga_excel = False
+                solicitud.excel_descarga_activa = False
+            elif solicitud.ficha_excel == 1:
+                solicitud.mostrar_input_excel = False
+                solicitud.mostrar_boton_descarga_excel = True
+                solicitud.excel_descarga_activa = False
+            elif solicitud.ficha_excel == 2:
+                solicitud.mostrar_input_excel = False
+                solicitud.mostrar_boton_descarga_excel = False
+                solicitud.excel_descarga_activa = False
+            elif solicitud.ficha_excel == 3:
+                solicitud.mostrar_input_excel = False
+                solicitud.mostrar_boton_descarga_excel = True
+                solicitud.excel_descarga_activa = True
+            else:
+                solicitud.mostrar_input_excel = True
+                solicitud.mostrar_boton_descarga_excel = False
+                solicitud.excel_descarga_activa = False
+
         else:
             solicitud.estado_usuario = None
             solicitud.observacion_usuario = ''
             solicitud.codigo_ficha = ''
-            solicitud.ficha_excel = 1
-
-        # Regla clara
-        solicitud.mostrar_descarga_excel = solicitud.ficha_excel == 0
-        solicitud.mostrar_subida_excel = solicitud.ficha_excel == 1
+            solicitud.ficha_excel = 0
+            solicitud.mostrar_input_excel = True
+            solicitud.mostrar_boton_descarga_excel = False
+            solicitud.excel_descarga_activa = False
 
         solicitud.codigo_solicitud = solicitud.codigosolicitud
 
@@ -267,17 +308,30 @@ def consultas_todos(request):
         solicitud.mostrar_boton_carta_funcionario = (id_rol == 3 and solicitud.idempresa is None)
 
         try:
-            ruta_excel_funcionario = os.path.join(settings.MEDIA_ROOT, 'excel', f'formato_inscripcion_{solicitud.idsolicitud}.xlsx')
+            ruta_excel_funcionario = os.path.join(
+                settings.MEDIA_ROOT, 'excel', f'formato_inscripcion_{solicitud.idsolicitud}.xlsx'
+            )
             solicitud.excel_funcionario_disponible = os.path.exists(ruta_excel_funcionario)
 
+            # ----------------------------
+            # Excel SOFÍA plus subido por el funcionario:
+            # Solo se considera disponible si ficha.excel == 1 Y el archivo existe en disco
+            # Ruta: media/Funcionario/solicitud_{id}/Masivos_sofia_plus/formato_inscripcion_{id}.xlsx
+            # ----------------------------
             carpeta_excel_sofia = os.path.join(
                 settings.MEDIA_ROOT,
                 'Funcionario',
                 f"solicitud_{solicitud.idsolicitud}",
                 'Masivos_sofia_plus'
             )
-            ruta_excel_sofia = os.path.join(carpeta_excel_sofia, f'formato_inscripcion_{solicitud.idsolicitud}.xlsx')
-            solicitud.excel_masivo_disponible = os.path.exists(ruta_excel_sofia)
+            ruta_excel_sofia = os.path.join(
+                carpeta_excel_sofia,
+                f'formato_inscripcion_{solicitud.idsolicitud}.xlsx'
+            )
+            archivo_existe = os.path.exists(ruta_excel_sofia)
+            excel_en_bd = (ficha is not None and ficha.excel == 1)
+            solicitud.excel_masivo_disponible = archivo_existe and excel_en_bd
+
         except Exception:
             solicitud.excel_funcionario_disponible = False
             solicitud.excel_masivo_disponible = False
@@ -291,11 +345,9 @@ def consultas_todos(request):
 
     for solicitud in solicitudes:
 
-        # Por defecto
         solicitud.mostrar_pdf = False
         solicitud.mostrar_excel = False
 
-        # SOLO ROL 1
         if id_rol == 1:
             ruta_pdf = os.path.join(
                 settings.MEDIA_ROOT,
@@ -905,46 +957,8 @@ def revision_fichas(request, id):
                 solicitud.save(update_fields=['revisado'])
 
             # ----------------------------
-            # Buscar si ya existe ficha para esta solicitud
-            # ----------------------------
-            ficha = Ficha.objects.filter(idsolicitud=solicitud).first()
-
-            if ficha:
-                # ----------------------------
-                # Actualizar ficha existente
-                # ----------------------------
-                if numero_ficha is not None and numero_ficha != "":
-                    ficha.codigoficha = numero_ficha  # solo si se envía valor nuevo
-
-                ficha.idestado = id_estado
-                ficha.observacion = observacion
-                ficha.save()
-            else:
-                # ----------------------------
-                # Crear nueva ficha si no existía
-                # ----------------------------
-                Ficha.objects.create(
-                    codigoficha=numero_ficha if numero_ficha else None,
-                    idsolicitud=solicitud,
-                    idestado=id_estado,
-                    idusuario=creado_por,
-                    observacion=observacion,
-                    excel=0  # ← ESTADO INICIAL: DESCARGAR
-                )
-
-
-            # ----------------------------
-            # Actualizar la solicitud con el número/código
-            # ----------------------------
-            if numero_solicitud is not None and numero_solicitud != "":
-                solicitud.codigosolicitud = numero_solicitud  # solo si se envía valor nuevo
-                solicitud.save()
-            else:
-                # Si no se envía, mantiene el valor existente
-                pass
-
-            # ----------------------------
             # Guardar Excel si se envía uno nuevo
+            # (se hace antes de actualizar ficha para tener la ruta lista)
             # ----------------------------
             if nuevo_archivo:
                 carpeta_almacenar = f"solicitud_{id}"
@@ -962,24 +976,63 @@ def revision_fichas(request, id):
                     for chunk in nuevo_archivo.chunks():
                         destino.write(chunk)
 
-                ficha = Ficha.objects.filter(idsolicitud=solicitud).first()
-                if ficha:
+            # ----------------------------
+            # Buscar si ya existe ficha para esta solicitud
+            # ----------------------------
+            ficha = Ficha.objects.filter(idsolicitud=solicitud).first()
+
+            if ficha:
+                # ----------------------------
+                # Actualizar ficha existente
+                # ----------------------------
+                if numero_ficha is not None and numero_ficha != "":
+                    ficha.codigoficha = numero_ficha
+
+                ficha.idestado = id_estado
+                ficha.observacion = observacion
+
+                # ----------------------------
+                # Manejo del campo excel:
+                # - Si se sube un archivo nuevo → excel = 1 (archivo disponible para descargar)
+                # - Si es rechazo sin archivo   → excel = 2 (ocultar todo, esperar nuevo ciclo)
+                # - En cualquier otro caso      → no se toca, mantiene valor anterior
+                # ----------------------------
+                if nuevo_archivo:
                     ficha.excel = 1
-                    ficha.save(update_fields=['excel'])
+                elif id_estado.idestado == idRechazadoByFuncionario:
+                    ficha.excel = 2
+
+                ficha.save()
+
             else:
-                # Si no se envía archivo nuevo, mantiene el anterior
-                pass
+                # ----------------------------
+                # Crear nueva ficha si no existía
+                # El excel inicia en 0 (sin archivo todavía)
+                # Si en esta misma petición ya se subió archivo, queda en 1
+                # ----------------------------
+                Ficha.objects.create(
+                    codigoficha=numero_ficha if numero_ficha else None,
+                    idsolicitud=solicitud,
+                    idestado=id_estado,
+                    idusuario=creado_por,
+                    observacion=observacion,
+                    excel=1 if nuevo_archivo else 0
+                )
 
             # ----------------------------
-            # Mensaje de éxito
+            # Actualizar el código de la solicitud si se envió
+            # ----------------------------
+            if numero_solicitud is not None and numero_solicitud != "":
+                solicitud.codigosolicitud = numero_solicitud
+                solicitud.save()
+
+            # ----------------------------
+            # Mensaje de éxito y redirección
             # ----------------------------
             messages.success(request, 'Haz enviado respuesta a esta solicitud')
             return redirect('consultas_instructor')
 
         except Exception as e:
-            # ----------------------------
-            # Mensaje de error en caso de excepción
-            # ----------------------------
             messages.error(request, f'Error al enviar respuesta: {e}')
             return redirect('consultas_instructor')
 
@@ -990,7 +1043,6 @@ def revision_fichas(request, id):
         'layout': layout,
         'messages': messages
     })
-
 
 # ===============================================================
 # Descargar el formato generado por sofia plus
@@ -1016,6 +1068,27 @@ def descargar_excel_ficha(request, id):
     else:
         # Si no existe, mostrar un error
         raise Http404("Aun no se ha subido el excel.")
+
+# ===============================================================
+# Marcar excel para subir (cambia ficha.excel = 0 en BD)
+# ===============================================================
+@login_required_custom
+def marcar_excel_para_subir(request, id):
+    """
+    Cambia ficha.excel = 0 para que el funcionario pueda subir un nuevo archivo.
+    Solo acepta POST para evitar cambios accidentales.
+    """
+    if request.method == "POST":
+        solicitud = get_object_or_404(Solicitud, idsolicitud=id)
+        ficha = Ficha.objects.filter(idsolicitud=solicitud).first()
+
+        if ficha:
+            ficha.excel = 0
+            ficha.save(update_fields=['excel'])
+
+        return JsonResponse({'ok': True})
+
+    return JsonResponse({'ok': False, 'error': 'Método no permitido'}, status=405)
 
 @login_required_custom
 def revision_coordinador(request, id_solicitud):
@@ -1082,12 +1155,22 @@ def revision_coordinador(request, id_solicitud):
                 idsolicitud=solicitud,
                 defaults={
                     "usuario_solicitud": usuario_solicitud,          # usuario que creó la solicitud
-                    "usuario_revisador": usuario_revisador,  # coordinador que revisa
+                    "usuario_revisador": usuario_revisador,          # coordinador que revisa
                     "idestado": estado_obj,
                     "observacion": observacion,
                     "fecha": datetime.date.today(),
                 }
             )
+
+            # ----------------------------
+            # Si el coordinador aprueba de nuevo → resetear excel a 3
+            # para que el funcionario pueda descargar el nuevo formato y luego subir
+            # ----------------------------
+            if estado_obj.id == 1:  # Aprobado
+                ficha = Ficha.objects.filter(idsolicitud=solicitud).first()
+                if ficha and ficha.excel == 2:
+                    ficha.excel = 3  # ← reinicia mostrando botón de descarga activo
+                    ficha.save(update_fields=['excel'])
 
             # ============================
             # Generar carta PDF internamente SOLO SI la revisión fue exitosa
@@ -1151,9 +1234,9 @@ def revision_coordinador(request, id_solicitud):
 
 @login_required_custom
 def ver_formato_inscripcion(request, id_solicitud):
-    # Nombre del archivo
-    folder_name = f'formato_inscripcion_{id_solicitud}.xlsx'
-    ruta_archivo = os.path.join(settings.MEDIA_ROOT, "excel", folder_name)
+    # Nombre del archivo con la nueva ruta
+    folder_name = f'Funcionario/{id_solicitud}/Masivos_sofia_plus/formato_inscripcion_{id_solicitud}.xlsx'
+    ruta_archivo = os.path.join(settings.MEDIA_ROOT, folder_name)
 
     datos = []
     error = None
@@ -1171,7 +1254,7 @@ def ver_formato_inscripcion(request, id_solicitud):
             datos.append(fila)
 
     except Exception as e:
-            error = f"Error al abrir el archivo: {e}"
+        error = f"Error al abrir el archivo: {e}"
 
     return render(request, "fichacaracterizacion/formato_inscripcion.html", {
         "datos": datos,
@@ -1207,3 +1290,101 @@ def ver_pdf_carta(request, id_solicitud):
         return redirect(ruta_pdf)
     else:
         return HttpResponseNotFound("El archivo PDF no existe para esta solicitud.")
+
+
+# Enviar datos para la creación de la grafica
+@login_required_custom
+def reporteCreaciones(request):
+
+    # ----------------------------
+    # Filtros desde GET
+    # ----------------------------
+    filtro_estado = request.GET.get('estado', '').strip().lower()
+    filtro_instructor = request.GET.get('instructor', '').strip()
+
+    # ----------------------------
+    # Total real de solicitudes (base del 100%)
+    # ----------------------------
+    total_solicitudes = Solicitud.objects.count()
+
+    # ----------------------------
+    # Query base de fichas
+    # ----------------------------
+    fichas_qs = Ficha.objects.select_related('idestado', 'idsolicitud__idusuario')
+
+    # Aplicar filtro por instructor si se envía
+    if filtro_instructor:
+        fichas_qs = fichas_qs.filter(
+            idsolicitud__idusuario__idusuario=filtro_instructor
+        )
+
+    # Aplicar filtro por estado si se envía
+    if filtro_estado:
+        fichas_qs = fichas_qs.filter(
+            idestado__estados__iexact=filtro_estado
+        )
+
+    solicitudes_por_estado = (
+        fichas_qs
+        .values('idestado__estados')
+        .annotate(total=Count('idsolicitud', distinct=True))
+        .order_by('idestado__estados')
+    )
+
+    # porcentajes (la suma de todos los estados)
+    total_estados = sum(item['total'] for item in solicitudes_por_estado)
+
+    colores_estado = {
+        'matriculada': '#2ecc71',      # verde
+        'rechazada': '#e74c3c',        # rojo
+        'lista de espera': '#e6dccb',  # beige
+        'creacion': '#f39c12',         # naranja
+        'creación': '#f39c12',
+    }
+
+    resumen = []
+    for item in solicitudes_por_estado:
+        estado = item['idestado__estados']
+        cantidad = item['total']
+
+        porcentaje = round(
+            (cantidad / total_estados) * 100, 1
+        ) if total_estados > 0 else 0
+
+        resumen.append({
+            'estado': estado,
+            'total': cantidad,
+            'porcentaje': porcentaje,
+            'color': colores_estado.get(estado.lower(), '#95a5a6')
+        })
+
+    # ----------------------------
+    # Lista de instructores con todos los datos necesarios para el modal
+    # ----------------------------
+    instructores = Usuario.objects.filter(
+        rol__idrol=1
+    ).values(
+        'idusuario', 'nombre', 'apellido',
+        'numeroidentificacion', 'correo'
+    ).order_by('nombre', 'apellido')
+
+    # ----------------------------
+    # Lista de estados únicos para el filtro
+    # ----------------------------
+    estados_disponibles = Estados.objects.values_list('estados', flat=True).distinct()
+
+    context = {
+        'layout': 'layout/layout_funcionario.html',
+        'totalSolicitudes': total_solicitudes,
+        'total_estados': total_estados,
+        'estados': [r['estado'] for r in resumen],
+        'totales': [r['total'] for r in resumen],
+        'colores': [r['color'] for r in resumen],
+        'resumen': resumen,
+        'instructores': instructores,
+        'estados_disponibles': estados_disponibles,
+        'filtro_estado_activo': filtro_estado,
+        'filtro_instructor_activo': filtro_instructor,
+    }
+
+    return render(request, 'reportes/grafica.html', context)

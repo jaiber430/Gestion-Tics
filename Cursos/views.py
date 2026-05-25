@@ -238,3 +238,89 @@ def registerUser(request):
         'title': 'Registro',
         'tipos_identificacion': tipo_documento,
     })
+
+# =====================================================================
+# Ver / Editar perfil completo del usuario en sesión
+# =====================================================================
+@login_required_custom
+def editar_perfil(request):
+
+    user_id = request.session.get('user_id')
+    usuario = Usuario.objects.select_related('rol', 'tipoidentificacion', 'contrato').get(idusuario=user_id)
+
+    tipos_identificacion = Tipoidentificacion.objects.all()
+    tipos_contrato = Tipocontrato.objects.all()
+
+    id_rol = usuario.rol.idrol
+    if id_rol == 1:
+        layout = 'layout/layoutinstructor.html'
+    elif id_rol == 2:
+        layout = 'layout/layout_coordinador.html'
+    elif id_rol == 3:
+        layout = 'layout/layout_funcionario.html'
+    elif id_rol == 4:
+        layout = 'layout/layout_admin.html'
+    else:
+        layout = 'layout/layout_admin.html'
+
+    if request.method == 'POST':
+        try:
+            nombre              = request.POST.get('nombre', '').strip()
+            apellido            = request.POST.get('apellido', '').strip()
+            correo              = request.POST.get('correo', '').strip()
+            numeroidentificacion = request.POST.get('numeroidentificacion', '').strip()
+            idtipoidentificacion = request.POST.get('tipoidentificacion')
+            contrato_id         = request.POST.get('contrato')
+            numerocontrato      = request.POST.get('numerocontrato', '').strip()
+            clave_actual        = request.POST.get('clave_actual', '').strip()
+            clave_nueva         = request.POST.get('clave_nueva', '').strip()
+            clave_confirmar     = request.POST.get('clave_confirmar', '').strip()
+
+            # --- Datos personales ---
+            if nombre:
+                usuario.nombre = nombre
+            if apellido:
+                usuario.apellido = apellido
+            if correo:
+                usuario.correo = correo
+            if numeroidentificacion:
+                usuario.numeroidentificacion = int(numeroidentificacion)
+            if idtipoidentificacion:
+                usuario.tipoidentificacion_id = int(idtipoidentificacion)
+
+            # Readonly en frontend — se actualizan si se habilitan
+            if contrato_id:
+                usuario.contrato_id = int(contrato_id)
+            if numerocontrato:
+                usuario.numerocontrato = numerocontrato
+
+            # --- Cambio de contraseña (solo si llenó los campos) ---
+            if clave_actual or clave_nueva or clave_confirmar:
+                if not check_password(clave_actual, usuario.clave):
+                    messages.error(request, 'La contraseña actual no es correcta.')
+                    return redirect('editar_perfil')
+
+                if not clave_nueva:
+                    messages.error(request, 'La nueva contraseña no puede estar vacía.')
+                    return redirect('editar_perfil')
+
+                if clave_nueva != clave_confirmar:
+                    messages.error(request, 'Las contraseñas nuevas no coinciden.')
+                    return redirect('editar_perfil')
+
+                usuario.clave = make_password(clave_nueva)
+
+            usuario.save()
+            messages.success(request, 'Perfil actualizado correctamente.')
+
+        except Exception as e:
+            messages.error(request, f'Error al actualizar el perfil: {e}')
+
+        return redirect('editar_perfil')
+
+    return render(request, 'inicio/editar_perfil.html', {
+        'layout': layout,
+        'usuario': usuario,
+        'tipos_identificacion': tipos_identificacion,
+        'tipos_contrato': tipos_contrato,
+    })
