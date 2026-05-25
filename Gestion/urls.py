@@ -100,7 +100,9 @@ urlpatterns = [
     path('applicant/edit/<int:idSolicitud>/<int:numDoc>/',views_aspirantes.updateCandidate,name='updateCandidate'),
     path('applicant/remove/<int:idSolicitud>/<int:numDoc>/',views_aspirantes.removeApplicant,name='removeApplicant'),
     # Creación de grafica
-    path('graphReports/', views_consultas.reporteCreaciones, name='viewGraphReports')
+    path('graphReports/', views_consultas.reporteCreaciones, name='viewGraphReports'),
+    # En tu archivo urls.py agrega esta ruta:
+    path('perfil/editar/', views.editar_perfil, name='editar_perfil'),
 ]
 # Poder almacenar archivos en la carpeta media
 if settings.DEBUG:

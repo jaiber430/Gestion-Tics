@@ -209,7 +209,7 @@ def consultas_todos(request):
         solicitudes = Solicitud.objects.filter(
             idsolicitud__in=solicitudes_aprobadas
         ).exclude(
-            idsolicitud__in=fichas_ocultas  # ← excluir las que tienen estado 4
+            idsolicitud__in=fichas_ocultas
         ).select_related('idusuario', 'idempresa').order_by('-fechasolicitud')
 
     else:
@@ -251,7 +251,7 @@ def consultas_todos(request):
             # ----------------------------
             # Lógica del campo excel según valor:
             # 0 → sin archivo, mostrar input para subir
-            # 1 → archivo subido, botón descargar DESHABILITADO
+            # 1 → archivo subido, botón descargar DESHABILITADO (funcionario)
             # 2 → rechazada, no mostrar nada (esperar ciclo)
             # 3 → ciclo reiniciado tras rechazo, botón descargar ACTIVO (con fetch)
             # ----------------------------
@@ -262,24 +262,21 @@ def consultas_todos(request):
             elif solicitud.ficha_excel == 1:
                 solicitud.mostrar_input_excel = False
                 solicitud.mostrar_boton_descarga_excel = True
-                solicitud.excel_descarga_activa = False  # deshabilitado
+                solicitud.excel_descarga_activa = False
             elif solicitud.ficha_excel == 2:
-                # Rechazada → no mostrar nada
                 solicitud.mostrar_input_excel = False
                 solicitud.mostrar_boton_descarga_excel = False
                 solicitud.excel_descarga_activa = False
             elif solicitud.ficha_excel == 3:
-                # Reinicio tras rechazo → botón descargar activo (igual que al inicio del flujo)
                 solicitud.mostrar_input_excel = False
                 solicitud.mostrar_boton_descarga_excel = True
-                solicitud.excel_descarga_activa = True  # activo con fetch
+                solicitud.excel_descarga_activa = True
             else:
                 solicitud.mostrar_input_excel = True
                 solicitud.mostrar_boton_descarga_excel = False
                 solicitud.excel_descarga_activa = False
 
         else:
-            # Sin ficha en BD → mostrar input para subir
             solicitud.estado_usuario = None
             solicitud.observacion_usuario = ''
             solicitud.codigo_ficha = ''
@@ -311,17 +308,30 @@ def consultas_todos(request):
         solicitud.mostrar_boton_carta_funcionario = (id_rol == 3 and solicitud.idempresa is None)
 
         try:
-            ruta_excel_funcionario = os.path.join(settings.MEDIA_ROOT, 'excel', f'formato_inscripcion_{solicitud.idsolicitud}.xlsx')
+            ruta_excel_funcionario = os.path.join(
+                settings.MEDIA_ROOT, 'excel', f'formato_inscripcion_{solicitud.idsolicitud}.xlsx'
+            )
             solicitud.excel_funcionario_disponible = os.path.exists(ruta_excel_funcionario)
 
+            # ----------------------------
+            # Excel SOFÍA plus subido por el funcionario:
+            # Solo se considera disponible si ficha.excel == 1 Y el archivo existe en disco
+            # Ruta: media/Funcionario/solicitud_{id}/Masivos_sofia_plus/formato_inscripcion_{id}.xlsx
+            # ----------------------------
             carpeta_excel_sofia = os.path.join(
                 settings.MEDIA_ROOT,
                 'Funcionario',
                 f"solicitud_{solicitud.idsolicitud}",
                 'Masivos_sofia_plus'
             )
-            ruta_excel_sofia = os.path.join(carpeta_excel_sofia, f'formato_inscripcion_{solicitud.idsolicitud}.xlsx')
-            solicitud.excel_masivo_disponible = os.path.exists(ruta_excel_sofia)
+            ruta_excel_sofia = os.path.join(
+                carpeta_excel_sofia,
+                f'formato_inscripcion_{solicitud.idsolicitud}.xlsx'
+            )
+            archivo_existe = os.path.exists(ruta_excel_sofia)
+            excel_en_bd = (ficha is not None and ficha.excel == 1)
+            solicitud.excel_masivo_disponible = archivo_existe and excel_en_bd
+
         except Exception:
             solicitud.excel_funcionario_disponible = False
             solicitud.excel_masivo_disponible = False
@@ -335,11 +345,9 @@ def consultas_todos(request):
 
     for solicitud in solicitudes:
 
-        # Por defecto
         solicitud.mostrar_pdf = False
         solicitud.mostrar_excel = False
 
-        # SOLO ROL 1
         if id_rol == 1:
             ruta_pdf = os.path.join(
                 settings.MEDIA_ROOT,
@@ -949,57 +957,8 @@ def revision_fichas(request, id):
                 solicitud.save(update_fields=['revisado'])
 
             # ----------------------------
-            # Buscar si ya existe ficha para esta solicitud
-            # ----------------------------
-            ficha = Ficha.objects.filter(idsolicitud=solicitud).first()
-
-            if ficha:
-                # ----------------------------
-                # Actualizar ficha existente
-                # ----------------------------
-                if numero_ficha is not None and numero_ficha != "":
-                    ficha.codigoficha = numero_ficha  # solo si se envía valor nuevo
-
-                ficha.idestado = id_estado
-                ficha.observacion = observacion
-
-                # ----------------------------
-                # Manejo del campo excel según acción:
-                # - Si sube archivo → excel=1 (tiene archivo, botón descargar deshabilitado)
-                # - Si rechaza sin archivo → excel=2 (ocultar todo, esperar ciclo)
-                # - En cualquier otro caso → mantiene el valor anterior
-                # ----------------------------
-                if nuevo_archivo:
-                    ficha.excel = 1
-                elif id_estado.idestado == idRechazadoByFuncionario:
-                    ficha.excel = 2
-
-                ficha.save()
-            else:
-                # ----------------------------
-                # Crear nueva ficha si no existía
-                # ----------------------------
-                Ficha.objects.create(
-                    codigoficha=numero_ficha if numero_ficha else None,
-                    idsolicitud=solicitud,
-                    idestado=id_estado,
-                    idusuario=creado_por,
-                    observacion=observacion,
-                    excel=0  # ← ESTADO INICIAL: sin archivo, mostrar input para subir
-                )
-
-            # ----------------------------
-            # Actualizar la solicitud con el número/código
-            # ----------------------------
-            if numero_solicitud is not None and numero_solicitud != "":
-                solicitud.codigosolicitud = numero_solicitud  # solo si se envía valor nuevo
-                solicitud.save()
-            else:
-                # Si no se envía, mantiene el valor existente
-                pass
-
-            # ----------------------------
             # Guardar Excel si se envía uno nuevo
+            # (se hace antes de actualizar ficha para tener la ruta lista)
             # ----------------------------
             if nuevo_archivo:
                 carpeta_almacenar = f"solicitud_{id}"
@@ -1017,27 +976,63 @@ def revision_fichas(request, id):
                     for chunk in nuevo_archivo.chunks():
                         destino.write(chunk)
 
+            # ----------------------------
+            # Buscar si ya existe ficha para esta solicitud
+            # ----------------------------
+            ficha = Ficha.objects.filter(idsolicitud=solicitud).first()
+
+            if ficha:
                 # ----------------------------
-                # Marcar excel=1 en ficha (ya subió archivo)
+                # Actualizar ficha existente
                 # ----------------------------
-                ficha = Ficha.objects.filter(idsolicitud=solicitud).first()
-                if ficha:
+                if numero_ficha is not None and numero_ficha != "":
+                    ficha.codigoficha = numero_ficha
+
+                ficha.idestado = id_estado
+                ficha.observacion = observacion
+
+                # ----------------------------
+                # Manejo del campo excel:
+                # - Si se sube un archivo nuevo → excel = 1 (archivo disponible para descargar)
+                # - Si es rechazo sin archivo   → excel = 2 (ocultar todo, esperar nuevo ciclo)
+                # - En cualquier otro caso      → no se toca, mantiene valor anterior
+                # ----------------------------
+                if nuevo_archivo:
                     ficha.excel = 1
-                    ficha.save(update_fields=['excel'])
+                elif id_estado.idestado == idRechazadoByFuncionario:
+                    ficha.excel = 2
+
+                ficha.save()
+
             else:
-                # Si no se envía archivo nuevo, mantiene el anterior
-                pass
+                # ----------------------------
+                # Crear nueva ficha si no existía
+                # El excel inicia en 0 (sin archivo todavía)
+                # Si en esta misma petición ya se subió archivo, queda en 1
+                # ----------------------------
+                Ficha.objects.create(
+                    codigoficha=numero_ficha if numero_ficha else None,
+                    idsolicitud=solicitud,
+                    idestado=id_estado,
+                    idusuario=creado_por,
+                    observacion=observacion,
+                    excel=1 if nuevo_archivo else 0
+                )
 
             # ----------------------------
-            # Mensaje de éxito
+            # Actualizar el código de la solicitud si se envió
+            # ----------------------------
+            if numero_solicitud is not None and numero_solicitud != "":
+                solicitud.codigosolicitud = numero_solicitud
+                solicitud.save()
+
+            # ----------------------------
+            # Mensaje de éxito y redirección
             # ----------------------------
             messages.success(request, 'Haz enviado respuesta a esta solicitud')
             return redirect('consultas_instructor')
 
         except Exception as e:
-            # ----------------------------
-            # Mensaje de error en caso de excepción
-            # ----------------------------
             messages.error(request, f'Error al enviar respuesta: {e}')
             return redirect('consultas_instructor')
 
@@ -1048,7 +1043,6 @@ def revision_fichas(request, id):
         'layout': layout,
         'messages': messages
     })
-
 
 # ===============================================================
 # Descargar el formato generado por sofia plus
@@ -1240,9 +1234,9 @@ def revision_coordinador(request, id_solicitud):
 
 @login_required_custom
 def ver_formato_inscripcion(request, id_solicitud):
-    # Nombre del archivo
-    folder_name = f'formato_inscripcion_{id_solicitud}.xlsx'
-    ruta_archivo = os.path.join(settings.MEDIA_ROOT, "excel", folder_name)
+    # Nombre del archivo con la nueva ruta
+    folder_name = f'Funcionario/{id_solicitud}/Masivos_sofia_plus/formato_inscripcion_{id_solicitud}.xlsx'
+    ruta_archivo = os.path.join(settings.MEDIA_ROOT, folder_name)
 
     datos = []
     error = None
@@ -1260,7 +1254,7 @@ def ver_formato_inscripcion(request, id_solicitud):
             datos.append(fila)
 
     except Exception as e:
-            error = f"Error al abrir el archivo: {e}"
+        error = f"Error al abrir el archivo: {e}"
 
     return render(request, "fichacaracterizacion/formato_inscripcion.html", {
         "datos": datos,

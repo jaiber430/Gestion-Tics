@@ -14,11 +14,12 @@
 
     <div class="contenedor-tabla-fichas">
       <table class="tabla-fichas">
-        <thead>
+<thead>
           <tr>
             <th>Nombre del Programa</th>
             <th>Revisión realizada por</th>
             <th>Descargas</th>
+            <th>Subir Excel SOFÍA plus</th>
             <th>Fecha Creación</th>
             <th>Estado</th>
             <th>Código de la ficha</th>
@@ -63,38 +64,31 @@
                     <a href="{% url 'descargar_carta' solicitud_consulta.idsolicitud rol %}" class="boton-descargar" style="padding: 6px 10px; font-size: 12px;">Carta de solicitud</a>
                   {% endif %}
 
-                  <div id="excel-container-{{ solicitud_consulta.idsolicitud }}">
-
-                    {% if solicitud_consulta.mostrar_input_excel %}
-                      <!-- ESTADO 0: sin archivo, mostrar input para subir -->
-                      <input type="file"
-                             name="actualizar_excel"
-                             class="archivo-subida">
-
-                    {% elif solicitud_consulta.mostrar_boton_descarga_excel %}
-                      {% if solicitud_consulta.excel_descarga_activa %}
-                        <!-- ESTADO 3: reinicio tras rechazo, botón activo con fetch -->
-                        <a href="{% url 'descargar_excel' solicitud_consulta.idsolicitud rol %}"
-                           class="boton-descargar excel-toggle"
-                           data-id="{{ solicitud_consulta.idsolicitud }}"
-                           style="padding: 6px 10px; font-size: 12px;">
-                          Formato inscripción masivo
-                        </a>
-                      {% else %}
-                        <!-- ESTADO 1: archivo subido, botón deshabilitado -->
-                        <a class="boton-descargar"
-                           style="pointer-events:none; opacity:0.5; padding: 6px 10px; font-size: 12px;"
-                           title="Formato ya subido">
-                          Formato inscripción masivo
-                        </a>
-                      {% endif %}
-
-                    {% endif %}
-                    <!-- ESTADO 2: rechazada, no se muestra nada -->
-
-                  </div>
+                  {# Excel del instructor: siempre disponible para descargar #}
+                  <a href="{% url 'descargar_excel' solicitud_consulta.idsolicitud rol %}"
+                     class="boton-descargar"
+                     style="padding: 6px 10px; font-size: 12px;">
+                    Formato inscripción masivo
+                  </a>
 
                 </div>
+              </td>
+
+              {# ------------------------------------------------------------------ #}
+              {# COLUMNA: SUBIR Excel SOFÍA plus (archivo del funcionario)           #}
+              {# excel = 0 → nunca subido → input activo                            #}
+              {# excel = 1 → ya subido → input activo (puede reemplazar)            #}
+              {# excel = 2 → rechazado, nuevo ciclo → input activo                  #}
+              {# Solo se deshabilita cuando está Matriculada                         #}
+              {# ------------------------------------------------------------------ #}
+              <td>
+                {% if solicitud_consulta.estado_usuario == "Matriculada" %}
+                  <span style="font-size:12px; color:#888;">No disponible (Matriculada)</span>
+                {% else %}
+                  <input type="file"
+                         name="actualizar_excel"
+                         class="archivo-subida">
+                {% endif %}
               </td>
 
               <td>{{ solicitud_consulta.fechasolicitud }}</td>
@@ -362,7 +356,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
       <!-- Contenedor de la tabla de fichas -->
       <div class="contenedor-tabla-fichas">
-        <table class="tabla-fichas">
+<table class="tabla-fichas">
           <thead>
             <tr>
               <th>Nombre del Programa</th>
@@ -419,13 +413,23 @@ document.addEventListener('DOMContentLoaded', function () {
                     Sin aspirantes
                   {% endif %}
                 </td>
+
+                {# -------------------------------------------------------------- #}
+                {# Excel SOFÍA plus: disponible solo si ficha.excel == 1           #}
+                {# y el archivo existe en disco (excel_masivo_disponible)           #}
+                {# -------------------------------------------------------------- #}
                 <td>
-                  {% if solicitud_consulta.estado_usuario in 'Matriculada Rechazada Creacion Creada Lista de espera' and solicitud_consulta.excel_masivo_disponible %}
-                    <a href="{% url 'sofia_plus_descarga' solicitud_consulta.idsolicitud %}" class="boton-descargar">Descargar Excel</a>
+                  {% if solicitud_consulta.excel_masivo_disponible %}
+                    <a href="{% url 'sofia_plus_descarga' solicitud_consulta.idsolicitud %}" class="boton-descargar">
+                      Descargar Excel
+                    </a>
                   {% else %}
-                    <a class="boton-descargar disabled-link" tabindex="-1" aria-disabled="true">Descargar Excel</a>
+                    <a class="boton-descargar disabled-link" tabindex="-1" aria-disabled="true">
+                      Descargar Excel
+                    </a>
                   {% endif %}
                 </td>
+
                 <td>{{ solicitud_consulta.fechasolicitud }}</td>
                 <td>
                   <button onclick="document.getElementById('modal-{{ solicitud_consulta.idsolicitud }}').style.display='block'" class="boton-compartir">Compartir</button>
@@ -443,7 +447,6 @@ document.addEventListener('DOMContentLoaded', function () {
                   <div class="cuerpo-modal">
                     <p class="programa-seleccionado">Programa: {{ solicitud_consulta.codigoprograma.nombreprograma }}</p>
 
-                    <!-- Enlace con href correcto -->
                     <div class="opcion-compartir">
                       <h4>Compartir con enlace</h4>
                         <div class="grupo-link">
@@ -464,7 +467,6 @@ document.addEventListener('DOMContentLoaded', function () {
                       <span>O</span>
                     </div>
 
-                    <!-- Lista de aspirantes -->
                     <div class="opcion-compartir">
                       <h4>Ver aspirantes Inscritos</h4>
                       <div class="resultados-busqueda">
@@ -475,7 +477,6 @@ document.addEventListener('DOMContentLoaded', function () {
                               <span class="documento-aprendiz">{{ aspirante.tipoidentificacion.tipoidentificacion }} {{ aspirante.numeroidentificacion }}</span>
                               <span class="documento-aprendiz">Teléfono: {{ aspirante.telefono }}</span>
                               <span class="documento-aprendiz">Correo: {{ aspirante.correo }}</span>
-                              {% comment %} Ver Pdf de los aspirantes {% endcomment %}
                               <div class="acciones-aprendiz">
                                 <a class="accion-link"
                                   href="{% url 'seePdfForapplicants' solicitud_consulta.idsolicitud aspirante.numeroidentificacion %}"
@@ -503,7 +504,6 @@ document.addEventListener('DOMContentLoaded', function () {
                           </div>
                         {% endfor %}
                       </div>
-                      {% comment %} Botones ver combinado de PDF y excel {% endcomment %}
                         <div class="acciones-combinados">
                           <a href="{% url 'viewCombinedPdf' solicitud_consulta.idsolicitud %}" class="boton-descargar boton-descargar-sm">
                             Ver PDF combinado
@@ -530,7 +530,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     </div>
                   </div>
 
-                  <!-- Pie modal -->
                   <div class="pie-modal">
                     <button onclick="document.getElementById('modal-{{ solicitud_consulta.idsolicitud }}').style.display='none'" class="boton-cancelar">Cancelar</button>
                     <button class="boton-compartir-modal">Compartir</button>
