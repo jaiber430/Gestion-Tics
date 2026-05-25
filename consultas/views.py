@@ -339,7 +339,7 @@ def consultas_todos(request):
     if id_rol in [1, 4]:
         for solicitud in solicitudes:
             aspirantes = Aspirantes.objects.select_related(
-                'tipoidentificacion', 'idcaracterizacion'
+                'tipoidentificacion'
             ).filter(solicitudinscripcion=solicitud.idsolicitud)
             solicitud.aspirantes = aspirantes
 
