@@ -1,0 +1,60 @@
+# ── Orquestación de servicios: app Django + MySQL ─────────────────────────────
+# Puerto externo de MySQL: 3307 (evita choque con WAMP que usa 3306 en Windows).
+# El init script CursosV17.sql se importa SOLO la primera vez que el volumen
+# mysql_data está vacío (comportamiento nativo de la imagen mysql:8).
+
+services:
+
+  # ── Base de datos MySQL ─────────────────────────────────────────────────────
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    # mysql_native_password evita el plugin caching_sha2_password de MySQL 8
+    # que requiere el paquete 'cryptography' en PyMySQL para autenticarse.
+    command: --default-authentication-plugin=mysql_native_password
+    env_file: .env
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "${DB_EXTERNAL_PORT:-3307}:3306"
+    volumes:
+      # Datos persistentes entre reinicios
+      - mysql_data:/var/lib/mysql
+      # Script de inicialización: se ejecuta solo cuando el volumen está vacío
+      - ./CursosV17.sql:/docker-entrypoint-initdb.d/01_init.sql:ro
+    healthcheck:
+      # CMD-SHELL ejecuta en /bin/sh dentro del contenedor; $$ escapa el $ para
+      # que Docker Compose no lo interpole y sea el shell del contenedor quien lo use.
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root --password=$$MYSQL_ROOT_PASSWORD"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 60s
+
+  # ── Aplicación Django ────────────────────────────────────────────────────────
+  app:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      # Dentro de Docker, el host de BD es el nombre del servicio 'db'
+      DB_HOST: db
+      DB_PORT: "3306"
+    ports:
+      - "${APP_PORT:-8000}:8000"
+    volumes:
+      # Archivos subidos por usuarios (PDFs, Excel, etc.)
+      - ./media:/app/media
+      # Archivos estáticos recolectados (puede montarse en Nginx si se añade)
+      - staticfiles:/app/staticfiles
+    depends_on:
+      db:
+        condition: service_healthy
+
+# ── Volúmenes nombrados ────────────────────────────────────────────────────────
+volumes:
+  mysql_data:
+  staticfiles:
