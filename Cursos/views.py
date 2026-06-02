@@ -78,6 +78,7 @@ def login_view(request):
             elif rol == 5:
                 layout = "layout/layout_programa.html"
                 rol_name = "Modificador"
+                return redirect("buscar_programa")
             else:
                 layout = "layout/layout_desconocido.html"
                 rol_name = "Desconocido"
@@ -98,6 +99,38 @@ def login_view(request):
             return render(request, "inicio/index.html")
 
     return render(request, "inicio/index.html")
+
+# ==============================================
+# Página de inicio para usuarios autenticados
+# ==============================================
+@login_required_custom
+def home(request):
+    rol = request.session.get('rol')
+    name = request.session.get('name')
+
+    if rol == 5:
+        return redirect('buscar_programa')
+
+    layouts = {
+        1: 'layout/layoutinstructor.html',
+        2: 'layout/layout_coordinador.html',
+        3: 'layout/layout_funcionario.html',
+        4: 'layout/layout_admin.html',
+    }
+    rol_names = {
+        1: 'Instructor',
+        2: 'Coordinador',
+        3: 'Funcionario',
+        4: 'Administrador',
+    }
+
+    return render(request, 'user/inicio.html', {
+        'layout': layouts.get(rol, 'layout/layout_admin.html'),
+        'rol': rol,
+        'user': rol_names.get(rol, 'Usuario'),
+        'name': name,
+    })
+
 # ==============================================
 # Cerrar sesion
 # ==============================================
@@ -260,6 +293,8 @@ def editar_perfil(request):
         layout = 'layout/layout_funcionario.html'
     elif id_rol == 4:
         layout = 'layout/layout_admin.html'
+    elif id_rol == 5:
+        layout = 'layout/layout_programa.html'
     else:
         layout = 'layout/layout_admin.html'
 

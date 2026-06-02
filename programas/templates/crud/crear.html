@@ -2,103 +2,56 @@
 
 {% block content %}
   <main class="contenido-principal">
-    <!-- Botón para volver -->
-    <div style="margin-bottom: 20px;">
-      <a href="{% url 'buscar_programa' %}" class="btn btn-secondary">
-        <i class="fas fa-arrow-left"></i> Volver al Listado
-      </a>
+    <div class="titulo-seccion">
+      <h2 class="titulo-pagina">CREAR NUEVO PROGRAMA</h2>
     </div>
 
-    <!-- Modal de creación (Abierto por defecto) -->
-    <div class="modal fade show" id="crearModal" tabindex="-1" aria-labelledby="crearModalLabel" aria-hidden="false" style="display: block; background-color: rgba(0,0,0,0.5);">
-      <div class="modal-dialog">
-        <div class="modal-content modal-programa">
-          <form method="POST" action="{% url 'crear_programa' %}">
-            {% csrf_token %}
+    <form class="formulario-ficha" method="POST" action="{% url 'crear_programa' %}">
+      {% csrf_token %}
+      <div class="seccion-formulario">
+        <h3 class="titulo-seccion-form">Datos del Programa</h3>
 
-            <div class="modal-header modal-programa-header">
-              <h5 class="modal-title" id="crearModalLabel">Crear Nuevo Programa</h5>
-              <a href="{% url 'buscar_programa' %}" class="btn-cerrar-modal" aria-label="Cerrar">&times;</a>
-            </div>
+        <div class="fila-campos-2">
+          <div class="campo-entrada">
+            <label for="codigo" class="etiqueta-campo">Código del Programa *</label>
+            <input type="text" name="codigo" id="codigo" class="entrada-texto"
+                   placeholder="Ej: 21410101" required>
+          </div>
+          <div class="campo-entrada">
+            <label for="version" class="etiqueta-campo">Versión *</label>
+            <input type="text" name="version" id="version" class="entrada-texto"
+                   placeholder="Ej: 1.0" required>
+          </div>
+        </div>
 
-            <div class="modal-body modal-programa-body">
-              <div class="mb-3">
-                <label for="codigo" class="form-label">Código del Programa *</label>
-                <input 
-                  type="text" 
-                  name="codigo" 
-                  id="codigo" 
-                  class="form-control" 
-                  placeholder="Ej: 21410101"
-                  required
-                />
-              </div>
+        <div class="campo-entrada">
+          <label for="nombre" class="etiqueta-campo">Nombre del Programa *</label>
+          <input type="text" name="nombre" id="nombre" class="entrada-texto"
+                 placeholder="Ej: Gestión de Proyectos TIC" required>
+        </div>
 
-              <div class="mb-3">
-                <label for="version" class="form-label">Versión *</label>
-                <input 
-                  type="text" 
-                  name="version" 
-                  id="version" 
-                  class="form-control" 
-                  placeholder="Ej: 1.0"
-                  required
-                />
-              </div>
-
-              <div class="mb-3">
-                <label for="nombre" class="form-label">Nombre del Programa *</label>
-                <input 
-                  type="text" 
-                  name="nombre" 
-                  id="nombre" 
-                  class="form-control" 
-                  placeholder="Ej: Gestión de Proyectos TIC"
-                  required
-                />
-              </div>
-
-              <div class="mb-3">
-                <label for="horas" class="form-label">Horas *</label>
-                <input 
-                  type="number" 
-                  name="horas" 
-                  id="horas" 
-                  class="form-control" 
-                  placeholder="Ej: 120"
-                  required
-                  min="1"
-                />
-              </div>
-
-              <div class="mb-3">
-                <label for="area" class="form-label">Área *</label>
-                <select name="area" id="area" class="form-control" required>
-                  <option value="">-- Seleccione un área --</option>
-                  {% for area in areas %}
-                    <option value="{{ area.idarea }}">{{ area.area }}</option>
-                  {% endfor %}
-                </select>
-              </div>
-
-              <div class="mb-3">
-                <label for="modalidad" class="form-label">Modalidad *</label>
-                <select name="modalidad" id="modalidad" class="form-control" required>
-                  <option value="">-- Seleccione una modalidad --</option>
-                  {% for modalidad in modalidades %}
-                    <option value="{{ modalidad.idmodalidad }}">{{ modalidad.modalidad }}</option>
-                  {% endfor %}
-                </select>
-              </div>
-            </div>
-
-            <div class="modal-footer modal-programa-footer">
-              <a href="{% url 'buscar_programa' %}" class="boton-cancelar-modal">Cerrar</a>
-              <button type="submit" class="boton-guardar-modal">Crear Programa</button>
-            </div>
-          </form>
+        <div class="fila-campos-2">
+          <div class="campo-entrada">
+            <label for="horas" class="etiqueta-campo">Horas *</label>
+            <input type="number" name="horas" id="horas" class="entrada-texto"
+                   placeholder="Ej: 120" required min="1">
+          </div>
+          <div class="campo-entrada">
+            <label for="area" class="etiqueta-campo">Área *</label>
+            <select name="area" id="area" class="entrada-select" required>
+              <option value="">-- Seleccione un área --</option>
+              {% for area in areas %}
+                <option value="{{ area.idarea }}">{{ area.area }}</option>
+              {% endfor %}
+            </select>
+          </div>
         </div>
       </div>
-    </div>
+
+      <div class="contenedor-botones-formulario">
+        <a href="{% url 'buscar_programa' %}" class="boton-cancelar">Cancelar</a>
+        <button type="submit" class="boton-enviar">Crear Programa</button>
+      </div>
+    </form>
   </main>
 {% endblock %}

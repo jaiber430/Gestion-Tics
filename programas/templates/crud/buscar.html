@@ -6,15 +6,25 @@
     <div class="seccion-formulario">
       <form method="POST" action="{% url 'buscar_programa' %}" class="programa-busqueda-form">
         {% csrf_token %}
-        <input type="text" name="programa" id="programa" placeholder="Buscar programa" class="programa-input" />
+        <input type="text" name="programa" id="programa" placeholder="Buscar por nombre" class="programa-input" />
+        <select name="area_filtro" class="programa-input" style="flex:0 0 220px;">
+          <option value="">Todas las áreas</option>
+          {% for area in areas %}
+            <option value="{{ area.idarea }}"
+              {% if area_seleccionada == area.idarea|stringformat:'s' %}selected{% endif %}>
+              {{ area.area }}
+            </option>
+          {% endfor %}
+        </select>
         <button type="submit" class="programa-boton">Buscar</button>
       </form>
 
       <!-- Botón para crear nuevo programa -->
       <div style="margin-top: 25px; margin-bottom: 35px; text-align: right;">
-        <a href="{% url 'crear_programa' %}" class="programa-boton">
-          <i class="fas fa-plus"></i> Crear Programa
-        </a>
+        <button type="button" class="programa-boton"
+                data-bs-toggle="modal" data-bs-target="#crearModal">
+          + Crear Programa
+        </button>
       </div>
 
       <!-- Tabla de resultados -->
@@ -77,8 +87,61 @@
     </div>
   </main>
 
+  <!-- Modal de creación -->
+  <div class="modal fade" id="crearModal" tabindex="-1" aria-labelledby="crearModalLabel" aria-hidden="true" data-bs-backdrop="false" data-bs-scroll="true">
+    <div class="modal-dialog">
+      <div class="modal-content modal-programa">
+        <form method="POST" action="{% url 'crear_programa' %}">
+          {% csrf_token %}
+
+          <div class="modal-header modal-programa-header">
+            <h5 class="modal-title" id="crearModalLabel">Crear Nuevo Programa</h5>
+            <button type="button" class="btn-cerrar-modal" data-bs-dismiss="modal" aria-label="Cerrar">&times;</button>
+          </div>
+
+          <div class="modal-body modal-programa-body">
+            <div class="mb-3">
+              <label for="crear-codigo" class="form-label">Código del Programa *</label>
+              <input type="text" name="codigo" id="crear-codigo" class="form-control"
+                     placeholder="Ej: 21410101" required />
+            </div>
+            <div class="mb-3">
+              <label for="crear-version" class="form-label">Versión *</label>
+              <input type="text" name="version" id="crear-version" class="form-control"
+                     placeholder="Ej: 1.0" required />
+            </div>
+            <div class="mb-3">
+              <label for="crear-nombre" class="form-label">Nombre del Programa *</label>
+              <input type="text" name="nombre" id="crear-nombre" class="form-control"
+                     placeholder="Ej: Gestión de Proyectos TIC" required />
+            </div>
+            <div class="mb-3">
+              <label for="crear-horas" class="form-label">Horas *</label>
+              <input type="number" name="horas" id="crear-horas" class="form-control"
+                     placeholder="Ej: 120" required min="1" />
+            </div>
+            <div class="mb-3">
+              <label for="crear-area" class="form-label">Área *</label>
+              <select name="area" id="crear-area" class="form-control" required>
+                <option value="">-- Seleccione un área --</option>
+                {% for area in areas %}
+                  <option value="{{ area.idarea }}">{{ area.area }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <div class="modal-footer modal-programa-footer">
+            <button type="button" class="boton-cancelar-modal" data-bs-dismiss="modal">Cerrar</button>
+            <button type="submit" class="boton-guardar-modal">Crear Programa</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal de edición -->
-  <div class="modal fade" id="editarModal" tabindex="-1" aria-labelledby="editarModalLabel" aria-hidden="true">
+  <div class="modal fade" id="editarModal" tabindex="-1" aria-labelledby="editarModalLabel" aria-hidden="true" data-bs-backdrop="false" data-bs-scroll="true">
     <div class="modal-dialog">
       <div class="modal-content modal-programa">
         <form method="POST" action="{% url 'actualizar_programa' %}">
@@ -116,14 +179,6 @@
                 {% endfor %}
               </select>
             </div>
-            <div class="mb-3">
-              <label for="modalidad" class="form-label">Modalidad</label>
-              <select name="modalidad" id="modal-modalidad" class="form-control">
-                {% for mod in modalidades %}
-                  <option value="{{ mod.idmodalidad }}">{{ mod.modalidad }}</option>
-                {% endfor %}
-              </select>
-            </div>
           </div>
 
           <div class="modal-footer modal-programa-footer">
@@ -149,9 +204,8 @@
       document.getElementById('modal-nombre').value = button.getAttribute('data-nombre');
       document.getElementById('modal-horas').value = button.getAttribute('data-horas');
 
-      // Seleccionar área y modalidad por ID
+      // Seleccionar área por ID
       document.getElementById('modal-area').value = button.getAttribute('data-area-id');
-      document.getElementById('modal-modalidad').value = button.getAttribute('data-modalidad-id');
     });
   </script>
 {% endblock %}

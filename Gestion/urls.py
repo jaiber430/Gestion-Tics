@@ -103,6 +103,7 @@ urlpatterns = [
     path('graphReports/', views_consultas.reporteCreaciones, name='viewGraphReports'),
     # En tu archivo urls.py agrega esta ruta:
     path('perfil/editar/', views.editar_perfil, name='editar_perfil'),
+    path('inicio/', views.home, name='home'),
 ]
 # Poder almacenar archivos en la carpeta media
 if settings.DEBUG:

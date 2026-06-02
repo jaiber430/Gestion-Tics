@@ -1,0 +1,44 @@
+# ── Control de versiones ──────────────────────────────────────────────────────
+.git
+.gitignore
+
+# ── Caché de Python ───────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyc
+*.pyo
+
+# ── Entornos virtuales ────────────────────────────────────────────────────────
+venv/
+env/
+.venv/
+
+# ── Secretos y configuración local ───────────────────────────────────────────
+# .env se pasa al contenedor mediante 'env_file' en docker-compose, NO se
+# copia dentro de la imagen para evitar fuga de credenciales.
+.env
+*.env
+
+# ── Base de datos SQLite de desarrollo ───────────────────────────────────────
+db.sqlite3
+db.sqlite3-journal
+
+# ── Archivos multimedia subidos por usuarios ──────────────────────────────────
+# Se montan como volumen en docker-compose; no se incluyen en la imagen.
+media/
+
+# ── Archivos estáticos recolectados ──────────────────────────────────────────
+staticfiles/
+
+# ── Editores y herramientas locales ──────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+Thumbs.db
+
+# ── Documentación y artefactos de CI ─────────────────────────────────────────
+*.log
+htmlcov/
+.coverage
+.pytest_cache/

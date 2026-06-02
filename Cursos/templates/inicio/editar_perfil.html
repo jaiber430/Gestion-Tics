@@ -1,1 +1,116 @@
-{% extends layout %} {% load static %}  {% block content %} <div class="contenedor-perfil">   <h2>Mi perfil</h2>    {% if messages %}     {% for message in messages %}       <div class="alerta alerta-{{ message.tags }}">{{ message }}</div>     {% endfor %}   {% endif %}    <form action="{% url 'editar_perfil' %}" method="POST">     {% csrf_token %}      <h3>Datos personales</h3>      <div class="grupo-campo">       <label for="nombre">Nombre</label>       <input type="text" id="nombre" name="nombre" value="{{ usuario.nombre }}" required>     </div>      <div class="grupo-campo">       <label for="apellido">Apellido</label>       <input type="text" id="apellido" name="apellido" value="{{ usuario.apellido }}" required>     </div>      <div class="grupo-campo">       <label for="correo">Correo electrónico</label>       <input type="email" id="correo" name="correo" value="{{ usuario.correo }}" required>     </div>      <div class="grupo-campo">       <label for="tipoidentificacion">Tipo de identificación</label>       <select id="tipoidentificacion" name="tipoidentificacion">         {% for tipo in tipos_identificacion %}           <option value="{{ tipo.idtipoidentificacion }}"             {% if usuario.tipoidentificacion_id == tipo.idtipoidentificacion %}selected{% endif %}>             {{ tipo.tipoidentificacion }}           </option>         {% endfor %}       </select>     </div>      <div class="grupo-campo">       <label for="numeroidentificacion">Número de identificación</label>       <input type="number" id="numeroidentificacion" name="numeroidentificacion" value="{{ usuario.numeroidentificacion }}" required>     </div>      {# Readonly — quitar disabled/readonly para habilitar edición #}     <div class="grupo-campo">       <label for="contrato">Tipo de contrato</label>       <select id="contrato" name="contrato" disabled>         {% for tipo in tipos_contrato %}           <option value="{{ tipo.idcontrato }}"             {% if usuario.contrato_id == tipo.idcontrato %}selected{% endif %}>             {{ tipo.tipocontrato }}           </option>         {% endfor %}       </select>     </div>      <div class="grupo-campo">       <label for="numerocontrato">Número de contrato</label>       <input type="text" id="numerocontrato" name="numerocontrato"              value="{{ usuario.numerocontrato|default_if_none:'' }}" readonly>     </div>      <h3>Cambiar contraseña <span style="font-size:13px; font-weight:normal;">(dejar en blanco para no cambiar)</span></h3>      <div class="grupo-campo">       <label for="clave_actual">Contraseña actual</label>       <input type="password" id="clave_actual" name="clave_actual">     </div>      <div class="grupo-campo">       <label for="clave_nueva">Nueva contraseña</label>       <input type="password" id="clave_nueva" name="clave_nueva">     </div>      <div class="grupo-campo">       <label for="clave_confirmar">Confirmar nueva contraseña</label>       <input type="password" id="clave_confirmar" name="clave_confirmar">     </div>      <div class="acciones-form">       <button type="submit" class="boton-compartir">Guardar cambios</button>     </div>    </form> </div> {% endblock %}
+{% extends layout %}
+{% load static %}
+
+{% block content %}
+<main class="contenido-principal">
+
+  <!-- Título -->
+  <div class="titulo-seccion">
+    <h2 class="titulo-pagina">MI PERFIL</h2>
+    <p class="subtitulo-pagina">Actualice sus datos personales y credenciales de acceso</p>
+  </div>
+
+  <!-- Formulario -->
+  <form class="formulario-ficha" action="{% url 'editar_perfil' %}" method="POST">
+    {% csrf_token %}
+
+    <!-- Sección 1: Datos personales -->
+    <div class="seccion-formulario">
+      <h3 class="titulo-seccion-form">Datos personales</h3>
+
+      <div class="fila-campos-2">
+        <div class="campo-entrada">
+          <label for="nombre" class="etiqueta-campo">Nombre*</label>
+          <input type="text" id="nombre" name="nombre" class="entrada-texto"
+                 value="{{ usuario.nombre }}" required>
+        </div>
+        <div class="campo-entrada">
+          <label for="apellido" class="etiqueta-campo">Apellido*</label>
+          <input type="text" id="apellido" name="apellido" class="entrada-texto"
+                 value="{{ usuario.apellido }}" required>
+        </div>
+      </div>
+
+      <div class="campo-entrada">
+        <label for="correo" class="etiqueta-campo">Correo electrónico*</label>
+        <input type="email" id="correo" name="correo" class="entrada-texto"
+               value="{{ usuario.correo }}" required>
+      </div>
+
+      <div class="fila-campos-2">
+        <div class="campo-entrada">
+          <label for="tipoidentificacion" class="etiqueta-campo">Tipo de identificación</label>
+          <select id="tipoidentificacion" name="tipoidentificacion" class="entrada-select">
+            {% for tipo in tipos_identificacion %}
+              <option value="{{ tipo.idtipoidentificacion }}"
+                {% if usuario.tipoidentificacion_id == tipo.idtipoidentificacion %}selected{% endif %}>
+                {{ tipo.tipoidentificacion }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="campo-entrada">
+          <label for="numeroidentificacion" class="etiqueta-campo">Número de identificación*</label>
+          <input type="number" id="numeroidentificacion" name="numeroidentificacion"
+                 class="entrada-texto" value="{{ usuario.numeroidentificacion }}" required>
+        </div>
+      </div>
+
+      {# Readonly — quitar disabled/readonly para habilitar edición #}
+      <div class="fila-campos-2">
+        <div class="campo-entrada">
+          <label for="contrato" class="etiqueta-campo">Tipo de contrato</label>
+          <select id="contrato" name="contrato" class="entrada-select" disabled
+                  style="opacity:0.6; cursor:not-allowed;">
+            {% for tipo in tipos_contrato %}
+              <option value="{{ tipo.idcontrato }}"
+                {% if usuario.contrato_id == tipo.idcontrato %}selected{% endif %}>
+                {{ tipo.tipocontrato }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="campo-entrada">
+          <label for="numerocontrato" class="etiqueta-campo">Número de contrato</label>
+          <input type="text" id="numerocontrato" name="numerocontrato" class="entrada-texto"
+                 value="{{ usuario.numerocontrato|default_if_none:'' }}" readonly
+                 style="opacity:0.6; cursor:not-allowed;">
+        </div>
+      </div>
+    </div>
+
+    <!-- Sección 2: Cambiar contraseña -->
+    <div class="seccion-formulario">
+      <h3 class="titulo-seccion-form">
+        Cambiar contraseña
+        <span style="font-size:1.3rem; font-weight:400; color:var(--color-texto-secundario);">
+          (dejar en blanco para no cambiar)
+        </span>
+      </h3>
+
+      <div class="campo-entrada">
+        <label for="clave_actual" class="etiqueta-campo">Contraseña actual</label>
+        <input type="password" id="clave_actual" name="clave_actual" class="entrada-texto">
+      </div>
+
+      <div class="fila-campos-2">
+        <div class="campo-entrada">
+          <label for="clave_nueva" class="etiqueta-campo">Nueva contraseña</label>
+          <input type="password" id="clave_nueva" name="clave_nueva" class="entrada-texto">
+        </div>
+        <div class="campo-entrada">
+          <label for="clave_confirmar" class="etiqueta-campo">Confirmar nueva contraseña</label>
+          <input type="password" id="clave_confirmar" name="clave_confirmar" class="entrada-texto">
+        </div>
+      </div>
+    </div>
+
+    <!-- Botones -->
+    <div class="contenedor-botones-formulario">
+      <button type="submit" class="boton-enviar">Guardar cambios</button>
+    </div>
+
+  </form>
+</main>
+{% endblock %}
+
