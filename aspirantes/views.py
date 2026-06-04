@@ -89,17 +89,20 @@ def registro_aspirante(request):
                     solicitud_obj.save(update_fields=['linkpreinscripcion'])
                 return redirect('cupo_agotado')
 
-            # Validar duplicados correctamente y con redirect al mismo formulario
+            # ✅ CORRECCIÓN: Validar duplicados SOLO dentro de la misma solicitud
             duplicado = Aspirantes.objects.filter(
+                solicitudinscripcion=solicitud_obj,
                 telefono=telefono
             ).exists() or Aspirantes.objects.filter(
+                solicitudinscripcion=solicitud_obj,
                 numeroidentificacion=identificacion
             ).exists() or Aspirantes.objects.filter(
+                solicitudinscripcion=solicitud_obj,
                 correo=correo
             ).exists()
 
             if duplicado:
-                messages.error(request, 'Las credenciales ya han sido registradas')
+                messages.error(request, 'Las credenciales ya han sido registradas en esta solicitud')
                 return redirect('formularioaspirantes', idsolicitud=solicitud_inscripcion)
 
             # Obtener objetos relacionados
@@ -136,7 +139,7 @@ def registro_aspirante(request):
                 apellido=apellidos,
                 idcaracterizacion=id_tipo_caracterizacion,
                 telefono=int(telefono),
-                pdf=ruta_relativa_pdf,  # ruta relativa para FileField
+                pdf=ruta_relativa_pdf,
                 tipoidentificacion=id_tipo_documento,
                 numeroidentificacion=int(identificacion),
                 correo=correo,
@@ -159,34 +162,25 @@ def registro_aspirante(request):
                 # Generar archivo Excel con base en los aspirantes
                 # ==============================================================
 
-                # Asegurarse de que el id este siendo enviado cuando se oprima el boton de descargar
                 solicitud = id_solicitud_preinscripcion
 
-                # Consulta para obtener el nombre del programa relacionado con la solicitud
-                programa = solicitud.codigoprograma  # Ya tienes la solicitud, accedes directo al FK
-                nombre_programa = programa.nombreprograma  # Mostrar el nombre del programa
+                programa = solicitud.codigoprograma
+                nombre_programa = programa.nombreprograma
 
-                # Crear un nuevo archivo de excel en blanco
                 nuevo_archivo = Workbook()
-                hoja = nuevo_archivo.active  # Seleccionar la hoja del excel (Primera por defecto)
-                hoja.title = f"Aspirantes Inscritos"  # Colocar nombre a esa hoja
+                hoja = nuevo_archivo.active
+                hoja.title = f"Aspirantes Inscritos"
 
-                #  Insertar campo de título que abarca todas las columnas (A1:G1)
-                hoja.merge_cells("A1:G1")  # Unir desde A1 hasta G1
+                hoja.merge_cells("A1:G1")
                 celda = hoja["A1"]
                 celda.value = "FORMATO PARA LA INSCRIPCIÓN DE ASPIRANTES EN SOFIA PLUS v1.0"
 
-                # Estilo de celda del título
-                celda.font = Font(bold=True, color="FFFFFF")  # Negrita y texto blanco
-                celda.fill = PatternFill(start_color="66BB6A", end_color="66BB6A", fill_type="solid")  # Fondo verde medio
-                celda.alignment = Alignment(horizontal="center", vertical="center")  # Centrado
+                celda.font = Font(bold=True, color="FFFFFF")
+                celda.fill = PatternFill(start_color="66BB6A", end_color="66BB6A", fill_type="solid")
+                celda.alignment = Alignment(horizontal="center", vertical="center")
 
-                # Ajustar altura de la fila 1
                 hoja.row_dimensions[1].height = 28.5
 
-                # -----------------------------------------------------------
-                # Fila de encabezados (fila 2) - 7 columnas exactas (A2:G2)
-                # -----------------------------------------------------------
                 encabezados = [
                     'Resultado del Registro(Reservado para el sistema)',
                     'Tipo de identificacion',
@@ -198,62 +192,47 @@ def registro_aspirante(request):
                 ]
                 hoja.append(encabezados)
 
-                # Ajustar altura de la fila 2 (encabezados)
                 hoja.row_dimensions[2].height = 51
 
-                # Opcional: dar estilo a encabezados (negrita y centrado)
                 for col_idx in range(1, len(encabezados) + 1):
                     cell = hoja.cell(row=2, column=col_idx)
                     cell.font = Font(bold=True)
                     cell.alignment = Alignment(horizontal="center", vertical="center")
 
-                # Consulta para obtener los aspirantes relacionados con la solicitud
                 aspirantes = Aspirantes.objects.filter(
                     solicitudinscripcion=solicitud
                 ).order_by("numeroidentificacion")
 
-
-                # Agregar filas de datos (7 columnas por fila) para cada aspirante
                 for agregar in aspirantes:
-                    # Nombre del tipo de población
                     caracterizacion = agregar.idcaracterizacion
                     tipo_caracterizacion = caracterizacion.caracterizacion if caracterizacion else ''
 
-                    # Nombre del tipo de identificacion
                     identificacion_tipo = agregar.tipoidentificacion
                     tipo_identificacion = identificacion_tipo.tipoidentificacion if identificacion_tipo else ''
 
-                    # Buscar el NIT de la empresa desde la solicitud
                     empresa = agregar.solicitudinscripcion.idempresa
                     if empresa is not None:
                         mostrar_empresa = empresa.nitempresa
                     else:
                         mostrar_empresa = ''
 
-                    # Agregar fila de datos del aspirante (7 columnas exactas)
                     hoja.append([
-                        '',  # Resultado del Registro (vacío por ahora)
+                        '',
                         tipo_identificacion,
                         agregar.numeroidentificacion,
-                        '',  # Código de ficha (no definido aún)
+                        '',
                         tipo_caracterizacion,
-                        '',  # Columna vacía como en encabezado
+                        '',
                         mostrar_empresa
                     ])
 
-                # -----------------------------------------------------------
-                # Crear carpeta donde se van a almacenar los formatos masivos
-                # -----------------------------------------------------------
                 nombre_archivo_excel = f"formato_inscripcion_{solicitud.idsolicitud}.xlsx"
                 carpeta_excel = os.path.join(settings.MEDIA_ROOT, 'excel')
                 os.makedirs(carpeta_excel, exist_ok=True)
 
-                # Dirección donde se encuentra el archivo
                 directorio_excel = os.path.join(carpeta_excel, nombre_archivo_excel)
 
-                # Guardar archivo Excel
                 nuevo_archivo.save(directorio_excel)
-                # -----------------------------------------------------------
 
             messages.success(request, 'Te has preinscrito exitosamente')
             return redirect('formularioaspirantes', idsolicitud=solicitud_inscripcion)
@@ -272,7 +251,6 @@ def registro_aspirante(request):
     })
 
 def updateCandidate(request, idSolicitud, numDoc):
-
     if request.method != "POST":
         raise Http404()
 
@@ -283,12 +261,8 @@ def updateCandidate(request, idSolicitud, numDoc):
     )
 
     try:
-        # Documento antiguo
         doc_antiguo = aspirante.numeroidentificacion
-
-        # Documento nuevo
         doc_nuevo = int(request.POST.get('numero_identificacion'))
-
         nombre = request.POST.get('nombres').upper()
         apellido = request.POST.get('apellidos').upper()
         tipo_documento = int(request.POST.get('tipo_documento'))
@@ -310,7 +284,6 @@ def updateCandidate(request, idSolicitud, numDoc):
         # ===============================
         basePath = Path(settings.MEDIA_ROOT)
         folderPdf = basePath / "pdf" / f"solicitud_{idSolicitud}"
-
         pdfOld = folderPdf / f"{doc_antiguo}.pdf"
         pdfNew = folderPdf / f"{doc_nuevo}.pdf"
 
@@ -352,7 +325,6 @@ def updateCandidate(request, idSolicitud, numDoc):
             "",
             "Código empresa (solo si la ficha es cerrada)"
         ]
-
         ws.append(encabezados)
         ws.row_dimensions[2].height = 51
 
@@ -374,7 +346,6 @@ def updateCandidate(request, idSolicitud, numDoc):
             ])
 
         wb.save(excelPath)
-
         messages.success(request, "Aspirante actualizado y Excel regenerado correctamente")
 
     except Exception as e:

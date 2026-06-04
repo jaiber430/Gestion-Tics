@@ -111,7 +111,6 @@ def showExcelApprentices(request, excelFolder ):
 @login_required_custom
 def reviewedByInstructor(request, idSolicitud):
     user_id = request.session.get('user_id')
-
     usuario = Usuario.objects.select_related('rol').get(idusuario=user_id)
     id_rol = usuario.rol.idrol
 
@@ -119,8 +118,21 @@ def reviewedByInstructor(request, idSolicitud):
         return redirect('consultas_instructor')
 
     solicitud = get_object_or_404(Solicitud, idsolicitud=idSolicitud)
-    solicitud.revisado = 1
-    solicitud.save()
+
+    ID_CREACION = 6
+
+    ficha = Ficha.objects.filter(idsolicitud=solicitud).first()
+
+    if ficha and ficha.idestado and ficha.idestado.idestado == ID_CREACION:
+        # Directo al funcionario, sin pasar por coordinador
+        ficha.excel = 0
+        ficha.save(update_fields=['excel'])
+        solicitud.revisado = 1
+        solicitud.save(update_fields=['revisado'])
+    else:
+        # Flujo normal → coordinador
+        solicitud.revisado = 1
+        solicitud.save(update_fields=['revisado'])
 
     return redirect('consultas_instructor')
 
@@ -179,8 +191,7 @@ def consultas_todos(request):
         layout = 'layout/layout_admin.html'
         rol_name = "Desconocido"
 
-    # Solicitudes según rol
-    if id_rol == 2:  # Coordinador: solicitudes revisadas del mes actual
+    if id_rol == 2:
         hoy = datetime.date.today()
         primer_dia = datetime.date(hoy.year, hoy.month, 1)
         ultimo_dia = datetime.date(hoy.year, hoy.month, calendar.monthrange(hoy.year, hoy.month)[1])
@@ -190,29 +201,37 @@ def consultas_todos(request):
             revisado=1
         ).select_related('idusuario', 'idempresa').order_by('-fechasolicitud')
 
-    elif id_rol == 3:  # Funcionario: solicitudes aprobadas por coordinador
+    elif id_rol == 3:
+        # Solicitudes aprobadas por coordinador
         solicitudes_aprobadas = Solicitudcoordinador.objects.filter(
             idestado__estado="Aprobado"
         ).values_list('idsolicitud', flat=True)
 
-        # IDs de solicitudes con ficha en estado 4 (ocultar — Matriculada)
+        # Solicitudes con estado Creación (id=6) que vienen directo del instructor
+        # sin pasar por coordinador — el instructor ya marcó "Revisado" (revisado=1)
+        solicitudes_creacion = Ficha.objects.filter(
+            idestado__idestado=6,
+            idsolicitud__revisado=1
+        ).values_list('idsolicitud', flat=True)
+
+        # Solicitudes con ficha Matriculada (ocultar)
         fichas_ocultas = Ficha.objects.filter(
             idestado__idestado=4
         ).values_list('idsolicitud', flat=True)
 
+        from django.db.models import Q
         solicitudes = Solicitud.objects.filter(
-            idsolicitud__in=solicitudes_aprobadas
+            Q(idsolicitud__in=solicitudes_aprobadas) |
+            Q(idsolicitud__in=solicitudes_creacion)
         ).exclude(
             idsolicitud__in=fichas_ocultas
         ).select_related('idusuario', 'idempresa').order_by('-fechasolicitud')
 
     else:
-        # Instructor o Admin
         solicitudes = Solicitud.objects.select_related('idusuario', 'idempresa') \
             .filter(idusuario=user_id) \
             .order_by('-fechasolicitud')
 
-    # Estados según rol
     if id_rol == 3:
         estado = Estados.objects.values('idestado', 'estados')
     elif id_rol == 2:
@@ -242,13 +261,6 @@ def consultas_todos(request):
             solicitud.codigo_ficha = ficha.codigoficha or ''
             solicitud.ficha_excel = ficha.excel if ficha.excel is not None else 0
 
-            # ----------------------------
-            # Lógica del campo excel según valor:
-            # 0 → sin archivo, mostrar input para subir
-            # 1 → archivo subido, botón descargar DESHABILITADO (funcionario)
-            # 2 → rechazada, no mostrar nada (esperar ciclo)
-            # 3 → ciclo reiniciado tras rechazo, botón descargar ACTIVO (con fetch)
-            # ----------------------------
             if solicitud.ficha_excel == 0:
                 solicitud.mostrar_input_excel = True
                 solicitud.mostrar_boton_descarga_excel = False
@@ -307,11 +319,6 @@ def consultas_todos(request):
             )
             solicitud.excel_funcionario_disponible = os.path.exists(ruta_excel_funcionario)
 
-            # ----------------------------
-            # Excel SOFÍA plus subido por el funcionario:
-            # Solo se considera disponible si ficha.excel == 1 Y el archivo existe en disco
-            # Ruta: media/Funcionario/solicitud_{id}/Masivos_sofia_plus/formato_inscripcion_{id}.xlsx
-            # ----------------------------
             carpeta_excel_sofia = os.path.join(
                 settings.MEDIA_ROOT,
                 'Funcionario',
@@ -338,7 +345,6 @@ def consultas_todos(request):
             solicitud.aspirantes = aspirantes
 
     for solicitud in solicitudes:
-
         solicitud.mostrar_pdf = False
         solicitud.mostrar_excel = False
 
@@ -349,13 +355,11 @@ def consultas_todos(request):
                 f'solicitud_{solicitud.idsolicitud}',
                 'combinado.pdf'
             )
-
             ruta_excel = os.path.join(
                 settings.MEDIA_ROOT,
                 'excel',
                 f'formato_inscripcion_{solicitud.idsolicitud}.xlsx'
             )
-
             solicitud.mostrar_pdf = os.path.exists(ruta_pdf)
             solicitud.mostrar_excel = os.path.exists(ruta_excel)
 
@@ -885,25 +889,12 @@ def descargar_carta(request, id, idrol):
 @login_required_custom
 def revision_fichas(request, id):
 
-    # ----------------------------
-    # Buscar la solicitud
-    # ----------------------------
     solicitud = get_object_or_404(Solicitud, idsolicitud=id)
 
-    # ----------------------------
-    # Obtener el id del usuario en sesión
-    # ----------------------------
     user_id = request.session.get('user_id')
-
-    # ----------------------------
-    # Obtener el usuario y su rol
-    # ----------------------------
     usuario = Usuario.objects.select_related('rol').get(idusuario=user_id)
     id_rol = usuario.rol.idrol
 
-    # ----------------------------
-    # Definir layout según rol del usuario actual
-    # ----------------------------
     if id_rol == 1:
         layout = 'layout/layoutinstructor.html'
     elif id_rol == 2:
@@ -915,14 +906,8 @@ def revision_fichas(request, id):
     else:
         layout = 'layout/layout_admin.html'
 
-    # ----------------------------
-    # Validar envío de formulario
-    # ----------------------------
     if request.method == "POST":
         try:
-            # ----------------------------
-            # Capturar datos enviados
-            # ----------------------------
             estados = request.POST.get('estado')
             numero_solicitud = request.POST.get('codigo_solicitud')
             numero_ficha = request.POST.get('codigo_ficha')
@@ -933,16 +918,27 @@ def revision_fichas(request, id):
             observacion = request.POST.get('observacion')
             nuevo_archivo = request.FILES.get('actualizar_excel', None)
 
-            # ----------------------------
-            # Obtener objetos relacionados
-            # ----------------------------
             id_estado = Estados.objects.get(idestado=estados)
             creado_por = solicitud.idusuario
 
-            idRechazadoByFuncionario = 2
+            ID_RECHAZADO_FUNCIONARIO = 2
+            ID_CREACION = 6
 
-            if id_rol == 3 and id_estado.idestado == idRechazadoByFuncionario:
+            # ================================================================
+            # Solo el funcionario (rol 3) puede cambiar estados
+            # ================================================================
+            if id_rol != 3:
+                messages.error(request, 'No tienes permisos para realizar esta acción.')
+                return redirect('consultas_instructor')
 
+            # ================================================================
+            # Si el funcionario rechaza:
+            # - Borra la revisión del coordinador
+            # - Pone revisado = 0 (vuelve al instructor solo para ver)
+            # - El instructor NO puede reenviar (solo ve el rechazo)
+            # - Solo si el estado es Creación (id=6) puede el instructor reenviar
+            # ================================================================
+            if id_estado.idestado == ID_RECHAZADO_FUNCIONARIO:
                 Solicitudcoordinador.objects.filter(
                     idsolicitud=solicitud
                 ).delete()
@@ -950,10 +946,18 @@ def revision_fichas(request, id):
                 solicitud.revisado = 0
                 solicitud.save(update_fields=['revisado'])
 
-            # ----------------------------
+            # ================================================================
+            # Si el estado es Creación (id=6):
+            # - Se habilita el flujo para que el instructor pueda reenviar
+            # - Se pone revisado = 0 para que aparezca el botón "Revisado"
+            # ================================================================
+            elif id_estado.idestado == ID_CREACION:
+                solicitud.revisado = 0
+                solicitud.save(update_fields=['revisado'])
+
+            # ================================================================
             # Guardar Excel si se envía uno nuevo
-            # (se hace antes de actualizar ficha para tener la ruta lista)
-            # ----------------------------
+            # ================================================================
             if nuevo_archivo:
                 carpeta_almacenar = f"solicitud_{id}"
                 excel_archivo = f"formato_inscripcion_{id}.xlsx"
@@ -970,40 +974,35 @@ def revision_fichas(request, id):
                     for chunk in nuevo_archivo.chunks():
                         destino.write(chunk)
 
-            # ----------------------------
+            # ================================================================
             # Buscar si ya existe ficha para esta solicitud
-            # ----------------------------
+            # ================================================================
             ficha = Ficha.objects.filter(idsolicitud=solicitud).first()
 
             if ficha:
-                # ----------------------------
-                # Actualizar ficha existente
-                # ----------------------------
                 if numero_ficha is not None and numero_ficha != "":
                     ficha.codigoficha = numero_ficha
 
                 ficha.idestado = id_estado
                 ficha.observacion = observacion
 
-                # ----------------------------
-                # Manejo del campo excel:
-                # - Si se sube un archivo nuevo → excel = 1 (archivo disponible para descargar)
-                # - Si es rechazo sin archivo   → excel = 2 (ocultar todo, esperar nuevo ciclo)
-                # - En cualquier otro caso      → no se toca, mantiene valor anterior
-                # ----------------------------
+                # ============================================================
+                # Manejo del campo excel según estado:
+                # - Nuevo archivo subido           → excel = 1
+                # - Rechazo sin archivo            → excel = 2 (ocultar todo)
+                # - Estado Creación                → excel = 0 (instructor puede reenviar)
+                # - Otros casos                    → no se toca
+                # ============================================================
                 if nuevo_archivo:
                     ficha.excel = 1
-                elif id_estado.idestado == idRechazadoByFuncionario:
+                elif id_estado.idestado == ID_RECHAZADO_FUNCIONARIO:
                     ficha.excel = 2
+                elif id_estado.idestado == ID_CREACION:
+                    ficha.excel = 0  # reinicia para que el instructor pueda actuar
 
                 ficha.save()
 
             else:
-                # ----------------------------
-                # Crear nueva ficha si no existía
-                # El excel inicia en 0 (sin archivo todavía)
-                # Si en esta misma petición ya se subió archivo, queda en 1
-                # ----------------------------
                 Ficha.objects.create(
                     codigoficha=numero_ficha if numero_ficha else None,
                     idsolicitud=solicitud,
@@ -1013,16 +1012,13 @@ def revision_fichas(request, id):
                     excel=1 if nuevo_archivo else 0
                 )
 
-            # ----------------------------
-            # Actualizar el código de la solicitud si se envió
-            # ----------------------------
+            # ================================================================
+            # Actualizar código de solicitud si se envió
+            # ================================================================
             if numero_solicitud is not None and numero_solicitud != "":
                 solicitud.codigosolicitud = numero_solicitud
                 solicitud.save()
 
-            # ----------------------------
-            # Mensaje de éxito y redirección
-            # ----------------------------
             messages.success(request, 'Haz enviado respuesta a esta solicitud')
             return redirect('consultas_instructor')
 
@@ -1030,9 +1026,6 @@ def revision_fichas(request, id):
             messages.error(request, f'Error al enviar respuesta: {e}')
             return redirect('consultas_instructor')
 
-    # ----------------------------
-    # Renderizar plantilla si no hay envío de formulario
-    # ----------------------------
     return render(request, 'consultas/consultas_instructor.html', {
         'layout': layout,
         'messages': messages
@@ -1228,25 +1221,25 @@ def revision_coordinador(request, id_solicitud):
 
 @login_required_custom
 def ver_formato_inscripcion(request, id_solicitud):
-    # Nombre del archivo con la nueva ruta
-    folder_name = f'Funcionario/{id_solicitud}/Masivos_sofia_plus/formato_inscripcion_{id_solicitud}.xlsx'
-    ruta_archivo = os.path.join(settings.MEDIA_ROOT, folder_name)
+    rol = request.session.get('rol')  # ajusta según cómo manejes el rol en tu proyecto
 
+    if rol == 2:
+        folder_name = f'excel/formato_inscripcion_{id_solicitud}.xlsx'
+    else:
+        folder_name = f'Funcionario/{id_solicitud}/Masivos_sofia_plus/formato_inscripcion_{id_solicitud}.xlsx'
+
+    ruta_archivo = os.path.join(settings.MEDIA_ROOT, folder_name)
     datos = []
     error = None
 
     try:
-        # Cargar el archivo Excel
         wb = load_workbook(ruta_archivo)
-        ws = wb.active  # primera hoja
-
-        # Recorrer todas las filas y columnas
+        ws = wb.active
         for row in ws.iter_rows(values_only=True):
             fila = []
             for celda in row:
                 fila.append("" if celda is None else str(celda))
             datos.append(fila)
-
     except Exception as e:
         error = f"Error al abrir el archivo: {e}"
 
