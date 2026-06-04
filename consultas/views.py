@@ -157,7 +157,7 @@ def editApplicantData(request, idSolicitud, numDoc):
 
     tipoIdentificacion = Tipoidentificacion.objects.all()
 
-    return render(request, 'forms/editApplicant.html', {
+    return render(request, 'forms/editapplicant.html', {
         "aspirante": aspirante,
         "tipoIdentificacion":tipoIdentificacion
     })
