@@ -1,10 +1,10 @@
-# CampeSENA
+# Gestion TIC's Django
 
 Sistema web para la gestión y creación de cursos cortos del **SENA**, diseñado para digitalizar y automatizar los procesos que anteriormente se realizaban de forma manual. La plataforma centraliza la administración de solicitudes, aspirantes y programas curriculares, y genera automáticamente los documentos y archivos requeridos en cada etapa del proceso, reduciendo significativamente los márgenes de error y el tiempo operativo.
 
 ## Características principales
 
-- Registro y seguimiento de solicitudes de cursos cortos (modalidad regular y campesina)
+- Registro y seguimiento de solicitudes de cursos cortos (modalidad regular y campeSENA)
 - Gestión de aspirantes con preinscripción en línea y control de cupos
 - Generación automática de fichas de caracterización, cartas de solicitud, formatos de inscripción y archivos SOFIA Plus (PDF y Excel)
 - Control de estados del proceso por roles: administrador, coordinador, funcionario e instructor
