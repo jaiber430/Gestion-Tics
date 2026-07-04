@@ -197,7 +197,7 @@ docker compose down -v
 | `/registro/` | Registro de usuarios |
 | `/crearficha/` | Crear solicitud de curso |
 | `/formulario_solicitud_regular/` | Solicitud modalidad regular |
-| `/formulario_solicitud_campesina/` | Solicitud modalidad campesina |
+| `/formulario_solicitud_campesina/` | Solicitud modalidad campeSENA |
 | `/Consultas/` | Consultas según rol |
 | `/ficha_caracterizacion/<id>/` | Ver ficha de caracterización |
 | `/ficha_caracterizacion/<id>/pdf/` | Descargar ficha en PDF |
